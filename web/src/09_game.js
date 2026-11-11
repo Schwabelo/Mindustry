@@ -8,20 +8,20 @@ const WAVE_GROUPS = [
   { unit: 'crawler', begin: 4, end: 13, unitAmount: 2, unitScaling: 1.5 },
   { unit: 'flare', begin: 12, end: 16, unitScaling: 1 },
   { unit: 'dagger', begin: 11, unitScaling: 1.7, spacing: 2, max: 4, shieldScaling: 25 },
-  { unit: 'nova', begin: 13, spacing: 3, unitScaling: 0.5, max: 25 },           // pulsar
+  { unit: 'pulsar', begin: 13, spacing: 3, unitScaling: 0.5, max: 25 },
   { unit: 'mace', begin: 7, spacing: 3, unitScaling: 2, end: 30 },
   { unit: 'dagger', begin: 12, unitScaling: 1, unitAmount: 4, spacing: 2, shieldScaling: 20, max: 14 },
   { unit: 'mace', begin: 28, spacing: 3, unitScaling: 1, end: 40, shieldScaling: 20 },
   { unit: 'mace', begin: 45, spacing: 3, unitScaling: 1, max: 10, shieldScaling: 30, shields: 100 }, // spiroct
   { unit: 'flare', begin: 16, unitScaling: 1, spacing: 2, shieldScaling: 20, max: 20 },
-  { unit: 'fortress', begin: 82, spacing: 3, unitAmount: 4, unitScaling: 3, shieldScaling: 30 }, // quasar
-  { unit: 'nova', begin: 41, spacing: 5, unitAmount: 1, unitScaling: 3, shields: 640, max: 25 },   // pulsar
+  { unit: 'quasar', begin: 82, spacing: 3, unitAmount: 4, unitScaling: 3, shieldScaling: 30 },
+  { unit: 'pulsar', begin: 41, spacing: 5, unitAmount: 1, unitScaling: 3, shields: 640, max: 25 },
   { unit: 'fortress', begin: 40, spacing: 5, unitAmount: 2, unitScaling: 2, max: 20, shieldScaling: 30 },
   { unit: 'nova', begin: 35, spacing: 3, unitAmount: 4, end: 60 },
   { unit: 'dagger', begin: 42, spacing: 3, unitAmount: 4, end: 130, max: 30 },
   { unit: 'horizon', begin: 40, unitAmount: 2, spacing: 2, unitScaling: 2, shieldScaling: 20 },
   { unit: 'flare', begin: 50, unitAmount: 4, unitScaling: 3, spacing: 5, shields: 100, shieldScaling: 10, max: 20 },
-  { unit: 'horizon', begin: 50, unitAmount: 2, unitScaling: 3, spacing: 5, max: 16, shieldScaling: 30 }, // zenith
+  { unit: 'zenith', begin: 50, unitAmount: 2, unitScaling: 3, spacing: 5, max: 16, shieldScaling: 30 },
   { unit: 'nova', begin: 53, unitAmount: 2, unitScaling: 3, spacing: 4, shieldScaling: 30 },
   { unit: 'crawler', begin: 31, unitAmount: 4, unitScaling: 1, spacing: 3, shieldScaling: 10 },        // atrax
   { unit: 'fortress', begin: 41, unitAmount: 1, unitScaling: 1, spacing: 30, shieldScaling: 30 },      // scepter
@@ -56,6 +56,7 @@ const Game = {
     Time.time = 0;
     this.lastCoreWarn = -9999;
     this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [] };
+    this.rebuildQueue = [];
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(seed);
     this.wave = 1;

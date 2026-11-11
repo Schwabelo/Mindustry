@@ -243,10 +243,14 @@ const Input = {
     const p = Game.player;
     // ghosts of destroyed blocks get re-queued after a short delay (rebuild)
     if (p && this.ghosts.length) {
+      const builders = Game.units.some(u => u.team === 'sharded' && u.controller instanceof BuilderAI);
       for (const g of this.ghosts) {
         if (Time.time - g.time > 120 && !g.queued) {
           g.queued = true;
-          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) p.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
+          if (!Game.validPlace(g.block, g.x, g.y, g.rotation)) continue;
+          // polys rebuild destroyed blocks (BuilderAI rebuild command); without them the player re-queues them
+          if (builders) Game.rebuildQueue.push(g);
+          else p.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
         }
       }
       this.ghosts = this.ghosts.filter(g => !g.queued);
@@ -289,56 +293,7 @@ const Input = {
     if (--p.stack.amount <= 0) p.stack.item = null;
   },
 
-  // BuilderComp.update
-  updateBuilding(p) {
-    this.activePlan = null;
-    if (!p.plans.length) return;
-    const core = Game.playerCore();
-    // find first plan within range
-    let idx = -1;
-    for (let i = 0; i < p.plans.length; i++) {
-      const pl = p.plans[i];
-      const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
-      if (Math.hypot(px - p.x, py - p.y) <= BUILD_RANGE) { idx = i; break; }
-    }
-    if (idx < 0) return;
-    const pl = p.plans[idx];
-    this.activePlan = pl;
-    const bs = 1 / Math.max(pl.block.buildTime, 0.0001) * p.type.buildSpeed * Time.delta;
-    let ex = World.buildAt(pl.x, pl.y);
-
-    if (pl.breaking) {
-      if (!ex || ex.team !== 'sharded') { p.plans.splice(idx, 1); return; }
-      if (!(ex instanceof ConstructBuild)) ex = Game.beginBreak(ex);
-      ex.deconstruct(p, core, bs);
-      if (ex.dead) p.plans.splice(idx, 1);
-      return;
-    }
-
-    if (ex instanceof ConstructBuild && ex.current === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
-      // continue (also resumes a deconstruction in reverse)
-    } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
-      if (pl.block.rotate && ex.rotation !== pl.rotation) { ex.rotation = pl.rotation; Game.refreshAround(ex); Audio2.play('rotate', ex.x, ex.y, 0.3); }
-      p.plans.splice(idx, 1);
-      return;
-    } else {
-      if (!Game.validPlace(pl.block, pl.x, pl.y, pl.rotation)) { p.plans.splice(idx, 1); return; }
-      if (!core || !pl.block.requirements.every(r => core.items[r.item.id] > 0)) {
-        // not enough resources: move to back of the queue
-        pl.stuck = (pl.stuck || 0) + Time.delta;
-        if (pl.stuck > 30 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
-        return;
-      }
-      const config = pl.block.cls === 'ItemBridge' ? null : pl.config;
-      ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, 'sharded', config);
-    }
-    const ok = ex.construct(p, core, bs);
-    if (!ok) {
-      pl.stuck = (pl.stuck || 0) + Time.delta;
-      if (pl.stuck > 60 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
-    }
-    if (ex.dead) p.plans.splice(p.plans.indexOf(pl), 1);
-  },
+  updateBuilding(p) { this.activePlan = builderUpdate(p); },
 
   // ------------------------------------------------------------ drawing (world overlays)
   drawWorld() {
@@ -347,25 +302,8 @@ const Input = {
     if (p) {
       for (const pl of p.plans) this.drawPlan(pl, pl === this.activePlan);
     }
-    // build beam
-    if (p && this.activePlan) {
-      const pl = this.activePlan;
-      const bx = pl.x * TS + pl.block.offset, by = pl.y * TS + pl.block.offset, hs = pl.block.size * TS / 2;
-      const sx = p.x + Angles.trnsx(p.rotation, 4), sy = p.y + Angles.trnsy(p.rotation, 4);
-      const corners = [[bx - hs, by - hs], [bx + hs, by - hs], [bx + hs, by + hs], [bx - hs, by + hs]];
-      const c = pl.breaking ? Pal.remove : Pal.accent;
-      Fill.set(rgba(c, 0.18 + Mathf.absin(Time.time, 3, 0.06)));
-      // fan between the two silhouette corners
-      let best = null, bestAng = -1;
-      for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
-        const a = Angles.angleDist(Angles.angle(sx, sy, ...corners[i]), Angles.angle(sx, sy, ...corners[j]));
-        if (a > bestAng) { bestAng = a; best = [corners[i], corners[j]]; }
-      }
-      Fill.tri(sx, sy, best[0][0], best[0][1], best[1][0], best[1][1]);
-      Lines.set(rgba(c, 0.8), 0.7);
-      Lines.line(sx, sy, best[0][0], best[0][1]); Lines.line(sx, sy, best[1][0], best[1][1]);
-      Fill.set(c.css); Fill.square(sx, sy, 1.2, 45);
-    }
+    if (p && this.activePlan) drawBuildBeam(p, this.activePlan);
+    for (const u of Game.units) if (u !== p && u.activePlan && !u.dead) drawBuildBeam(u, u.activePlan);
 
     if (Game.state !== 'playing') return;
     const [tx, ty] = this.tile;
@@ -471,3 +409,71 @@ const Input = {
     }
   },
 };
+
+// BuilderComp.update, shared by the player and builder AI units. Returns the plan being worked on.
+function builderUpdate(p) {
+  if (!p.plans.length) return null;
+    const core = Game.playerCore();
+    // find first plan within range
+    let idx = -1;
+    for (let i = 0; i < p.plans.length; i++) {
+      const pl = p.plans[i];
+      const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
+      if (Math.hypot(px - p.x, py - p.y) <= BUILD_RANGE) { idx = i; break; }
+    }
+    if (idx < 0) return null;
+    const pl = p.plans[idx];
+    const bs = 1 / Math.max(pl.block.buildTime, 0.0001) * p.type.buildSpeed * Time.delta;
+    let ex = World.buildAt(pl.x, pl.y);
+
+    if (pl.breaking) {
+      if (!ex || ex.team !== 'sharded') { p.plans.splice(idx, 1); return pl; }
+      if (!(ex instanceof ConstructBuild)) ex = Game.beginBreak(ex);
+      ex.deconstruct(p, core, bs);
+      if (ex.dead) p.plans.splice(idx, 1);
+      return pl;
+    }
+
+    if (ex instanceof ConstructBuild && ex.current === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
+      // continue (also resumes a deconstruction in reverse)
+    } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
+      if (pl.block.rotate && ex.rotation !== pl.rotation) { ex.rotation = pl.rotation; Game.refreshAround(ex); Audio2.play('rotate', ex.x, ex.y, 0.3); }
+      p.plans.splice(idx, 1);
+      return pl;
+    } else {
+      if (!Game.validPlace(pl.block, pl.x, pl.y, pl.rotation)) { p.plans.splice(idx, 1); return pl; }
+      if (!core || !pl.block.requirements.every(r => core.items[r.item.id] > 0)) {
+        // not enough resources: move to back of the queue
+        pl.stuck = (pl.stuck || 0) + Time.delta;
+        if (pl.stuck > 30 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
+        return pl;
+      }
+      const config = pl.block.cls === 'ItemBridge' ? null : pl.config;
+      ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, 'sharded', config);
+    }
+    const ok = ex.construct(p, core, bs);
+    if (!ok) {
+      pl.stuck = (pl.stuck || 0) + Time.delta;
+      if (pl.stuck > 60 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
+    }
+    if (ex.dead) p.plans.splice(p.plans.indexOf(pl), 1);
+  return pl;
+}
+
+
+function drawBuildBeam(p, pl) {
+  const bx = pl.x * TS + pl.block.offset, by = pl.y * TS + pl.block.offset, hs = pl.block.size * TS / 2;
+  const sx = p.x + Angles.trnsx(p.rotation, p.type.hitSize / 2), sy = p.y + Angles.trnsy(p.rotation, p.type.hitSize / 2);
+  const corners = [[bx - hs, by - hs], [bx + hs, by - hs], [bx + hs, by + hs], [bx - hs, by + hs]];
+  const c = pl.breaking ? Pal.remove : Pal.accent;
+  Fill.set(rgba(c, 0.18 + Mathf.absin(Time.time, 3, 0.06)));
+  let best = null, bestAng = -1;
+  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+    const a = Angles.angleDist(Angles.angle(sx, sy, ...corners[i]), Angles.angle(sx, sy, ...corners[j]));
+    if (a > bestAng) { bestAng = a; best = [corners[i], corners[j]]; }
+  }
+  Fill.tri(sx, sy, best[0][0], best[0][1], best[1][0], best[1][1]);
+  Lines.set(rgba(c, 0.8), 0.7);
+  Lines.line(sx, sy, best[0][0], best[0][1]); Lines.line(sx, sy, best[1][0], best[1][1]);
+  Fill.set(c.css); Fill.square(sx, sy, 1.2, 45);
+}

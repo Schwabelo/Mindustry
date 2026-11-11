@@ -235,11 +235,18 @@ class Unit {
         const q = m.queued[i]; q.delay -= Time.delta;
         if (q.delay <= 0) { m.queued.splice(i, 1); this.fireBullet(m); }
       }
+      if (w.rotate) {
+        if (m.angle === undefined) m.angle = this.rotation;
+        const [mx, my] = this.mountPos(m);
+        const want = m.shoot ? Angles.angle(mx, my, this.aimX, this.aimY) : this.rotation;
+        m.angle = Angles.moveToward(m.angle, want, w.rotateSpeed * Time.delta);
+      }
       if (!m.shoot || !w.bullet) continue;
       if (w.minShootVelocity > 0 && speed < w.minShootVelocity) continue;
       if (!w.ignoreRotation) {
-        const ang = Angles.angle(this.x, this.y, this.aimX, this.aimY);
-        if (!Angles.within(this.rotation, ang, w.shootCone)) continue;
+        const [mx, my] = w.rotate ? this.mountPos(m) : [this.x, this.y];
+        const ang = Angles.angle(mx, my, this.aimX, this.aimY);
+        if (!Angles.within(w.rotate ? m.angle : this.rotation, ang, w.shootCone)) continue;
       }
       if (m.reload > 0.0001) continue;
       if (w.alternate && m.other && m.side !== m.flip) continue;
@@ -262,14 +269,18 @@ class Unit {
   fireBullet(m) {
     if (this.dead) return;
     const w = m.weapon;
-    const [bx, by] = this.mountPos(m, w.shootY);
-    const ang = this.rotation + Mathf.range(w.inaccuracy + (w.bullet.inaccuracy || 0));
+    let bx, by;
+    if (w.rotate && m.angle !== undefined) {
+      const [mx, my] = this.mountPos(m);
+      bx = mx + Angles.trnsx(m.angle, w.shootY); by = my + Angles.trnsy(m.angle, w.shootY);
+    } else [bx, by] = this.mountPos(m, w.shootY);
+    const ang = (w.rotate && m.angle !== undefined ? m.angle : this.rotation) + Mathf.range(w.inaccuracy + (w.bullet.inaccuracy || 0));
     let lifeScl = 1;
     if (w.bullet.scaleLife) {
       const tr = w.bullet.speed * w.bullet.lifetime;
       lifeScl = Mathf.clamp(Math.hypot(this.aimX - bx, this.aimY - by) / tr, 0, 1);
     }
-    Bullets.create(w.bullet, this, this.team, bx, by, ang, 1, lifeScl, this.aimX, this.aimY);
+    Bullets.create(w.bullet, this, this.team, bx, by, ang, w.velocityRnd ? 1 - w.velocityRnd + Math.random() * w.velocityRnd : 1, lifeScl, this.aimX, this.aimY);
     if (w.bullet.shootEffect) Fx.create(w.bullet.shootEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.bullet.smokeEffect) Fx.create(w.bullet.smokeEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.ejectEffect) Fx.create(w.ejectEffect, bx, by, this.rotation * (m.flip ? -1 : 1));
@@ -362,9 +373,15 @@ class Unit {
       const w = m.weapon;
       if (!w.sprite || w.top !== top) continue;
       const r = this.rotation - 90;
+      const reg = this.regs().weapons[t_widx(this, w)];
+      if (w.rotate && m.angle !== undefined) {
+        const mx = x + Angles.trnsx(r, m.x, w.y), my = y + Angles.trnsy(r, m.x, w.y);
+        const wr = m.angle - 90, rec = -m.recoil * w.recoil;
+        Draw.rect(reg, mx + Angles.trnsx(wr, 0, rec), my + Angles.trnsy(wr, 0, rec), reg.ww * (m.flip ? -1 : 1), reg.wh, wr);
+        continue;
+      }
       const rec = -m.recoil * w.recoil;
       const wx = x + Angles.trnsx(r, m.x, w.y + rec), wy = y + Angles.trnsy(r, m.x, w.y + rec);
-      const reg = this.regs().weapons[t_widx(this, w)];
       Draw.rect(reg, wx, wy, reg.ww * (m.flip ? -1 : 1), reg.wh, r);
     }
   }

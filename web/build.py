@@ -106,9 +106,15 @@ UNITS = {
     "mace": ["mace", "mace-base", "mace-leg"], "fortress": ["fortress", "fortress-base", "fortress-leg"],
     "crawler": ["crawler", "crawler-base", "crawler-leg"], "flare": ["flare"], "horizon": ["horizon"],
     "nova": ["nova", "nova-base", "nova-leg"], "mono": ["mono"],
+    "pulsar": ["pulsar", "pulsar-base", "pulsar-leg"], "quasar": ["quasar", "quasar-base", "quasar-leg"],
+    "zenith": ["zenith"], "poly": ["poly"], "mega": ["mega"],
 }
 for parts in UNITS.values():
     add(parts, UNIT_OUTLINE)
+add(["pulsar-cell", "quasar-cell", "zenith-cell", "poly-cell", "mega-cell"])
+add(["heal-shotgun-weapon", "beam-weapon", "zenith-missiles", "poly-weapon", "heal-weapon-mount"], UNIT_OUTLINE)
+add(["missile", "missile-back", "additive-reconstructor", "additive-reconstructor-top", "multiplicative-reconstructor",
+     "multiplicative-reconstructor-top", "factory-in-5", "factory-out-5"])
 add(["mono-cell", "alpha-cell", "mace-cell", "fortress-cell", "crawler-cell", "horizon-cell", "nova-cell"])
 add(["small-basic-weapon", "large-weapon", "flamethrower", "artillery", "heal-weapon"], UNIT_OUTLINE)
 
@@ -206,7 +212,8 @@ SOUNDS = {
     "shootScatter": "shoot/shootScatter", "shootArtillerySmall": "shoot/shootArtillerySmall",
     "shootArtillery": "shoot/shootArtillery", "shootLancer": "shoot/shootLancer", "chargeLancer": "charge/chargeLancer",
     "shootArc": "shoot/shootArc", "shootFlame": "shoot/shootFlame", "shootHorizon": "shoot/shootHorizon",
-    "shootLaser": "shoot/shootLaser", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
+    "shootLaser": "shoot/shootLaser", "shootPulsar": "shoot/shootPulsar", "shootMissile": "shoot/shootMissile",
+    "shootMissilePlasmaShort": "shoot/shootMissilePlasmaShort", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
     "explosion": "explosions/explosion", "explosionCrawler": "explosions/explosionCrawler",
     "explosionArtillery": "explosions/explosionArtillery", "blockExplode": "explosions/blockExplode1",
     "blockExplodeWall": "explosions/blockExplodeWall", "unitExplode": "explosions/unitExplode1",

@@ -10,18 +10,25 @@ A JavaScript re-implementation of Mindustry's core survival loop, with stats and
 taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/**`):
 
 - Procedurally generated map with Mindustry floors, edge blending (from `edge-stencil.png`),
-  ores, static walls and wall darkness
+  ores (copper, lead, coal, sand, scrap, titanium, thorium), static walls and wall darkness
 - Alpha core unit: fly, shoot, mine ore, build and deconstruct with build plans
-- Blocks: conveyor, titanium conveyor, junction, router, sorter, overflow gate, bridge conveyor,
-  unloader, mechanical/pneumatic drill, graphite press, silicon smelter, kiln, pulverizer,
-  combustion generator, solar panel, battery, power node, copper/titanium walls (+large),
-  mender, duo, scatter, hail, lancer, arc, ground factory, container, core shard
-- Enemies: dagger, mace, fortress, crawler, flare, horizon, nova, using the wave table from
-  `game/Waves.java`, with ground flow-field pathfinding and Mindustry's AI behaviours
-- Player-built units (dagger / crawler / nova) that defend the core or attack (G)
+- Items: conveyor, titanium conveyor, junction, router, sorter, overflow gate, bridge conveyor, unloader
+- Liquids: mechanical pump, conduit, liquid router, liquid junction, bridge conduit, liquid tank;
+  water boosts drills (1.6x) and cools turrets, cryofluid cools better
+- Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
+  pulverizer, cryofluid mixer
+- Power: combustion generator, solar panel, battery (+large), power node (+large)
+- Defense: copper/titanium/thorium walls (+large), mender; turrets duo, scatter, hail, lancer, arc,
+  wave, salvo, ripple
+- Units: ground factory (dagger, crawler, nova), air factory (flare, mono), additive and
+  multiplicative reconstructors (mace, fortress, pulsar, quasar, horizon, zenith, poly, mega)
+  with their abilities (repair fields, shield regen, quasar force field); monos auto-mine,
+  polys rebuild destroyed blocks, megas repair
+- Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
+- Save/load: autosave every minute, Continue on the title screen, save file export/import
 
 It is not a port of the Java game; there is no campaign, tech tree, multiplayer, logic
-processors, liquids or saves.
+processors, payload blocks, or the Erekir planet.
 
 ## Controls
 

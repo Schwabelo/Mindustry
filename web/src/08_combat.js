@@ -8,7 +8,7 @@ const Bullets = {
 
   create(type, owner, team, x, y, angle, velScl = 1, lifeScl = 1, aimX, aimY) {
     if (type.type === 'laser') return this.laser(type, owner, team, x, y, angle);
-    if (type.type === 'lightning') return Lightning.create(team, type.color || Pal.lancerLaser, type.damage, x, y, angle, type.lightningLength, type);
+    if (type.type === 'lightning') return Lightning.create(team, type.color || Pal.lancerLaser, type.damage, x, y, angle, type.lightningLength + Math.round(Math.random() * (type.lightningLengthRand || 0)), type);
     const b = {
       type, owner, team, x, y, rotation: angle, id: nextBulletId++,
       vx: Angles.trnsx(angle, type.speed * velScl), vy: Angles.trnsy(angle, type.speed * velScl),
@@ -32,9 +32,11 @@ const Bullets = {
       if (d <= u.type.hitSize / 2 + 4) hits.push({ t: Mathf.dst(x, y, u.x, u.y), u });
     }
     for (const b of Game.buildings) {
-      if (b.team === team || b.dead) continue;
+      if (b.dead) continue;
       const d = segDist(x, y, ex, ey, b.x, b.y);
-      if (d <= b.hitSize / 2) hits.push({ t: Mathf.dst(x, y, b.x, b.y), b });
+      if (d > b.hitSize / 2) continue;
+      if (b.team !== team) hits.push({ t: Mathf.dst(x, y, b.x, b.y), b });
+      else if (type.healPercent && b.health < b.maxHealth && !(b instanceof ConstructBuild)) { b.heal(b.maxHealth * type.healPercent / 100); Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal); }
     }
     hits.sort((a, c) => a.t - c.t);
     let n = 0;
@@ -71,6 +73,11 @@ const Bullets = {
         const a = Angles.moveToward(Angles.angle(0, 0, b.vx, b.vy), Angles.angle(b.x, b.y, tgt.x, tgt.y), t.homingPower * Time.delta * 50);
         b.vx = Angles.trnsx(a, sp); b.vy = Angles.trnsy(a, sp);
       }
+    }
+    if (t.weaveMag) {
+      const a = Math.sin((b.time + Math.PI * t.weaveScale / 2) / t.weaveScale) * t.weaveMag * Time.delta * DEG * (b.id % 2 ? 1 : -1);
+      const cs = Math.cos(a), sn = Math.sin(a), vx = b.vx;
+      b.vx = vx * cs - b.vy * sn; b.vy = vx * sn + b.vy * cs;
     }
     if (t.trailLength > 0) { b.trail.push(b.x, b.y); if (b.trail.length > t.trailLength * 2) b.trail.splice(0, 2); }
     b.x += b.vx * Time.delta; b.y += b.vy * Time.delta;
@@ -163,7 +170,7 @@ const Bullets = {
       }
       const fin = b.time / b.lifetime, fout = 1 - fin;
       switch (t.type) {
-        case 'basic': case 'flak': case 'bomb': case 'artillery': {
+        case 'basic': case 'flak': case 'bomb': case 'artillery': case 'missile': {
           let w = t.width, h = t.height * ((1 - t.shrinkY) + t.shrinkY * fout);
           if (t.type === 'artillery') { const sc = 0.7 + Mathf.slope(fin) * 0.3; w *= sc; h *= sc; }
           if (!t._back) { t._back = Assets.tinted(t.sprite + '-back', t.backColor); t._front = Assets.tinted(t.sprite, t.frontColor); }
@@ -192,7 +199,7 @@ const Bullets = {
         const ex = L.x + Angles.trnsx(L.angle, baseLen), ey = L.y + Angles.trnsy(L.angle, baseLen);
         Fill.triAngle(ex, ey, stroke, cwidth * 2 + t.width / 2, L.angle);
         Fill.circle(L.x, L.y, cwidth * fout);
-        for (const i of [-1, 1]) Fill.triAngle(L.x, L.y, 0.7 * fout * cwidth, 29 * compound, L.angle + 90 * i);
+        for (const i of [-1, 1]) Fill.triAngle(L.x, L.y, (t.sideWidth || 0.7) * fout * cwidth, (t.sideLength || 29) * compound, L.angle + (t.sideAngle || 90) * i);
         compound *= 0.5;
       }
     }
@@ -248,7 +255,11 @@ const Lightning = {
         if (Mathf.within(cx, cy, u.x, u.y, u.type.hitSize / 2 + 5)) { hitUnits.add(u); u.damage(damage); Fx.create('hitLancer', u.x, u.y, 0, color); }
       }
       const b = World.buildWorld(cx, cy);
-      if (b && b.team !== team && !hitBuilds.has(b)) { hitBuilds.add(b); b.damage(damage * (type.buildingDamageMultiplier || 1)); }
+      if (b && !hitBuilds.has(b)) {
+        hitBuilds.add(b);
+        if (b.team !== team) b.damage(damage * (type.buildingDamageMultiplier || 1));
+        else if (type.healPercent && b.health < b.maxHealth && !(b instanceof ConstructBuild)) { b.heal(b.maxHealth * type.healPercent / 100); Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal); }
+      }
       if (World.isWall(Math.round(cx / TS), Math.round(cy / TS))) break;
     }
     this.list.push({ pts, color, time: 0, lifetime: 10 });

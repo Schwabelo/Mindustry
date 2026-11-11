@@ -62,6 +62,9 @@ UnitFactory.prototype.readState = function (s) { this.currentPlan = s.c; this.pr
 CryofluidMixer.prototype.writeState = function () { return { w: this.waterIn, p: this.progress }; };
 CryofluidMixer.prototype.readState = function (s) { this.waterIn = s.w; this.progress = s.p; };
 
+Reconstructor.prototype.writeState = function () { return { pl: this.payload ? this.payload.name : null, p: this.progress, d: this.inDir }; };
+Reconstructor.prototype.readState = function (s) { this.payload = s.pl ? UNITS[s.pl] : null; this.progress = s.p; this.inDir = s.d; };
+
 // ---------------------------------------------------------------- save / load
 const SaveIO = {
   serialize() {
@@ -102,7 +105,7 @@ const SaveIO = {
     if (!data || data.v !== SAVE_VERSION) throw new Error('Unsupported save version');
     Game.seed = data.seed;
     Time.time = data.time || 0;
-    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] };
+    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = [];
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(data.seed);
     Game.wave = data.wave; Game.waveCountdown = data.wc; Game.command = data.cmd || 'defend';
