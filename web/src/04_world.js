@@ -192,6 +192,25 @@ const World = {
 
     this.computeDarkness();
     this.buildMinimapBase();
+    this._oreTiles = {};
+  },
+
+  // all ore tiles of an item, sorted by distance to the starting core
+  oreTiles(item) {
+    let t = this._oreTiles[item.id];
+    if (!t) {
+      t = [];
+      const W = this.w, c = this.coreTile;
+      for (let i = 0; i < this.ore.length; i++) if (this.ore[i] === item.id + 1 && !this.wall[i]) t.push(i);
+      t.sort((a, b) => Math.hypot(a % W - c.x, (a / W | 0) - c.y) - Math.hypot(b % W - c.x, (b / W | 0) - c.y));
+      this._oreTiles[item.id] = t;
+    }
+    return t;
+  },
+  closestOre(item, cx, cy) {
+    const W = this.w;
+    for (const i of this.oreTiles(item)) if (!this.build[i]) return [i % W, (i / W) | 0];
+    return null;
   },
 
   carvePath(from, to, rand) {

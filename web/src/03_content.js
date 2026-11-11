@@ -148,6 +148,11 @@ defUnit('horizon', {
   })],
 });
 
+defUnit('mono', {
+  flying: true, drag: 0.06, accel: 0.12, speed: 1.5, health: 100, engineSize: 1.8, engineOffset: 5.7, range: 50,
+  mineTier: 1, mineSpeed: 2.5, itemCapacity: 20, cell: true, miner: true, weapons: [],
+});
+
 defUnit('nova', {
   canBoost: true, speed: 0.55, hitSize: 8, health: 200, armor: 1, mech: true, cell: true, buildSpeed: 0.3,
   weapons: [weapon('heal-weapon', {
@@ -315,6 +320,16 @@ defBlock('ground-factory', 'UnitFactory', {
   iconLayers: ['ground-factory', 'factory-out-3', 'factory-top-3'],
 });
 
+defBlock('air-factory', 'UnitFactory', {
+  requirements: req('copper', 60, 'lead', 70, 'silicon', 60), size: 3, consumesPower: 1.2, category: 'units', hasPower: true,
+  hasItems: true, rotate: true, configurable: true, flags: ['factory'],
+  plans: [
+    { unit: 'flare', time: 60 * 15, requirements: req('silicon', 15) },
+    { unit: 'mono', time: 60 * 35, requirements: req('silicon', 30, 'lead', 15) },
+  ],
+  iconLayers: ['air-factory', 'factory-out-3', 'factory-top-3'],
+});
+
 // --- storage / core
 defBlock('container', 'StorageBlock', { requirements: req('lead', 350, 'titanium', 100), size: 2, health: 400, itemCapacity: 300, category: 'effect', hasItems: true, storage: true });
 defBlock('core-shard', 'Core', {
@@ -355,6 +370,7 @@ const DESCRIPTIONS = {
   'hail': 'Fires small artillery shells at ground targets. Accepts graphite and silicon.',
   'lancer': 'Charges and fires powerful beams of energy at ground targets. Requires power.',
   'arc': 'Fires electrical arcs at ground targets. Requires power.',
+  'air-factory': 'Produces air units. Monos automatically mine copper and lead and deliver them to the core.',
   'ground-factory': 'Produces ground units. Click to choose the unit. Units defend the core; press G to send them to attack.',
   'container': 'Stores a small amount of items of each type. Use an unloader to retrieve them.',
   'core-shard': 'The core of the base. Once destroyed, the sector is lost.',

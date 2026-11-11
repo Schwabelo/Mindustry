@@ -83,7 +83,7 @@ add(["junction", "router", "sorter", "overflow-gate", "bridge-conveyor", "bridge
      "combustion-generator", "combustion-generator-top", "power-node", "battery", "battery-top", "solar-panel",
      "copper-wall", "copper-wall-large", "titanium-wall", "titanium-wall-large",
      "mender", "mender-top", "core-shard", "core-shard-team", "container", "container-team",
-     "unloader", "unloader-center", "ground-factory", "factory-out-3", "factory-in-3", "factory-top-3",
+     "unloader", "unloader-center", "ground-factory", "air-factory", "factory-out-3", "factory-in-3", "factory-top-3",
      "block-1", "block-2", "block-border", "block-select", "place-arrow"])
 for i in range(1, 9):
     add([f"rubble-{i}-0"])
@@ -97,11 +97,11 @@ UNITS = {
     "alpha": ["alpha"], "dagger": ["dagger", "dagger-base", "dagger-leg"],
     "mace": ["mace", "mace-base", "mace-leg"], "fortress": ["fortress", "fortress-base", "fortress-leg"],
     "crawler": ["crawler", "crawler-base", "crawler-leg"], "flare": ["flare"], "horizon": ["horizon"],
-    "nova": ["nova", "nova-base", "nova-leg"],
+    "nova": ["nova", "nova-base", "nova-leg"], "mono": ["mono"],
 }
 for parts in UNITS.values():
     add(parts, UNIT_OUTLINE)
-add(["alpha-cell", "mace-cell", "fortress-cell", "crawler-cell", "horizon-cell", "nova-cell"])
+add(["mono-cell", "alpha-cell", "mace-cell", "fortress-cell", "crawler-cell", "horizon-cell", "nova-cell"])
 add(["small-basic-weapon", "large-weapon", "flamethrower", "artillery", "heal-weapon"], UNIT_OUTLINE)
 
 # effects

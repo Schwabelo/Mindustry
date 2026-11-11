@@ -275,27 +275,7 @@ const Input = {
     this.updateTransfer(p);
   },
 
-  updateMining(p) {
-    if (!p.mineTile) return;
-    const [tx, ty] = p.mineTile;
-    const it = World.oreItem(tx, ty);
-    if (!it || World.buildAt(tx, ty) || Math.hypot(tx * TS - p.x, ty * TS - p.y) > MINE_RANGE + 8 || it.hardness > p.type.mineTier) {
-      p.mineTile = null; return;
-    }
-    p.mineTimer += Time.delta * p.type.mineSpeed;
-    if (Math.random() < 0.06 * Time.delta) Fx.create('mineSpark', tx * TS + Mathf.range(3), ty * TS + Mathf.range(3), 0, it.color);
-    if (p.mineTimer >= 50 + it.hardness * 15) {
-      p.mineTimer = 0;
-      const core = Game.playerCore();
-      if (core && Math.hypot(core.x - p.x, core.y - p.y) < TRANSFER_RANGE && core.items[it.id] < core.block.itemCapacity) {
-        core.addItem(it);
-        Fx.create('itemTransfer', tx * TS, ty * TS, 0, null, { item: it, tx: core.x, ty: core.y });
-      } else if ((p.stack.item === it || !p.stack.item) && p.stack.amount < p.type.itemCapacity) {
-        p.stack.item = it; p.stack.amount++;
-        Fx.create('itemTransfer', tx * TS, ty * TS, 0, null, { item: it, tx: p.x, ty: p.y });
-      }
-    }
-  },
+  updateMining(p) { p.updateMining(); },
 
   updateTransfer(p) {
     if (!p.stack.amount) return;
@@ -366,15 +346,6 @@ const Input = {
     // build plans (ghosts)
     if (p) {
       for (const pl of p.plans) this.drawPlan(pl, pl === this.activePlan);
-    }
-    // mining laser
-    if (p && p.mineTile) {
-      const [tx, ty] = p.mineTile;
-      const ex = tx * TS + Mathf.sin(Time.time + 48, 6, 1.4), ey = ty * TS + Mathf.sin(Time.time, 7, 1.4);
-      const sx = p.x + Angles.trnsx(p.rotation, 4), sy = p.y + Angles.trnsy(p.rotation, 4);
-      Draw.setAlpha(0.9);
-      Draw.laser(sx, sy, ex, ey, 0.75, col('e8d174'));
-      Draw.setAlpha(1);
     }
     // build beam
     if (p && this.activePlan) {

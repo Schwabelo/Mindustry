@@ -181,8 +181,48 @@ class Unit {
     this.speedNow = moved / Math.max(Time.delta, 1e-3);
 
     this.updateWeapons();
+    if (!this.isPlayer) this.updateMining();
     this.hitTime = Math.max(0, this.hitTime - Time.delta / 9);
     if (this.shieldAlpha) this.shieldAlpha = Math.max(0, this.shieldAlpha - Time.delta / 20);
+  }
+
+  // MinerComp.update
+  validMine(tx, ty) {
+    if (!World.inside(tx, ty) || World.buildAt(tx, ty)) return null;
+    const it = World.oreItem(tx, ty);
+    if (!it || it.hardness > this.type.mineTier) return null;
+    return Math.hypot(tx * TS - this.x, ty * TS - this.y) <= MINE_RANGE + 8 ? it : null;
+  }
+
+  updateMining() {
+    if (!this.mineTile) return;
+    const [tx, ty] = this.mineTile;
+    const it = this.validMine(tx, ty);
+    if (!it) { this.mineTile = null; return; }
+    this.mineTimer += Time.delta * this.type.mineSpeed;
+    if (Math.random() < 0.06 * Time.delta) Fx.create('mineSpark', tx * TS + Mathf.range(3), ty * TS + Mathf.range(3), 0, it.color);
+    if (this.mineTimer >= 50 + it.hardness * 15) {
+      this.mineTimer = 0;
+      const core = Game.teamBuildings(this.team).find(b => b.block.cls === 'Core');
+      // players offload straight into a nearby core; AI miners fill their stack and fly it back
+      if (this.isPlayer && core && Math.hypot(core.x - this.x, core.y - this.y) < TRANSFER_RANGE && core.items[it.id] < core.block.itemCapacity) {
+        core.addItem(it);
+        Fx.create('itemTransfer', tx * TS, ty * TS, 0, null, { item: it, tx: core.x, ty: core.y });
+      } else if ((this.stack.item === it || !this.stack.item) && this.stack.amount < this.type.itemCapacity) {
+        this.stack.item = it; this.stack.amount++;
+        Fx.create('itemTransfer', tx * TS, ty * TS, 0, null, { item: it, tx: this.x, ty: this.y });
+      }
+    }
+  }
+
+  drawMining() {
+    if (!this.mineTile) return;
+    const [tx, ty] = this.mineTile;
+    const ex = tx * TS + Mathf.sin(Time.time + 48, 6, 1.4), ey = ty * TS + Mathf.sin(Time.time, 7, 1.4);
+    const sx = this.x + Angles.trnsx(this.rotation, this.type.hitSize / 2), sy = this.y + Angles.trnsy(this.rotation, this.type.hitSize / 2);
+    Draw.setAlpha(0.9);
+    Draw.laser(sx, sy, ex, ey, 0.75, col('e8d174'));
+    Draw.setAlpha(1);
   }
 
   updateWeapons() {
@@ -576,12 +616,59 @@ class SuicideAI {
   }
 }
 
+// MinerAI: mine the minable item the core has least of, return when full
+class MinerAI {
+  constructor() { this.mining = true; this.targetItem = null; this.ore = null; this.t1 = 0; this.t2 = 0; }
+  update(u) {
+    const core = Game.teamBuildings(u.team).find(b => b.block.cls === 'Core');
+    if (!core) return;
+    if (u.mineTile && !u.validMine(...u.mineTile)) u.mineTile = null;
+    if (this.mining) {
+      this.t1 -= Time.delta;
+      if (this.t1 <= 0 || !this.targetItem) {
+        this.t1 = 240;
+        let best = null;
+        for (const it of [Items.copper, Items.lead, Items.titanium]) {
+          if (it.hardness > u.type.mineTier || !World.oreTiles(it).length) continue;
+          if (!best || core.items[it.id] < core.items[best.id]) best = it;
+        }
+        this.targetItem = best;
+      }
+      if (!this.targetItem) return;
+      if (core.items[this.targetItem.id] >= core.block.itemCapacity) { u.mineTile = null; u.stack = { item: null, amount: 0 }; return; }
+      if (u.stack.amount >= u.type.itemCapacity || (u.stack.item && u.stack.item !== this.targetItem)) this.mining = false;
+      else {
+        this.t2 -= Time.delta;
+        if (this.t2 <= 0) { this.t2 = 60; this.ore = World.closestOre(this.targetItem, core.tx, core.ty); }
+        if (this.ore) {
+          const ox = this.ore[0] * TS, oy = this.ore[1] * TS;
+          u.moveTo(ox, oy, MINE_RANGE / 2);
+          if (Math.hypot(ox - u.x, oy - u.y) < MINE_RANGE && !u.mineTile) u.mineTile = this.ore;
+          u.lookAt(ox, oy);
+        }
+      }
+    } else {
+      u.mineTile = null;
+      if (u.stack.amount === 0) { this.mining = true; return; }
+      if (Math.hypot(core.x - u.x, core.y - u.y) < u.type.range + core.block.size * TS / 2) {
+        const it = u.stack.item;
+        const n = Math.min(u.stack.amount, core.block.itemCapacity - core.items[it.id]);
+        if (n > 0) { core.addItem(it, n); Fx.create('itemTransfer', u.x, u.y, 0, null, { item: it, tx: core.x, ty: core.y }); }
+        u.stack = { item: null, amount: 0 };
+        this.mining = true;
+      }
+      circleAttack(u, core, u.type.range / 1.8);
+    }
+  }
+}
+
 // player-team units: defend around the core, or attack toward the enemy spawn (G toggles)
 class DefenderAI {
   constructor() { this.target = null; this.retarget = Math.random() * 20; this.slot = Math.random() * 360; }
   update(u) {
     const t = u.type;
     if (t.crawler) return this.updateCrawler(u);
+    if (t.flying) return this.updateFlying(u);
     this.retarget -= Time.delta;
     if (this.retarget <= 0) {
       this.retarget = 20;
@@ -605,6 +692,41 @@ class DefenderAI {
     }
     aimAndShoot(u, this.target);
   }
+  updateFlying(u) {
+    const t = u.type;
+    this.retarget -= Time.delta;
+    if (this.retarget <= 0) {
+      this.retarget = 20;
+      const core = Game.playerCore();
+      const cx = core ? core.x : u.x, cy = core ? core.y : u.y;
+      // defend: enemies near the core; attack: anything near us, then the drop zone
+      this.target = Game.command === 'attack'
+        ? Targeting.closestTarget(u.team, u.x, u.y, 400, t.targetAir, t.targetGround)
+        : Targeting.closestTarget(u.team, cx, cy, 300, t.targetAir, t.targetGround);
+    }
+    if (this.target && this.target.dead) this.target = null;
+    if (t.autoDropBombs) {
+      const below = World.buildWorld(u.x, u.y);
+      const shoot = !!(below && below.team !== u.team) || (this.target && Math.hypot(this.target.x - u.x, this.target.y - u.y) < 12);
+      for (const m of u.mounts) m.shoot = shoot;
+      u.aimX = u.x; u.aimY = u.y;
+    }
+    if (this.target) {
+      if (t.circleTarget) circleAttack(u, this.target, t.circleTargetRadius);
+      else { u.moveTo(this.target.x, this.target.y, u.range * 0.8); }
+      if (!t.autoDropBombs) aimAndShoot(u, this.target, !t.circleTarget);
+    } else {
+      for (const m of u.mounts) m.shoot = false;
+      const core = Game.playerCore();
+      if (Game.command === 'attack') u.moveTo(World.spawn.x * TS, World.spawn.y * TS, 30);
+      else if (core) {
+        if (t.omniMovement) u.moveTo(core.x + Angles.trnsx(this.slot, 40), core.y + Angles.trnsy(this.slot, 40), 6);
+        else circleAttack(u, core, 60);
+      }
+      if (t.omniMovement && Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
+    }
+  }
+
   followField(u, field, target) {
     if (target && !field) { u.moveTo(target.x, target.y, u.range * 0.7); return; }
     const nxt = field && field.next(u.x, u.y);
@@ -657,6 +779,7 @@ function circleAttack(u, target, circleLength) {
 }
 
 function makeController(type, team) {
+  if (type.miner) return new MinerAI();
   if (team === 'sharded') return new DefenderAI();
   if (type.crawler) return new SuicideAI();
   if (type.flying) return new FlyingAI();

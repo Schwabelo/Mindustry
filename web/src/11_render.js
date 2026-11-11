@@ -70,6 +70,8 @@ function renderFrame() {
   for (const u of ground) u.drawShadow();
   for (const u of ground) u.draw();
 
+  for (const u of Game.units) if (u.mineTile && inView(v, u.x, u.y, 100)) u.drawMining();
+
   // bridges + power lasers
   for (const b of vis) if (b instanceof ItemBridge) b.drawBridge();
   Power.drawLasers();

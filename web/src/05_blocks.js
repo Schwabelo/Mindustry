@@ -927,7 +927,7 @@ class UnitFactory extends Building {
     } else this.speedScl = Mathf.approach(this.speedScl, 0, 0.05 * Time.delta);
   }
   draw() {
-    Draw.rect('ground-factory', this.x, this.y);
+    Draw.rect(this.block.name, this.x, this.y);
     const p = this.plan;
     if (p) {
       const f = this.progress / p.time;
