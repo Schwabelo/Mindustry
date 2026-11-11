@@ -272,7 +272,37 @@ const UI = {
       if (Input.selected && this.frame % 30 === 0) this.showBlockInfo(Input.selected);
     }
     this.updateHover();
+    this.updateHints();
     if (this.frame % 20 === 0 || this.minimapDirty) { this.drawMinimap(); this.minimapDirty = false; }
+  },
+
+  // contextual tips, each shown once per browser
+  hintsSeen: null,
+  updateHints() {
+    if (Game.state !== 'playing' || this.frame % 60 !== 0) return;
+    if (!this.hintsSeen) {
+      try { this.hintsSeen = new Set(JSON.parse(localStorage.getItem('mindustry-lite-hints') || '[]')); } catch (e) { this.hintsSeen = new Set(); }
+    }
+    const core = Game.playerCore();
+    if (!core) return;
+    const has = cls => Game.byTeam.sharded.some(b => b.block.cls === cls);
+    const hints = [
+      ['mine', () => Time.time > 60, 'Click copper ore near your core to mine it by hand.'],
+      ['drill', () => Time.time > 60 * 8 && !has('Drill'), 'Open the production tab and place Mechanical Drills on ore. Connect them to the core with conveyors.'],
+      ['turret', () => has('Drill') && !has('ItemTurret') && Time.time > 60 * 20, 'Build Duo turrets (turret tab) near the core, and feed them copper with a conveyor.'],
+      ['wave', () => Game.waveCountdown < 60 * 20 && Game.wave === 1, 'The first wave is coming from the red drop zone. Check the minimap (top right).'],
+      ['coal', () => core.items[Items.coal.id] > 0 || has('GenericCrafter'), 'Graphite presses turn coal into graphite: better Duo ammo, and needed for Pneumatic Drills and Hail turrets.'],
+      ['power', () => core.items[Items.graphite.id] > 20 && !has('ConsumeGenerator'), 'Combustion generators burn coal for power. Power nodes link them to silicon smelters, menders and lancers.'],
+      ['units', () => has('UnitFactory'), 'Ground factory units defend the core. Press G to send them to attack the enemy drop zone.'],
+    ];
+    for (const [id, cond, text] of hints) {
+      if (this.hintsSeen.has(id) || !cond()) continue;
+      this.hintsSeen.add(id);
+      try { localStorage.setItem('mindustry-lite-hints', JSON.stringify([...this.hintsSeen])); } catch (e) { /* ignore */ }
+      this.toast(text, 7);
+      Audio2.play('uiNotify', undefined, undefined, 0.4);
+      break;
+    }
   },
 
   updateHover() {

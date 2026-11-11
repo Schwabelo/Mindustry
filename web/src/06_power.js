@@ -20,7 +20,9 @@ const Power = {
         const b = stack.pop();
         g.members.push(b);
         const neighbors = [...b.power.links];
-        for (const p of b.proximity) if (this.isPower(p)) neighbors.push(p);
+        // adjacency conducts power, except between two pure consumers (BuildingComp.getPowerConnections)
+        const pure = x => x.block.consumesPower > 0 && !x.block.outputsPower;
+        for (const p of b.proximity) if (this.isPower(p) && !(pure(b) && pure(p))) neighbors.push(p);
         for (const n of neighbors) {
           if (this.isPower(n) && !n.power.graph) { n.power.graph = g; stack.push(n); }
         }
@@ -125,8 +127,9 @@ const Power = {
   // called when a non-node power building is placed: nearest node in range links to it (PowerNode.getNodeLinks)
   autoLinkConsumer(b) {
     if (this.dirty) this.rebuild();
-    if (b.proximity.some(p => this.isPower(p))) return; // already connected by adjacency
-    const nodes = Game.teamBuildings(b.team).filter(n => n.block.cls === 'PowerNode' && !n.dead && this.inLaserRange(n, b) && n.power.links.length < n.block.maxNodes);
+    const g = b.power.graph;
+    const nodes = Game.teamBuildings(b.team).filter(n => n.block.cls === 'PowerNode' && !n.dead && n.power.graph !== g &&
+      this.inLaserRange(n, b) && n.power.links.length < n.block.maxNodes);
     nodes.sort((a, c) => Mathf.dst2(b.x, b.y, a.x, a.y) - Mathf.dst2(b.x, b.y, c.x, c.y));
     if (nodes.length) this.link(nodes[0], b);
   },

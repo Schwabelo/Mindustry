@@ -53,6 +53,8 @@ const Game = {
   // ------------------------------------------------------------ lifecycle
   newGame(seed) {
     this.seed = seed;
+    Time.time = 0;
+    this.lastCoreWarn = -9999;
     this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [] };
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(seed);

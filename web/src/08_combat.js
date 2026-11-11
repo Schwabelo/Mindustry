@@ -360,14 +360,16 @@ Object.assign(FX, {
     Lines.set(lerpColorCss(Pal.lightFlame, Pal.darkFlame, e.fin), e.fout * 1.5);
     randLen({ id: e.id + 3 }, Math.round(5 + size * 3), (2 + 26 * Mathf.pow2Out(e.fin)) * size, (x, y) => Lines.lineAngle(e.x + x, e.y + y, Angles.angle(0, 0, x, y), 1 + e.fout * 4));
   } },
+  // Fx.dynamicExplosion
   blockExplode: { life: 50, draw(e) {
-    const size = e.data || 1;
-    const s = Mathf.clamp(e.time / 12);
-    if (s < 1) { Lines.set('#ffd2ae', 3 * (1 - s) * size); Lines.circle(e.x, e.y, (4 + s * 12) * size); }
-    Fill.set(lerp3(Pal.lightFlame, Pal.darkFlame, col('5a5a5a'), e.fin));
-    Draw.setAlpha(e.fout);
-    randLen(e, 4 + size * 4, (4 + 18 * Mathf.pow2Out(e.fin)) * size, (x, y) => Fill.circle(e.x + x, e.y + y, (e.fout * 3.2 + 0.6) * Math.sqrt(size)));
-    Draw.setAlpha(1);
+    const it = Math.max(1, (e.data || 1) * 0.7);
+    const sc = Mathf.clamp(e.time / (5 + it * 2));
+    if (sc < 1) { Lines.set(lighterOrange.css, (3.1 + it / 5) * (1 - sc)); Lines.circle(e.x, e.y, (3 + sc * 14) * it); }
+    const fp = Mathf.pow2Out(e.fin);
+    Fill.set('#7f7f7f');
+    randLen(e, Math.round(6 * it), 21 * it * fp, (x, y) => { Fill.circle(e.x + x, e.y + y, e.fout * (2 + it) * 1.2 + 0.5); Fill.circle(e.x + x / 2, e.y + y / 2, e.fout * it * 1.2); });
+    Lines.set(lerp3(lighterOrange, Pal.lightOrange, col('7f7f7f'), e.fin), 1.7 * e.fout * (1 + (it - 1) / 2));
+    randLen({ id: e.id + 1 }, Math.round(9 * it), 40 * it * fp + 0.01, (x, y) => Lines.lineAngle(e.x + x, e.y + y, Angles.angle(0, 0, x, y), 1 + e.fout * 4 * (1 + it / 3)));
   } },
   pulverize: { life: 40, draw(e) {
     Fill.set(Pal.stoneGray.css);
