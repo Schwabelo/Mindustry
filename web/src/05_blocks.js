@@ -554,11 +554,21 @@ class GenericCrafter extends Building {
   acceptItem(source, item) {
     return this.block.consumeItems.some(c => c.item === item) && this.items[item.id] < this.block.itemCapacity;
   }
-  canConsume() { return this.block.consumeItems.every(c => this.has(c.item, c.amount)); }
+  info() {
+    const b = this.block, lines = [`${b.consumeItems.map(c => c.amount + ' ' + c.item.name).join(' + ')}${b.consumeLiquid ? ' + ' + (b.consumeLiquid.amount * 60).toFixed(0) + ' ' + b.consumeLiquid.liquid + '/s' : ''} → ${b.outputItem.amount} ${b.outputItem.item.name}`];
+    lines.push(`${(60 / b.craftTime * b.outputItem.amount).toFixed(2)}/s at full speed`);
+    return lines;
+  }
+  canConsume() {
+    const cl = this.block.consumeLiquid;
+    if (cl && !(this.liquid.type && this.liquid.type.name === cl.liquid && this.liquid.amount >= cl.amount * Time.delta)) return false;
+    return this.block.consumeItems.every(c => this.has(c.item, c.amount));
+  }
   shouldConsume() { const o = this.block.outputItem; return this.items[o.item.id] + o.amount <= this.block.itemCapacity && this.canConsume(); }
   update() {
     const eff = this.shouldConsume() ? this.efficiency : 0;
     if (eff > 0) {
+      if (this.block.consumeLiquid) this.removeLiquid(this.block.consumeLiquid.amount * Time.delta * eff);
       this.progress += Time.delta * eff / this.block.craftTime;
       this.warmup = Mathf.approach(this.warmup, 1, 0.019 * Time.delta);
       if (this.block.flame && Math.random() < 0.05 * Time.delta) Fx.create('smokeSmall', this.x + Mathf.range(3), this.y + Mathf.range(3));
@@ -581,6 +591,7 @@ class GenericCrafter extends Building {
       Draw.rect(b.name + '-rotator', this.x, this.y, undefined, undefined, this.totalProgress * 2);
       Draw.rect(b.name + '-top', this.x, this.y);
     }
+    if (b.fadeTop) { Draw.setAlpha(Mathf.absin(this.totalProgress, 3, 0.9) * this.warmup); Draw.rect(b.name + '-top', this.x, this.y); Draw.setAlpha(1); }
     if (b.flame && this.warmup > 0) {
       Draw.setAlpha(this.warmup);
       Draw.rect(b.name + '-top', this.x, this.y);
@@ -592,11 +603,7 @@ class GenericCrafter extends Building {
       Draw.setAlpha(1);
     }
   }
-  info() {
-    const b = this.block;
-    return [`${b.consumeItems.map(c => c.amount + ' ' + c.item.name).join(' + ')} → ${b.outputItem.amount} ${b.outputItem.item.name}`,
-      `${(60 / b.craftTime * b.outputItem.amount).toFixed(2)}/s at full speed`];
-  }
+
 }
 
 // ================================================================ power
@@ -662,13 +669,14 @@ class Wall extends Building {}
 
 class MendProjector extends Building {
   constructor(...a) { super(...a); this.charge = Math.random() * 50; this.heat = 0; this.phaseHeat = 0; this.useTime = 0; }
-  acceptItem(source, item) { return item === Items.silicon && this.items[item.id] < this.block.itemCapacity; }
+  acceptItem(source, item) { return this.block.boostItem !== null && item === Items.silicon && this.items[item.id] < this.block.itemCapacity; }
   update() {
     const eff = this.efficiency;
     this.heat = Mathf.approach(this.heat, eff > 0 ? 1 : 0, 0.08 * Time.delta);
     this.charge += this.heat * Time.delta;
-    this.phaseHeat = Mathf.approach(this.phaseHeat, this.has(Items.silicon) ? 1 : 0, 0.1 * Time.delta);
-    if (this.has(Items.silicon) && eff > 0) {
+    const boosted = !!this.items && this.has(Items.silicon);
+    this.phaseHeat = Mathf.approach(this.phaseHeat, boosted ? 1 : 0, 0.1 * Time.delta);
+    if (boosted && eff > 0) {
       this.useTime += Time.delta;
       if (this.useTime >= 400) { this.useTime = 0; this.removeItem(Items.silicon); }
     }
@@ -689,9 +697,9 @@ class MendProjector extends Building {
   }
   shouldConsume() { return true; }
   draw() {
-    Draw.rect('mender', this.x, this.y);
+    Draw.rect(this.block.name, this.x, this.y);
     Draw.setAlpha(this.heat * Mathf.absin(Time.time, 50 / (Math.PI * 2), 1) * 0.5);
-    Draw.rect('mender-top', this.x, this.y);
+    Draw.rect(this.block.name + '-top', this.x, this.y);
     Draw.setAlpha(1);
   }
   drawSelect() {

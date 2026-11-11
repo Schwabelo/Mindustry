@@ -68,7 +68,7 @@ for o in ORES:
 
 add(["boulder1", "boulder2", "sand-boulder1", "sand-boulder2", "snow-boulder1", "snow-boulder2", "spawn"])
 
-ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium"]
+ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium", "plastanium"]
 add([f"item-{i}" for i in ITEMS])
 
 # blocks
@@ -77,7 +77,12 @@ for c in ["conveyor", "titanium-conveyor"]:
 add(["conduit-bottom"] + [f"conduit-bottom-{i}" for i in range(5)] + [f"conduit-top-{i}" for i in range(5)])
 add(["mechanical-pump", "mechanical-pump-liquid", "liquid-router", "liquid-router-bottom", "liquid-junction",
      "bridge-conduit", "bridge-conduit-end", "bridge-conduit-bridge", "bridge-conduit-arrow", "liquid-tank", "liquid-tank-bottom",
-     "liquid-water", "liquid-cryofluid"])
+     "liquid-water", "liquid-cryofluid", "liquid-oil"])
+add(["fuse", "cyclone", "cyclone-barrel-1", "cyclone-barrel-2", "cyclone-barrel-3", "tsunami"], BLOCK_OUTLINE)
+add(["fuse-heat", "tsunami-liquid", "tsunami-top", "oil-extractor", "oil-extractor-rotator", "oil-extractor-top", "oil-extractor-liquid",
+     "plastanium-compressor", "plastanium-compressor-top", "plastanium-wall", "plastanium-wall-large",
+     "force-projector", "force-projector-top", "force-projector-team", "overdrive-projector", "overdrive-projector-top",
+     "mend-projector", "mend-projector-top"])
 add(["junction", "router", "sorter", "overflow-gate", "bridge-conveyor", "bridge-conveyor-end",
      "bridge-conveyor-bridge", "bridge-conveyor-arrow", "center",
      "mechanical-drill", "mechanical-drill-rotator", "mechanical-drill-top",
@@ -213,7 +218,7 @@ SOUNDS = {
     "shootArtillery": "shoot/shootArtillery", "shootLancer": "shoot/shootLancer", "chargeLancer": "charge/chargeLancer",
     "shootArc": "shoot/shootArc", "shootFlame": "shoot/shootFlame", "shootHorizon": "shoot/shootHorizon",
     "shootLaser": "shoot/shootLaser", "shootPulsar": "shoot/shootPulsar", "shootMissile": "shoot/shootMissile",
-    "shootMissilePlasmaShort": "shoot/shootMissilePlasmaShort", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
+    "shootMissilePlasmaShort": "shoot/shootMissilePlasmaShort", "shootFuse": "shoot/shootFuse", "shootCyclone": "shoot/shootCyclone", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
     "explosion": "explosions/explosion", "explosionCrawler": "explosions/explosionCrawler",
     "explosionArtillery": "explosions/explosionArtillery", "blockExplode": "explosions/blockExplode1",
     "blockExplodeWall": "explosions/blockExplodeWall", "unitExplode": "explosions/unitExplode1",

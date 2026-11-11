@@ -65,6 +65,11 @@ CryofluidMixer.prototype.readState = function (s) { this.waterIn = s.w; this.pro
 Reconstructor.prototype.writeState = function () { return { pl: this.payload ? this.payload.name : null, p: this.progress, d: this.inDir }; };
 Reconstructor.prototype.readState = function (s) { this.payload = s.pl ? UNITS[s.pl] : null; this.progress = s.p; this.inDir = s.d; };
 
+Fracker.prototype.writeState = function () { return { w: this.waterIn, a: this.accumulator }; };
+Fracker.prototype.readState = function (s) { this.waterIn = s.w; this.accumulator = s.a; };
+ForceProjector.prototype.writeState = function () { return { b: this.buildup, k: this.broken ? 1 : 0 }; };
+ForceProjector.prototype.readState = function (s) { this.buildup = s.b; this.broken = !!s.k; };
+
 // ---------------------------------------------------------------- save / load
 const SaveIO = {
   serialize() {

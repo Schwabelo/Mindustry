@@ -72,6 +72,9 @@ function renderFrame() {
 
   for (const u of Game.units) if (u.mineTile && inView(v, u.x, u.y, 100)) u.drawMining();
 
+  for (const b of vis) if (b instanceof ForceProjector) b.drawShield();
+  for (const b of Game.buildings) if (b instanceof ForceProjector && !vis.includes(b) && inView(v, b.x, b.y, b.block.radius + 10)) b.drawShield();
+
   // bridges + power lasers
   for (const b of vis) if (b instanceof ItemBridge) b.drawBridge();
   Power.drawLasers();

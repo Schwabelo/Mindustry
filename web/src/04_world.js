@@ -6,15 +6,15 @@ const FLOOR_DEFS = [
   { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water' },
   { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
   { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
-  { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall' },
+  { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall', liquidDrop: 'oil', isLiquid: true },
   { name: 'stone', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'basalt', variants: 3, wall: 'dune-wall', boulder: 'boulder' },
-  { name: 'sand-floor', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'sand-wall', boulder: 'sand-boulder' },
-  { name: 'darksand', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'dune-wall', boulder: 'sand-boulder' },
+  { name: 'sand-floor', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'sand-wall', boulder: 'sand-boulder', oil: 0.7 },
+  { name: 'darksand', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'dune-wall', boulder: 'sand-boulder', oil: 1.5 },
   { name: 'dirt', variants: 3, wall: 'dirt-wall', boulder: 'boulder' },
   { name: 'grass', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
-  { name: 'salt', variants: 0, wall: 'sand-wall' },
+  { name: 'salt', variants: 0, wall: 'sand-wall', oil: 0.3 },
   { name: 'snow', variants: 3, wall: 'snow-wall', boulder: 'snow-boulder' },
   { name: 'ice', variants: 3, wall: 'ice-wall', boulder: 'snow-boulder' },
   { name: 'moss', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
@@ -123,6 +123,16 @@ const World = {
       }
     }
 
+    // tar pools in sandy / dark areas
+    const nTar = makeNoise(seed + 30);
+    for (let i = 0; i < N; i++) {
+      if (this.wall[i]) continue;
+      const fl = FLOOR_DEFS[this.floor[i]];
+      if (fl.isLiquid || !(fl.name === 'darksand' || fl.name === 'sand-floor' || fl.name === 'basalt' || fl.name === 'char')) continue;
+      const x = i % W, y = (i / W) | 0;
+      if (nTar.oct(x, y, 2, 0.5, 9) > 0.74) this.floor[i] = FLOOR.tar.id;
+    }
+
     // clear areas around core and spawn
     const clear = (cx, cy, r) => {
       for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) {
@@ -170,6 +180,7 @@ const World = {
           if (this.wall[i] || FLOOR_DEFS[this.floor[i]].isLiquid) continue;
           if (Math.hypot(x - bx, y - by) + nMisc(x / 2.5, y / 2.5) * 1.2 <= r) {
             if (item === 'sand') { this.floor[i] = FLOOR.darksand.id; this.ore[i] = 0; }
+            else if (item === 'tar') { this.floor[i] = FLOOR.tar.id; this.ore[i] = 0; }
             else this.ore[i] = Items[item].id + 1;
           }
         }
@@ -179,6 +190,7 @@ const World = {
     blob('copper', 8, 3); blob('copper', 13, 3); blob('lead', 11, 3); blob('lead', 16, 2);
     blob('sand', 16, 3); blob('coal', 19, 2); blob('coal', 24, 3); blob('scrap', 22, 2);
     blob('titanium', 36, 3); blob('titanium', 44, 3); blob('thorium', 60, 3); blob('thorium', 72, 3);
+    blob('tar', 32, 2);
 
     for (let i = 0; i < N; i++) {
       const fl = FLOOR_DEFS[this.floor[i]];

@@ -83,25 +83,26 @@ function drawLiquidFill(b, reg, inset) {
 class Pump extends Building {
   constructor(...a) {
     super(...a);
-    let n = 0, mult = 0;
-    this.eachTile((x, y) => { const f = World.floorAt(x, y); if (f.liquidDrop) { n++; mult += f.liquidMultiplier || 1; } });
-    this.pumpTiles = n; this.pumpMult = mult;
+    let n = 0, mult = 0, drop = null;
+    this.eachTile((x, y) => { const f = World.floorAt(x, y); if (f.liquidDrop && (!drop || drop === f.liquidDrop)) { drop = f.liquidDrop; n++; mult += f.liquidMultiplier || 1; } });
+    this.pumpTiles = n; this.pumpMult = mult; this.drop = drop;
   }
   update() {
     const lq = this.liquid;
-    if (this.pumpTiles > 0) {
-      if (lq.type !== Liquids.water) { lq.type = Liquids.water; lq.amount = 0; }
+    const out = this.drop ? Liquids[this.drop] : null;
+    if (this.pumpTiles > 0 && out) {
+      if (lq.type !== out) { lq.type = out; lq.amount = 0; }
       lq.amount = Math.min(this.block.liquidCapacity, lq.amount + this.block.pumpAmount * this.pumpMult * Time.delta);
       this.warmup = Mathf.approach(this.warmup, 1, 0.02 * Time.delta);
     }
-    this.dumpLiquid(Liquids.water);
+    if (out) this.dumpLiquid(out);
   }
   acceptLiquid() { return false; }
   draw() {
     Draw.rect(this.block.name, this.x, this.y);
     drawLiquidFill(this, this.block.name + '-liquid');
   }
-  info() { return this.pumpTiles ? [`Pumping ${(this.block.pumpAmount * this.pumpMult * 60).toFixed(1)} water/s`] : ['Not on water']; }
+  info() { return this.pumpTiles ? [`Pumping ${(this.block.pumpAmount * this.pumpMult * 60).toFixed(1)} ${this.drop}/s`] : ['Not on a liquid']; }
 }
 
 // ---------------------------------------------------------------- conduit
@@ -246,7 +247,7 @@ defBlock('liquid-tank', 'LiquidRouter', {
 
 
 Object.assign(DESCRIPTIONS, {
-  'mechanical-pump': 'Pumps water from the tile it is placed on. Place it on shallow or deep water.',
+  'mechanical-pump': 'Pumps liquid from the tile it is placed on: water from water tiles, oil from tar.',
   'conduit': 'Moves liquids forward, like a conveyor for liquids.',
   'liquid-router': 'Accepts liquid from one direction and outputs it to up to 3 other directions equally.',
   'liquid-junction': 'Acts as a bridge for two crossing conduits.',

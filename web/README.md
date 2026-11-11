@@ -13,13 +13,15 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   ores (copper, lead, coal, sand, scrap, titanium, thorium), static walls and wall darkness
 - Alpha core unit: fly, shoot, mine ore, build and deconstruct with build plans
 - Items: conveyor, titanium conveyor, junction, router, sorter, overflow gate, bridge conveyor, unloader
-- Liquids: mechanical pump, conduit, liquid router, liquid junction, bridge conduit, liquid tank;
-  water boosts drills (1.6x) and cools turrets, cryofluid cools better
+- Liquids: mechanical pump (water from water, oil from tar), conduit, liquid router, liquid junction,
+  bridge conduit, liquid tank; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
+  oil extractor (sand + water + power on sandy floors)
 - Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
-  pulverizer, cryofluid mixer
+  pulverizer, cryofluid mixer, plastanium compressor
 - Power: combustion generator, solar panel, battery (+large), power node (+large)
-- Defense: copper/titanium/thorium walls (+large), mender; turrets duo, scatter, hail, lancer, arc,
-  wave, salvo, ripple
+- Defense: copper/titanium/thorium/plastanium walls (+large; plastanium absorbs enemy lasers), mender,
+  mend projector, force projector (bullet-absorbing shield), overdrive projector (+50% speed);
+  turrets duo, scatter, hail, lancer, arc, wave, salvo, ripple, fuse, cyclone, tsunami
 - Units: ground factory (dagger, crawler, nova), air factory (flare, mono), additive and
   multiplicative reconstructors (mace, fortress, pulsar, quasar, horizon, zenith, poly, mega)
   with their abilities (repair fields, shield regen, quasar force field); monos auto-mine,

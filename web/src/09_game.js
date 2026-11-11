@@ -334,7 +334,15 @@ const Game = {
     for (let i = 0; i < bs.length; i++) {
       const b = bs[i];
       if (!b.dead) {
-        b.update();
+        if (b.timeScaleDuration > 0) {
+          // overdrive: run this building's update with a scaled delta
+          b.timeScaleDuration -= Time.delta;
+          const d = Time.delta;
+          Time.delta = d * b.timeScale;
+          b.update();
+          Time.delta = d;
+          if (b.timeScaleDuration <= 0) b.timeScale = 1;
+        } else b.update();
         if (b.hitTime > 0) b.hitTime = Math.max(0, b.hitTime - Time.delta / 9);
       }
     }
