@@ -164,6 +164,7 @@ const Game = {
   checkGameOver() {
     if (!this.playerCore() && this.state === 'playing') {
       this.state = 'over';
+      SaveIO.clearLocal();
       UI.showGameOver();
     }
   },
@@ -340,6 +341,7 @@ const Game = {
     Fx.update();
     Decals.update();
     Pathfinder.update();
+    SaveIO.update();
 
     if (this.player && this.player.dead) this.player = null;
     if (!this.player) {

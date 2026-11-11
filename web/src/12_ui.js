@@ -31,6 +31,12 @@ const UI = {
 
     // overlays
     $('playBtn').onclick = () => this.startGame();
+    $('continueBtn').onclick = () => this.startGame(true);
+    $('importBtn').onclick = () => { this.initAudio(); SaveIO.importFile(() => this.enterGame()); };
+    $('saveBtn').onclick = () => { SaveIO.saveLocal(); Audio2.play('uiButton'); };
+    $('loadBtn').onclick = () => { if (SaveIO.hasSave() && SaveIO.loadLocal()) { $('pause').classList.add('hidden'); Game.state = 'playing'; UI.toast('Save loaded', 1.5); } else if (!SaveIO.hasSave()) UI.toast('No save yet', 1.5); };
+    $('exportBtn').onclick = () => SaveIO.exportFile();
+    $('importBtn2').onclick = () => SaveIO.importFile(() => { $('pause').classList.add('hidden'); Game.state = 'playing'; });
     $('newMapBtn').onclick = () => { this.seed = Math.floor(Math.random() * 1e6); this.updateSeed(); Audio2.play('uiButton'); };
     $('resumeBtn').onclick = () => this.togglePause();
     $('restartBtn').onclick = () => { $('pause').classList.add('hidden'); Game.newGame(Game.seed); Game.state = 'playing'; };
@@ -71,21 +77,34 @@ const UI = {
   },
 
   showTitle() {
+    if (Game.state === 'playing' || Game.state === 'paused') SaveIO.saveLocal(true);
     Game.state = 'title';
     $('hud').classList.add('hidden');
     $('title').classList.remove('hidden');
+    const info = SaveIO.saveInfo();
+    $('continueBtn').classList.toggle('hidden', !info);
+    if (info) $('continueBtn').textContent = `Continue (wave ${info.wave})`;
   },
 
-  startGame() {
+  initAudio() {
     Audio2.init(); Audio2.resume();
     Audio2.setSfx(+$('sfxVol').value / 100);
     Audio2.musicVol = +$('musicVol').value / 100;
     Audio2.startMusic();
+  },
+
+  enterGame() {
     $('title').classList.add('hidden');
-    Game.newGame(this.seed);
     Game.state = 'playing';
     $('hud').classList.remove('hidden');
     Audio2.play('uiButton');
+  },
+
+  startGame(resume) {
+    this.initAudio();
+    if (resume) { if (!SaveIO.loadLocal()) return; }
+    else Game.newGame(this.seed);
+    this.enterGame();
   },
 
   onNewGame() {

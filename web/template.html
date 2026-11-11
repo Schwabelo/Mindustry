@@ -99,6 +99,7 @@ button.accent { border-color: var(--accent); }
 #controls { font-size: 13px; color: #bbb; display: grid; grid-template-columns: auto auto; gap: 3px 18px; margin-top: 8px; }
 #controls b { color: var(--accent); font-weight: normal; }
 .credit { position: fixed; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; color: #888; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .settingRow { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 14px; }
 .settingRow input[type=range] { width: 150px; accent-color: #ffd37f; }
 #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000; z-index: 30; color: var(--accent); font-size: 22px; }
@@ -139,8 +140,10 @@ button.accent { border-color: var(--accent); }
 <div id="title" class="overlay hidden">
   <img class="logo" id="logoImg" alt="Mindustry">
   <div class="box panel">
-    <button class="accent" id="playBtn">Play</button>
+    <button class="accent hidden" id="continueBtn">Continue</button>
+    <button class="accent" id="playBtn">New game</button>
     <button id="newMapBtn">New map seed</button>
+    <button id="importBtn">Import save file</button>
     <p id="seedText"></p>
     <div id="controls"></div>
   </div>
@@ -153,6 +156,8 @@ button.accent { border-color: var(--accent); }
     <button class="accent" id="resumeBtn">Resume</button>
     <div class="settingRow"><span>Music</span><input type="range" id="musicVol" min="0" max="100" value="50"></div>
     <div class="settingRow"><span>Sound</span><input type="range" id="sfxVol" min="0" max="100" value="70"></div>
+    <div class="row2"><button id="saveBtn">Save game</button><button id="loadBtn">Load save</button></div>
+    <div class="row2"><button id="exportBtn">Export save</button><button id="importBtn2">Import save</button></div>
     <button id="restartBtn">Restart</button>
     <button id="quitBtn">Quit to title</button>
   </div>
