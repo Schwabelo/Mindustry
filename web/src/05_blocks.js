@@ -516,8 +516,9 @@ class Drill extends Building {
     this.timeDrilled += this.warmup * Time.delta;
     if (!this.dominantItem) return;
     const delay = this.getDrillTime(this.dominantItem);
-    if (this.total < this.block.itemCapacity && this.dominantItems > 0) {
-      this.warmup = Mathf.approach(this.warmup, 1, 0.015 * Time.delta);
+    const peff = this.efficiency;
+    if (this.total < this.block.itemCapacity && this.dominantItems > 0 && peff > 0) {
+      this.warmup = Mathf.approach(this.warmup, peff, 0.015 * Time.delta);
       // optional water boost: Mathf.lerp(1, liquidBoostIntensity = 1.6, optionalEfficiency)
       const use = this.block.liquidUse * Time.delta;
       this.boosted = this.liquid && this.liquid.type === Liquids.water && this.liquid.amount >= use;
@@ -539,7 +540,7 @@ class Drill extends Building {
     Draw.rect(n, this.x, this.y);
     Draw.rect(n + '-rotator', this.x, this.y, undefined, undefined, this.timeDrilled * 2);
     Draw.rect(n + '-top', this.x, this.y);
-    if (this.dominantItem) Draw.rect(Assets.tinted('drill-item-2', this.dominantItem.color), this.x, this.y);
+    if (this.dominantItem) Draw.rect(Assets.tinted('drill-item-' + this.block.size, this.dominantItem.color), this.x, this.y);
   }
   info() {
     if (!this.dominantItem) return ['No ore'];
@@ -640,11 +641,12 @@ class SolarGenerator extends PowerBuilding {
 class Battery extends PowerBuilding {
   constructor(...a) { super(...a); this.power.stored = 0; }
   draw() {
-    Draw.rect('battery', this.x, this.y);
+    const n = this.block.name;
+    Draw.rect(n, this.x, this.y);
     const c = lerpCol(col('f8c266'), col('fb9567'), this.power.stored / this.block.capacity);
     Fill.set(this.power.stored > 1 ? c.css : '#3a3a3a');
-    Fill.square(this.x, this.y, TS / 2 - 1);
-    Draw.rect('battery-top', this.x, this.y);
+    Fill.square(this.x, this.y, this.block.size * TS / 2 - 1);
+    Draw.rect(n + '-top', this.x, this.y);
   }
   info() { return [`Stored: ${Math.round(this.power.stored)} / ${this.block.capacity}`]; }
 }

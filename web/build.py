@@ -62,13 +62,13 @@ WALLS = ["stone-wall", "dune-wall", "sand-wall", "snow-wall", "ice-wall", "dirt-
 for w in WALLS:
     add([f"{w}1", f"{w}2", f"{w}-large"])
 
-ORES = ["copper", "lead", "coal", "titanium", "scrap"]
+ORES = ["copper", "lead", "coal", "titanium", "scrap", "thorium"]
 for o in ORES:
     add([f"ore-{o}{i}" for i in range(1, 4)])
 
 add(["boulder1", "boulder2", "sand-boulder1", "sand-boulder2", "snow-boulder1", "snow-boulder2", "spawn"])
 
-ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon"]
+ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium"]
 add([f"item-{i}" for i in ITEMS])
 
 # blocks
@@ -95,6 +95,10 @@ add(["rubble-1-1", "rubble-2-1"])
 # turrets (outlined like the packer does)
 add(["duo", "duo-barrel-l", "duo-barrel-r", "scatter", "scatter-mid", "hail", "lancer", "arc"], BLOCK_OUTLINE)
 add(["hail-heat", "lancer-heat", "arc-heat"])
+add(["salvo-barrel", "salvo-side-l", "salvo-side-r", "ripple", "wave"], BLOCK_OUTLINE)
+add(["salvo-barrel-heat", "ripple-heat", "wave-liquid", "wave-top", "block-3",
+     "laser-drill", "laser-drill-rotator", "laser-drill-top", "drill-item-3", "thorium-wall", "thorium-wall-large",
+     "power-node-large", "battery-large", "battery-large-top", "cryofluid-mixer", "cryofluid-mixer-bottom"])
 
 # units
 UNITS = {
@@ -202,7 +206,7 @@ SOUNDS = {
     "shootScatter": "shoot/shootScatter", "shootArtillerySmall": "shoot/shootArtillerySmall",
     "shootArtillery": "shoot/shootArtillery", "shootLancer": "shoot/shootLancer", "chargeLancer": "charge/chargeLancer",
     "shootArc": "shoot/shootArc", "shootFlame": "shoot/shootFlame", "shootHorizon": "shoot/shootHorizon",
-    "shootLaser": "shoot/shootLaser",
+    "shootLaser": "shoot/shootLaser", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
     "explosion": "explosions/explosion", "explosionCrawler": "explosions/explosionCrawler",
     "explosionArtillery": "explosions/explosionArtillery", "blockExplode": "explosions/blockExplode1",
     "blockExplodeWall": "explosions/blockExplodeWall", "unitExplode": "explosions/unitExplode1",

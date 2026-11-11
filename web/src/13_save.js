@@ -59,6 +59,9 @@ ItemTurret.prototype.readState = function (s) {
 UnitFactory.prototype.writeState = function () { return { c: this.currentPlan, p: this.progress }; };
 UnitFactory.prototype.readState = function (s) { this.currentPlan = s.c; this.progress = s.p; };
 
+CryofluidMixer.prototype.writeState = function () { return { w: this.waterIn, p: this.progress }; };
+CryofluidMixer.prototype.readState = function (s) { this.waterIn = s.w; this.progress = s.p; };
+
 // ---------------------------------------------------------------- save / load
 const SaveIO = {
   serialize() {

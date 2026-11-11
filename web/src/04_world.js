@@ -22,7 +22,7 @@ const FLOOR_DEFS = [
 const FLOOR = {};
 FLOOR_DEFS.forEach((f, i) => { f.id = i; f.speed = f.speed || 1; FLOOR[f.name] = f; });
 const WALL_DEFS = ['stone-wall', 'dune-wall', 'sand-wall', 'snow-wall', 'ice-wall', 'dirt-wall'];
-const ORE_ITEMS = ['copper', 'lead', 'coal', 'titanium', 'scrap'];
+const ORE_ITEMS = ['copper', 'lead', 'coal', 'titanium', 'scrap', 'thorium'];
 
 const MAP_W = 150, MAP_H = 150, CHUNK = 16;
 
@@ -152,7 +152,7 @@ const World = {
       const dCore = Math.hypot(x - core.x, y - core.y);
       if (dCore < 4) continue;
       const rich = Mathf.clamp(1 - dCore / 120);
-      const th = [0.75 - rich * 0.04, 0.76 - rich * 0.03, 0.765, dCore > 30 ? 0.765 : 2, 0.8];
+      const th = [0.75 - rich * 0.04, 0.76 - rich * 0.03, 0.765, dCore > 30 ? 0.765 : 2, 0.8, dCore > 55 ? 0.775 : 2];
       for (let o = 0; o < ORE_ITEMS.length; o++) {
         const v = nOre[o].oct(x, y, 2, 0.5, 13);
         if (v > th[o]) { this.ore[i] = Items[ORE_ITEMS[o]].id + 1; }
@@ -178,7 +178,7 @@ const World = {
     };
     blob('copper', 8, 3); blob('copper', 13, 3); blob('lead', 11, 3); blob('lead', 16, 2);
     blob('sand', 16, 3); blob('coal', 19, 2); blob('coal', 24, 3); blob('scrap', 22, 2);
-    blob('titanium', 36, 3); blob('titanium', 44, 3);
+    blob('titanium', 36, 3); blob('titanium', 44, 3); blob('thorium', 60, 3); blob('thorium', 72, 3);
 
     for (let i = 0; i < N; i++) {
       const fl = FLOOR_DEFS[this.floor[i]];

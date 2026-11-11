@@ -7,7 +7,7 @@ function buildIcons() {
     if (b.iconLayers) layers = b.iconLayers;
     else if (b.cls === 'Conveyor') layers = [b.name + '-0-0'];
     else if (b.cls === 'Core' || b.cls === 'StorageBlock') layers = [b.name, Assets.team(b.name + '-team', Teams.sharded)];
-    else if (b.cls === 'Battery') layers = ['battery', 'battery-top'];
+    else if (b.cls === 'Battery') layers = [b.name, b.name + '-top'];
     else if (b.cls === 'MendProjector') layers = ['mender', 'mender-top'];
     else if (b.cls === 'GenericCrafter' && b.flame) layers = [b.name];
     else layers = [b.name];
