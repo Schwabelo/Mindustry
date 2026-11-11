@@ -172,7 +172,7 @@ function defBlock(name, cls, props) {
     solid: true, rotate: false, hasItems: false, itemCapacity: 10, hasPower: false, consumesPower: 0, outputsPower: false,
     powerProduction: 0, consumeItems: null, outputItem: null, buildable: true, group: null, description: '',
     canReplace: null, flags: [], region: name, iconLayers: null, targetable: true, underBullets: false, conductive: false,
-    hasLiquids: false, liquidCapacity: -1, liquidUse: 0, coolant: 0, liquidInputs: null, floating: false, outputsLiquid: false,
+    hasLiquids: false, liquidCapacity: -1, liquidUse: 0, coolant: 0, liquidInputs: null, floating: false, outputsLiquid: false, inaccuracy: 0, shootCone: 8, rotateSpeed: 5, recoil: 1,
   }, props);
   if (b.coolant) { b.hasLiquids = true; b.liquidInputs = b.liquidInputs || ['water', 'cryofluid']; }
   if (b.liquidUse) { b.hasLiquids = true; b.liquidInputs = b.liquidInputs || ['water']; }

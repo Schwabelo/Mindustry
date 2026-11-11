@@ -110,7 +110,7 @@ const SaveIO = {
     if (!data || data.v !== SAVE_VERSION) throw new Error('Unsupported save version');
     Game.seed = data.seed;
     Time.time = data.time || 0;
-    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = [];
+    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = []; Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(data.seed);
     Game.wave = data.wave; Game.waveCountdown = data.wc; Game.command = data.cmd || 'defend';

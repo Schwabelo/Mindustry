@@ -57,6 +57,7 @@ const Game = {
     this.lastCoreWarn = -9999;
     this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [] };
     this.rebuildQueue = [];
+    Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(seed);
     this.wave = 1;
@@ -146,6 +147,7 @@ const Game = {
   destroyBuilding(b) {
     if (b.dead) return;
     b.dead = true;
+    if (!(b instanceof ConstructBuild)) buildingExplosion(b);
     const size = b.current ? b.current.size : b.block.size;
     Fx.create('blockExplode', b.x, b.y, 0, null, size);
     Decals.add('rubble-' + Math.min(size, 8) + '-' + (size <= 2 ? Math.floor(Math.random() * 2) : 0), b.x, b.y, Math.floor(Math.random() * 4) * 90);
@@ -351,6 +353,7 @@ const Game = {
     Lightning.update();
     Fx.update();
     Decals.update();
+    Fires.update();
     Pathfinder.update();
     SaveIO.update();
 

@@ -68,7 +68,8 @@ for o in ORES:
 
 add(["boulder1", "boulder2", "sand-boulder1", "sand-boulder2", "snow-boulder1", "snow-boulder2", "spawn"])
 
-ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium", "plastanium"]
+ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium", "plastanium",
+         "spore-pod", "pyratite", "blast-compound", "surge-alloy", "phase-fabric"]
 add([f"item-{i}" for i in ITEMS])
 
 # blocks
@@ -78,6 +79,10 @@ add(["conduit-bottom"] + [f"conduit-bottom-{i}" for i in range(5)] + [f"conduit-
 add(["mechanical-pump", "mechanical-pump-liquid", "liquid-router", "liquid-router-bottom", "liquid-junction",
      "bridge-conduit", "bridge-conduit-end", "bridge-conduit-bridge", "bridge-conduit-arrow", "liquid-tank", "liquid-tank-bottom",
      "liquid-water", "liquid-cryofluid", "liquid-oil"])
+add([f"fire{i}" for i in range(40)])
+add(["scorch", "swarmer"], BLOCK_OUTLINE)
+add(["scorch-heat", "cultivator", "cultivator-bottom", "cultivator-top", "spore-press", "spore-press-bottom", "spore-press-top",
+     "spore-press-liquid", "spore-press-piston0", "spore-press-piston1", "pyratite-mixer", "blast-mixer"])
 add(["fuse", "cyclone", "cyclone-barrel-1", "cyclone-barrel-2", "cyclone-barrel-3", "tsunami"], BLOCK_OUTLINE)
 add(["fuse-heat", "tsunami-liquid", "tsunami-top", "oil-extractor", "oil-extractor-rotator", "oil-extractor-top", "oil-extractor-liquid",
      "plastanium-compressor", "plastanium-compressor-top", "plastanium-wall", "plastanium-wall-large",

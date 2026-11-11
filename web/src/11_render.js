@@ -60,6 +60,7 @@ function renderFrame() {
     Draw.setAlpha(1);
   }
   for (const b of turrets) b.draw();
+  Fires.draw();
 
   // ground units
   const ground = [], air = [];
