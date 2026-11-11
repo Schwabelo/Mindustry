@@ -74,6 +74,10 @@ add([f"item-{i}" for i in ITEMS])
 # blocks
 for c in ["conveyor", "titanium-conveyor"]:
     add([f"{c}-{a}-{b}" for a in range(5) for b in range(4)])
+add(["conduit-bottom"] + [f"conduit-bottom-{i}" for i in range(5)] + [f"conduit-top-{i}" for i in range(5)])
+add(["mechanical-pump", "mechanical-pump-liquid", "liquid-router", "liquid-router-bottom", "liquid-junction",
+     "bridge-conduit", "bridge-conduit-end", "bridge-conduit-bridge", "bridge-conduit-arrow", "liquid-tank", "liquid-tank-bottom",
+     "liquid-water", "liquid-cryofluid"])
 add(["junction", "router", "sorter", "overflow-gate", "bridge-conveyor", "bridge-conveyor-end",
      "bridge-conveyor-bridge", "bridge-conveyor-arrow", "center",
      "mechanical-drill", "mechanical-drill-rotator", "mechanical-drill-top",
@@ -108,7 +112,7 @@ add(["small-basic-weapon", "large-weapon", "flamethrower", "artillery", "heal-we
 add(["bullet", "bullet-back", "shell", "shell-back", "laser", "laser-end", "minelaser", "minelaser-end",
      "circle-shadow", "particle", "casing", "white", "laser-white", "laser-white-end"])
 
-ICON_NAMES = ["turret", "production", "distribution", "crafting", "power", "defense", "units", "effect",
+ICON_NAMES = ["turret", "production", "distribution", "liquid", "crafting", "power", "defense", "units", "effect",
               "pause", "play", "settings", "hammer", "cancel", "rotate", "trash", "info", "menu", "eye",
               "refresh", "exit", "home", "map", "item", "power", "check", "add"]
 

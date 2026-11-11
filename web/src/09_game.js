@@ -173,13 +173,14 @@ const Game = {
   validPlace(block, x, y, rot, team = 'sharded') {
     if (!block.buildable) return false;
     const s = block.size, o = block.sizeOffset;
-    let drillable = false;
+    let drillable = false, pumpable = false;
     for (let dy = 0; dy < s; dy++) for (let dx = 0; dx < s; dx++) {
       const tx = x + o + dx, ty = y + o + dy;
       if (!World.inside(tx, ty)) return false;
       const i = ty * World.w + tx;
       if (World.wall[i]) return false;
-      if (FLOOR_DEFS[World.floor[i]].isDeep) return false;
+      if (FLOOR_DEFS[World.floor[i]].isDeep && !block.floating) return false;
+      if (FLOOR_DEFS[World.floor[i]].liquidDrop) pumpable = true;
       if (Math.hypot(tx - World.spawn.x, ty - World.spawn.y) < SPAWN_SAFE_RADIUS) return false;
       const ex = World.build[i];
       if (ex) {
@@ -189,6 +190,7 @@ const Game = {
       if (block.cls === 'Drill') { const it = World.drop(tx, ty); if (it && it.hardness <= block.tier) drillable = true; }
     }
     if (block.cls === 'Drill' && !drillable) return false;
+    if (block.cls === 'Pump' && !pumpable) return false;
     if (block.solid) {
       const cx = x * TS + block.offset, cy = y * TS + block.offset, half = s * TS / 2;
       for (const u of this.units) {

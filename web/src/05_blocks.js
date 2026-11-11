@@ -17,6 +17,7 @@ class Building {
     this.cdump = 0;
     this.timers = {};
     this.power = block.hasPower ? { graph: null, status: 0, links: [], satisfaction: 0 } : null;
+    this.liquid = block.hasLiquids ? { type: null, amount: 0 } : null;
     this.id = nextBuildId++;
     this.dead = false; this.hitTime = 0; this.warmup = 0; this.lastHit = -999;
     this.hitSize = block.size * TS;
@@ -517,7 +518,11 @@ class Drill extends Building {
     const delay = this.getDrillTime(this.dominantItem);
     if (this.total < this.block.itemCapacity && this.dominantItems > 0) {
       this.warmup = Mathf.approach(this.warmup, 1, 0.015 * Time.delta);
-      this.progress += Time.delta * this.dominantItems * this.warmup;
+      // optional water boost: Mathf.lerp(1, liquidBoostIntensity = 1.6, optionalEfficiency)
+      const use = this.block.liquidUse * Time.delta;
+      this.boosted = this.liquid && this.liquid.type === Liquids.water && this.liquid.amount >= use;
+      if (this.boosted) this.removeLiquid(use);
+      this.progress += Time.delta * this.dominantItems * this.warmup * (this.boosted ? 1.6 : 1);
       if (Math.random() < 0.02 * this.warmup * Time.delta) Fx.create('drillDust', this.x + Mathf.range(this.block.size * 3), this.y + Mathf.range(this.block.size * 3), 0, this.dominantItem.color);
     } else {
       this.warmup = Mathf.approach(this.warmup, 0, 0.015 * Time.delta);
@@ -538,8 +543,8 @@ class Drill extends Building {
   }
   info() {
     if (!this.dominantItem) return ['No ore'];
-    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems;
-    return [`${this.dominantItem.name}: ${rate.toFixed(2)}/s`];
+    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems * (this.boosted ? 1.6 : 1);
+    return [`${this.dominantItem.name}: ${rate.toFixed(2)}/s${this.boosted ? ' (water boosted)' : ''}`];
   }
 }
 
@@ -758,6 +763,14 @@ class Turret extends Building {
     if (this.reloadCounter < b.reload) {
       const ammo = this.peekAmmo();
       this.reloadCounter += Time.delta * (ammo ? ammo.reloadMultiplier : 1) * eff;
+      const lq = this.liquid;
+      if (b.coolant && lq && lq.type && lq.amount > 0 && eff > 0) {
+        const want = b.coolant * Time.delta;
+        const ceff = Math.min(1, lq.amount / want);
+        this.removeLiquid(want * ceff);
+        this.reloadCounter += b.coolant * ceff * Time.delta * lq.type.heatCapacity * (b.coolantMultiplier || 5) * (ammo ? ammo.reloadMultiplier : 1);
+        if (Math.random() < 0.06 * b.coolant * ceff * Time.delta) Fx.create('smokeSmall', this.x + Mathf.range(b.size * 4), this.y + Mathf.range(b.size * 4));
+      }
     }
   }
   bulletPos(xOffset) {

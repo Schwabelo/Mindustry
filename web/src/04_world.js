@@ -2,10 +2,10 @@
 
 const FLOOR_DEFS = [
   // order = blend priority (Mindustry block id order): higher draws its edges onto lower
-  { name: 'deep-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.2 },
-  { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5 },
-  { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8 },
-  { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8 },
+  { name: 'deep-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.2, liquidDrop: 'water', liquidMultiplier: 1.5 },
+  { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water' },
+  { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
+  { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
   { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall' },
   { name: 'stone', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder' },

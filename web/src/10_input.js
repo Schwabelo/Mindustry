@@ -15,7 +15,7 @@ const Input = {
 
   reset() {
     this.selected = null; this.dragStart = null; this.removeStart = null; this.linkSource = null;
-    this.ghosts = []; this.lastBridge = null; this.shooting = false; this.left = this.right = false;
+    this.ghosts = []; this.lastBridge = null; this.lastBridges = {}; this.shooting = false; this.left = this.right = false;
   },
 
   init() {
@@ -202,7 +202,6 @@ const Input = {
       return;
     }
     pl.breaking = false;
-    if (pl.block.cls === 'ItemBridge' && this.lastBridge && !this.lastBridge.dead) pl.prevBridge = this.lastBridge;
     p.plans.push(pl);
   },
 
@@ -227,10 +226,11 @@ const Input = {
   },
 
   onBridgePlaced(b) {
-    // auto-link from the previously placed bridge (ItemBridge.lastBuild)
-    const prev = this.lastBridge;
+    // auto-link from the previously placed bridge of the same kind (ItemBridge.lastBuild)
+    this.lastBridges = this.lastBridges || {};
+    const prev = this.lastBridges[b.block.name];
     if (prev && !prev.dead && prev !== b && !prev.link && prev.linkValid(b)) prev.configure(b);
-    this.lastBridge = b;
+    this.lastBridges[b.block.name] = b;
   },
 
   updateWorldMouse() {

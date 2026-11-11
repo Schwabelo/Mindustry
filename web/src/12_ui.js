@@ -201,6 +201,10 @@ const UI = {
     if (b.cls === 'PowerNode') s.push(`Laser range: ${b.laserRange} tiles &middot; Max links: ${b.maxNodes}`);
     if (b.cls === 'ItemTurret') s.push(`Range: ${(b.range / TS).toFixed(1)} tiles &middot; Ammo: ${Object.keys(b.ammo).join(', ')}`, `Targets: ${[b.targetGround && 'ground', b.targetAir && 'air'].filter(Boolean).join(' + ')}`);
     if (b.cls === 'PowerTurret') s.push(`Range: ${(b.range / TS).toFixed(1)} tiles &middot; Damage: ${b.shootType.damage}`, `Targets: ground`);
+    if (b.coolant) s.push(`Coolant: water/cryofluid, +${Math.round(b.coolant * 0.4 * (b.coolantMultiplier || 5) * 100 / 1)}% fire rate with water`);
+    if (b.liquidUse) s.push(`Water boost: 1.6x speed (uses ${(b.liquidUse * 60).toFixed(1)}/s)`);
+    if (b.cls === 'Pump') s.push(`Output: ${(b.pumpAmount * 60).toFixed(0)} water/s per tile`);
+    if (b.hasLiquids && b.cls !== 'Drill' && !b.coolant) s.push(`Liquid capacity: ${b.liquidCapacity}`);
     if (b.cls === 'MendProjector') s.push(`Heals ${b.healPercent}% every ${(b.reload / 60).toFixed(1)}s in ${(b.range / TS).toFixed(1)} tiles`);
     if (b.cls === 'UnitFactory') s.push(`Produces: ${b.plans.map(p => p.unit).join(', ')}`);
     return s;
@@ -350,6 +354,7 @@ const UI = {
           const g = b.power.graph;
           html += `<div style="color:#fbd367">Power: +${g.produced * 60 | 0}/s, -${g.needed * 60 | 0}/s${g.capacity ? `, stored ${g.stored | 0}/${g.capacity}` : ''}</div>`;
         }
+        if (b.liquid && b.liquid.type && b.liquid.amount > 0.05) html += `<div style="color:${b.liquid.type.color.css}">${titleCase(b.liquid.type.name)}: ${b.liquid.amount.toFixed(1)} / ${b.block.liquidCapacity}</div>`;
         if (b.items && !(b instanceof Core) && !(b instanceof Conveyor) && b.total > 0) {
           html += '<div>' + ITEMS.filter(i => b.items[i.id] > 0).map(i => `${b.items[i.id]} ${i.name}`).join(', ') + '</div>';
         }

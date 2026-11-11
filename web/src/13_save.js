@@ -77,6 +77,7 @@ const SaveIO = {
         if (s) o.s = s;
       }
       if (b instanceof ItemBridge && b.link && idx.has(b.link)) o.lk = idx.get(b.link);
+      if (b.liquid && b.liquid.type && b.liquid.amount > 0.01) o.lq = [b.liquid.type.id, Math.round(b.liquid.amount * 100) / 100];
       if (b.power && b.power.links.length) o.pl = b.power.links.filter(l => idx.has(l) && idx.get(l) > idx.get(b)).map(l => idx.get(l));
       return o;
     });
@@ -120,6 +121,7 @@ const SaveIO = {
       }
       b.health = Math.min(o.h, b.maxHealth);
       if (o.it && b.items) for (const [id, n] of Object.entries(o.it)) { b.items[id] = n; b.total += n; }
+      if (o.lq && b.liquid) { b.liquid.type = LIQUIDS[o.lq[0]]; b.liquid.amount = o.lq[1]; }
       Game.addBuilding(b);
       list.push(b);
     }

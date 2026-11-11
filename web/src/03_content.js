@@ -164,7 +164,7 @@ defUnit('nova', {
 // ---------------------------------------------------------------- blocks
 const BLOCKS = {};
 const BLOCK_LIST = [];
-const CATEGORIES = ['turret', 'production', 'distribution', 'crafting', 'power', 'defense', 'units', 'effect'];
+const CATEGORIES = ['turret', 'production', 'distribution', 'liquid', 'crafting', 'power', 'defense', 'units', 'effect'];
 
 function defBlock(name, cls, props) {
   const b = Object.assign({
@@ -172,7 +172,12 @@ function defBlock(name, cls, props) {
     solid: true, rotate: false, hasItems: false, itemCapacity: 10, hasPower: false, consumesPower: 0, outputsPower: false,
     powerProduction: 0, consumeItems: null, outputItem: null, buildable: true, group: null, description: '',
     canReplace: null, flags: [], region: name, iconLayers: null, targetable: true, underBullets: false, conductive: false,
+    hasLiquids: false, liquidCapacity: -1, liquidUse: 0, coolant: 0, liquidInputs: null, floating: false, outputsLiquid: false,
   }, props);
+  if (b.coolant) { b.hasLiquids = true; b.liquidInputs = b.liquidInputs || ['water', 'cryofluid']; }
+  if (b.liquidUse) { b.hasLiquids = true; b.liquidInputs = b.liquidInputs || ['water']; }
+  // Block.init: liquidCapacity = round(10 * max(1, consumption per second))
+  if (b.liquidCapacity < 0) b.liquidCapacity = Math.round(10 * Math.max(1, b.liquidUse * 60, b.coolant * 60));
   if (b.health < 0) b.health = Math.round(b.size * b.size * b.scaledHealth);
   b.offset = ((b.size + 1) % 2) * TS / 2;
   b.sizeOffset = -Math.floor((b.size - 1) / 2);
@@ -211,11 +216,11 @@ defBlock('unloader', 'Unloader', { requirements: req('titanium', 25, 'silicon', 
 
 // --- production
 defBlock('mechanical-drill', 'Drill', {
-  requirements: req('copper', 12), tier: 2, drillTime: 600, size: 2, category: 'production', hasItems: true,
+  requirements: req('copper', 12), tier: 2, drillTime: 600, size: 2, category: 'production', hasItems: true, liquidUse: 0.05,
   iconLayers: ['mechanical-drill', 'mechanical-drill-rotator', 'mechanical-drill-top'],
 });
 defBlock('pneumatic-drill', 'Drill', {
-  requirements: req('copper', 18, 'graphite', 10), tier: 3, drillTime: 400, size: 2, category: 'production', hasItems: true,
+  requirements: req('copper', 18, 'graphite', 10), tier: 3, drillTime: 400, size: 2, category: 'production', hasItems: true, liquidUse: 3.5 / 60,
   iconLayers: ['pneumatic-drill', 'pneumatic-drill-rotator', 'pneumatic-drill-top'],
 });
 
@@ -267,7 +272,7 @@ defBlock('mender', 'MendProjector', {
 const T = 'turret';
 defBlock('duo', 'ItemTurret', {
   requirements: req('copper', 35), category: T, health: 250, reload: 20, range: 160, shootCone: 15, inaccuracy: 2, rotateSpeed: 10,
-  recoil: 0.5, shootY: 3, shootSound: 'shootDuo', alternateSpread: 3.5, targetAir: true, targetGround: true,
+  recoil: 0.5, shootY: 3, shootSound: 'shootDuo', alternateSpread: 3.5, targetAir: true, targetGround: true, coolant: 0.1, coolantMultiplier: 10,
   iconLayers: ['block-1', 'duo-barrel-l', 'duo-barrel-r', 'duo'],
   ammo: {
     copper: basic(2.5, 9, { width: 7, height: 9, lifetime: 60, ammoMultiplier: 2, backColor: Pal.copperAmmoBack, frontColor: Pal.copperAmmoFront, hitColor: Pal.copperAmmoBack, trailColor: Pal.copperAmmoBack }),
@@ -277,7 +282,7 @@ defBlock('duo', 'ItemTurret', {
 });
 defBlock('scatter', 'ItemTurret', {
   requirements: req('copper', 85, 'lead', 45), category: T, size: 2, scaledHealth: 200, reload: 18, range: 220, targetGround: false,
-  targetAir: true, shots: 2, shotDelay: 5, recoil: 1, rotateSpeed: 15, inaccuracy: 17, shootCone: 35, shootSound: 'shootScatter',
+  targetAir: true, shots: 2, shotDelay: 5, recoil: 1, rotateSpeed: 15, inaccuracy: 17, shootCone: 35, shootSound: 'shootScatter', coolant: 0.2,
   iconLayers: ['block-2', 'scatter', 'scatter-mid'], partMid: true,
   ammo: {
     scrap: flak(4, 3, { lifetime: 60, ammoMultiplier: 5, reloadMultiplier: 0.5, width: 6, height: 8, splashDamage: 33, splashDamageRadius: 24, frontColor: Pal.scrapAmmoFront, backColor: Pal.scrapAmmoBack, hitColor: Pal.scrapAmmoBack }),
@@ -287,7 +292,7 @@ defBlock('scatter', 'ItemTurret', {
 });
 defBlock('hail', 'ItemTurret', {
   requirements: req('copper', 40, 'graphite', 17), category: T, targetAir: false, targetGround: true, reload: 60, recoil: 2,
-  range: 235, inaccuracy: 1, shootCone: 10, health: 260, shootSound: 'shootArtillerySmall', heatRegion: 'hail-heat',
+  range: 235, inaccuracy: 1, shootCone: 10, health: 260, shootSound: 'shootArtillerySmall', heatRegion: 'hail-heat', coolant: 0.1, coolantMultiplier: 10,
   iconLayers: ['block-1', 'hail'], minRange: 0, artillery: true,
   ammo: {
     graphite: artillery(3, 20, { knockback: 0.8, lifetime: 80, width: 11, height: 11, splashDamageRadius: 25 * 0.75, splashDamage: 33, hitColor: Pal.graphiteAmmoBack, backColor: Pal.graphiteAmmoBack, frontColor: Pal.graphiteAmmoFront }),
@@ -297,13 +302,13 @@ defBlock('hail', 'ItemTurret', {
 defBlock('lancer', 'PowerTurret', {
   requirements: req('copper', 60, 'lead', 70, 'silicon', 60, 'titanium', 30), category: T, range: 165, chargeTime: 40, recoil: 2,
   reload: 80, shake: 2, size: 2, scaledHealth: 280, targetAir: false, targetGround: true, shootSound: 'shootLancer',
-  chargeSound: 'chargeLancer', consumesPower: 6, hasPower: true, heatRegion: 'lancer-heat', rotateSpeed: 5, shootCone: 6,
+  chargeSound: 'chargeLancer', consumesPower: 6, hasPower: true, heatRegion: 'lancer-heat', rotateSpeed: 5, shootCone: 6, coolant: 0.2,
   iconLayers: ['block-2', 'lancer'],
   shootType: bullet('laser', { damage: 140, buildingDamageMultiplier: 0.25, length: 173, lifetime: 16, collidesAir: false, pierceCap: 4, width: 15, colors: [rgba(Pal.lancerLaser, 0.4), Pal.lancerLaser.css, '#fff'], hitEffect: 'hitLancer' }),
 });
 defBlock('arc', 'PowerTurret', {
   requirements: req('copper', 50, 'lead', 50), category: T, reload: 35, shootCone: 40, rotateSpeed: 8, targetAir: false,
-  range: 90, recoil: 1, health: 260, shootSound: 'shootArc', consumesPower: 3.3, hasPower: true, heatRegion: 'arc-heat',
+  range: 90, recoil: 1, health: 260, shootSound: 'shootArc', consumesPower: 3.3, hasPower: true, heatRegion: 'arc-heat', coolant: 0.1, coolantMultiplier: 30,
   iconLayers: ['block-1', 'arc'],
   shootType: bullet('lightning', { damage: 12, lightningLength: 25, collidesAir: false, buildingDamageMultiplier: 0.4, color: col('a9d8ff') }),
 });
