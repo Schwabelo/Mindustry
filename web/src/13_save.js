@@ -77,7 +77,7 @@ const SaveIO = {
     Game.buildings.forEach((b, i) => idx.set(b, i));
     const builds = Game.buildings.map(b => {
       const o = { b: b.block.name, t: b.team, x: b.tx, y: b.ty, r: b.rotation, h: Math.round(b.health * 10) / 10 };
-      if (b.items && b.total > 0) {
+      if (b.items && b.total > 0 && !b.linkedCore) {
         o.it = {};
         for (let i = 0; i < ITEMS.length; i++) if (b.items[i]) o.it[i] = b.items[i];
       }

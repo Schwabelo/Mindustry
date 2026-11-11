@@ -83,6 +83,12 @@ add([f"fire{i}" for i in range(40)])
 add(["scorch", "swarmer"], BLOCK_OUTLINE)
 add(["scorch-heat", "cultivator", "cultivator-bottom", "cultivator-top", "spore-press", "spore-press-bottom", "spore-press-top",
      "spore-press-liquid", "spore-press-piston0", "spore-press-piston1", "pyratite-mixer", "blast-mixer"])
+add(["spectre", "meltdown", "foreshadow", "segment", "parallax"], BLOCK_OUTLINE)
+add(["spectre-heat", "meltdown-heat", "foreshadow-heat", "block-4", "surge-smelter", "surge-smelter-top", "phase-weaver",
+     "phase-weaver-bottom", "phase-weaver-weave", "phase-wall", "phase-wall-large", "surge-wall", "surge-wall-large",
+     "core-foundation", "core-foundation-team", "core-nucleus", "core-nucleus-team", "vault", "vault-team", "beta-cell", "gamma-cell"])
+add(["beta", "gamma"], UNIT_OUTLINE)
+add(["small-mount-weapon"], UNIT_OUTLINE)
 add(["fuse", "cyclone", "cyclone-barrel-1", "cyclone-barrel-2", "cyclone-barrel-3", "tsunami"], BLOCK_OUTLINE)
 add(["fuse-heat", "tsunami-liquid", "tsunami-top", "oil-extractor", "oil-extractor-rotator", "oil-extractor-top", "oil-extractor-liquid",
      "plastanium-compressor", "plastanium-compressor-top", "plastanium-wall", "plastanium-wall-large",
@@ -223,7 +229,7 @@ SOUNDS = {
     "shootArtillery": "shoot/shootArtillery", "shootLancer": "shoot/shootLancer", "chargeLancer": "charge/chargeLancer",
     "shootArc": "shoot/shootArc", "shootFlame": "shoot/shootFlame", "shootHorizon": "shoot/shootHorizon",
     "shootLaser": "shoot/shootLaser", "shootPulsar": "shoot/shootPulsar", "shootMissile": "shoot/shootMissile",
-    "shootMissilePlasmaShort": "shoot/shootMissilePlasmaShort", "shootFuse": "shoot/shootFuse", "shootCyclone": "shoot/shootCyclone", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
+    "shootMissilePlasmaShort": "shoot/shootMissilePlasmaShort", "shootFuse": "shoot/shootFuse", "shootSpectre": "shoot/shootSpectre", "shootForeshadow": "shoot/shootForeshadow", "shootCyclone": "shoot/shootCyclone", "shootSalvo": "shoot/shootSalvo", "shootRipple": "shoot/shootRipple",
     "explosion": "explosions/explosion", "explosionCrawler": "explosions/explosionCrawler",
     "explosionArtillery": "explosions/explosionArtillery", "blockExplode": "explosions/blockExplode1",
     "blockExplodeWall": "explosions/blockExplodeWall", "unitExplode": "explosions/unitExplode1",

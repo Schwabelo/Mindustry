@@ -17,11 +17,16 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   bridge conduit, liquid tank; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
   oil extractor (sand + water + power on sandy floors)
 - Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
-  pulverizer, cryofluid mixer, plastanium compressor
+  pulverizer, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
+  surge smelter, phase weaver
 - Power: combustion generator, solar panel, battery (+large), power node (+large)
-- Defense: copper/titanium/thorium/plastanium walls (+large; plastanium absorbs enemy lasers), mender,
-  mend projector, force projector (bullet-absorbing shield), overdrive projector (+50% speed);
-  turrets duo, scatter, hail, lancer, arc, wave, salvo, ripple, fuse, cyclone, tsunami
+- Defense: copper/titanium/thorium/plastanium/phase/surge walls (+large; plastanium absorbs enemy lasers,
+  phase reflects bullets, surge arcs lightning), mender, mend projector, force projector, overdrive projector
+  (phase fabric boosts the projectors); turrets duo, scatter, scorch, hail, lancer, arc, wave, salvo, segment,
+  swarmer, ripple, fuse, cyclone, tsunami, parallax, spectre, meltdown, foreshadow
+- Fires: incendiary ammo and burning buildings spread fire; water puts it out; explosive cargo blows up
+- Cores: shard → foundation → nucleus (placed over the old core), with alpha → beta → gamma ships;
+  containers and vaults touching the core share its storage
 - Units: ground factory (dagger, crawler, nova), air factory (flare, mono), additive and
   multiplicative reconstructors (mace, fortress, pulsar, quasar, horizon, zenith, poly, mega)
   with their abilities (repair fields, shield regen, quasar force field); monos auto-mine,
