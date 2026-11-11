@@ -127,6 +127,7 @@ const UI = {
     for (const el of $('cats').children) el.classList.toggle('sel', el.dataset.cat === c);
     const blocks = $('blocks');
     blocks.innerHTML = '';
+    this.hoverBlock = null;
     BLOCK_LIST.filter(b => b.category === c).forEach((b, i) => {
       const btn = document.createElement('div');
       btn.className = 'bbtn'; btn.dataset.block = b.name;
@@ -135,8 +136,8 @@ const UI = {
         Input.select(Input.selected === b ? null : b);
         Audio2.play('click', undefined, undefined, 0.3);
       };
-      btn.onmouseenter = () => this.showBlockInfo(b);
-      btn.onmouseleave = () => this.showBlockInfo(Input.selected);
+      btn.onmouseenter = () => { this.hoverBlock = b; this.showBlockInfo(b); };
+      btn.onmouseleave = () => { if (this.hoverBlock === b) this.hoverBlock = null; this.showBlockInfo(Input.selected); };
       blocks.appendChild(btn);
     });
     this.refreshBlockButtons();
@@ -269,7 +270,8 @@ const UI = {
       $('status').innerHTML = `Units: ${myUnits} &middot; <span style="color:${Game.command === 'attack' ? '#e55454' : '#84f491'}">${Game.command === 'attack' ? 'Attack' : 'Defend'}</span> (G)` +
         (queue ? `<br>Build queue: ${queue}` : '') + (!p ? '<br><span style="color:#e55454">Respawning...</span>' : '');
       this.refreshBlockButtons();
-      if (Input.selected && this.frame % 30 === 0) this.showBlockInfo(Input.selected);
+      // refresh costs (have/need colors) for whatever is shown: hovered button first, else the selection
+      if (this.frame % 30 === 0 && (this.hoverBlock || Input.selected)) this.showBlockInfo(this.hoverBlock || Input.selected);
     }
     this.updateHover();
     this.updateHints();
