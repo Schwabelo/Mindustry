@@ -159,6 +159,10 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["multi-press", "silicon-crucible", "silicon-crucible-top", "melter", "melter-bottom", "separator", "separator-bottom",
+     "separator-spinner", "disassembler", "disassembler-bottom", "disassembler-spinner", "coal-centrifuge", "blast-drill", "blast-drill-rim",
+     "blast-drill-rotator", "blast-drill-top", "water-extractor", "water-extractor-liquid", "water-extractor-rotator", "water-extractor-top",
+     "liquid-slag", "drill-item-4"])
 add(["rotary-pump", "rotary-pump-liquid", "impulse-pump", "impulse-pump-liquid", "plated-conduit-cap", "liquid-container",
      "liquid-container-bottom", "phase-conduit", "phase-conduit-arrow", "phase-conduit-bridge", "phase-conduit-end"]
     + [f"pulse-conduit-top-{i}" for i in range(5)] + [f"plated-conduit-top-{i}" for i in range(5)])

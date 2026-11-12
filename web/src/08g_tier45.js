@@ -5,7 +5,7 @@
 Pal.surge = col('f3e979');
 Pal.sapBullet = col('bf92f9');
 Pal.sapBulletBack = col('6d56bf');
-const SLAG = { name: 'slag', color: col('ffa166'), coolant: false };
+const SLAG = defLiquid('slag', 'ffa166', { heatCapacity: 0, coolant: false, temperature: 1 });
 
 Object.assign(STATUS, {
   slow: { speedMultiplier: 0.4, healthMultiplier: 1, color: Pal.white, noFx: true },

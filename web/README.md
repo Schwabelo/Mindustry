@@ -17,7 +17,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Liquids: mechanical, rotary and impulse pumps (water from water, oil from tar), conduit, pulse and plated
   conduits, liquid router, liquid container, liquid tank, liquid junction, bridge and phase conduits; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
   oil extractor (sand + water + power on sandy floors)
-- Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
+- Production/crafting: mechanical, pneumatic, laser and blast drills, water extractor; graphite press, multi-press,
+  silicon smelter, silicon crucible, melter, separator, disassembler, coal centrifuge (slag as a liquid), kiln,
   pulverizer, incinerator, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
   surge smelter, phase weaver
 - Power: combustion, steam, differential and RTG generators, solar panel (+large), thorium reactor (needs

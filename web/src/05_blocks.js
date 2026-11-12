@@ -525,7 +525,7 @@ class Drill extends Building {
       const use = this.block.liquidUse * Time.delta;
       this.boosted = this.liquid && this.liquid.type === Liquids.water && this.liquid.amount >= use;
       if (this.boosted) this.removeLiquid(use);
-      this.progress += Time.delta * this.dominantItems * this.warmup * (this.boosted ? 1.6 : 1);
+      this.progress += Time.delta * this.dominantItems * this.warmup * (this.boosted ? (this.block.liquidBoost || 1.6) : 1);
       if (Math.random() < 0.02 * this.warmup * Time.delta) Fx.create('drillDust', this.x + Mathf.range(this.block.size * 3), this.y + Mathf.range(this.block.size * 3), 0, this.dominantItem.color);
     } else {
       this.warmup = Mathf.approach(this.warmup, 0, 0.015 * Time.delta);
@@ -546,7 +546,7 @@ class Drill extends Building {
   }
   info() {
     if (!this.dominantItem) return ['No ore'];
-    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems * (this.boosted ? 1.6 : 1);
+    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems * (this.boosted ? (this.block.liquidBoost || 1.6) : 1);
     return [`${this.dominantItem.name}: ${rate.toFixed(2)}/s${this.boosted ? ' (water boosted)' : ''}`];
   }
 }
