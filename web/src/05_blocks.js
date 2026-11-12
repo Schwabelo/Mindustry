@@ -328,7 +328,7 @@ class Sorter extends Building {
     instantDepth++;
     try {
       let to;
-      if (item === this.sortItem) {
+      if ((item === this.sortItem) !== !!this.block.invert) {
         to = this.nearby(dir);
         if (!to || to.team !== this.team || (INSTANT.has(to.block.cls) && INSTANT.has(source.block.cls)) || !to.acceptItem(this, item)) return null;
       } else {
@@ -348,7 +348,7 @@ class Sorter extends Building {
   }
   draw() {
     if (this.sortItem) { Fill.set(this.sortItem.color.css); Fill.square(this.x, this.y, TS / 2 - 0.01); }
-    Draw.rect('sorter', this.x, this.y);
+    Draw.rect(this.block.name, this.x, this.y);
   }
 }
 
@@ -369,11 +369,12 @@ class OverflowGate extends Building {
     try {
       let to = this.nearby(from);
       const canForward = to && to.team === this.team && !(INSTANT.has(to.block.cls) && INSTANT.has(src.block.cls)) && to.acceptItem(this, item);
-      if (!canForward) {
+      const inv = !!this.block.invert; // underflow gate: sides first, forward only when both sides are blocked
+      if (!canForward || inv) {
         const a = this.nearby(from - 1), b = this.nearby(from + 1);
         const ac = a && a.team === this.team && !(INSTANT.has(a.block.cls) && INSTANT.has(src.block.cls)) && a.acceptItem(this, item);
         const bc = b && b.team === this.team && !(INSTANT.has(b.block.cls) && INSTANT.has(src.block.cls)) && b.acceptItem(this, item);
-        if (!ac && !bc) return null;
+        if (!ac && !bc) return inv && canForward ? to : null;
         if (ac && !bc) to = a;
         else if (bc && !ac) to = b;
         else {
@@ -444,15 +445,16 @@ class ItemBridge extends Building {
     const o = this.link;
     const ang = Angles.angle(this.x, this.y, o.x, o.y);
     Draw.setAlpha(0.85);
-    Draw.lineRegion('bridge-conveyor-bridge', this.x, this.y, o.x, o.y, TS);
-    Draw.rect('bridge-conveyor-end', this.x, this.y, TS, TS, ang);
-    Draw.rect('bridge-conveyor-end', o.x, o.y, TS, TS, ang + 180);
+    const spr = this.block.name === 'phase-conveyor' ? 'phase-conveyor' : 'bridge-conveyor';
+    Draw.lineRegion(spr + '-bridge', this.x, this.y, o.x, o.y, TS);
+    Draw.rect(spr + '-end', this.x, this.y, TS, TS, ang);
+    Draw.rect(spr + '-end', o.x, o.y, TS, TS, ang + 180);
     const dist = Math.hypot(o.x - this.x, o.y - this.y);
     const arrows = Math.max(1, Math.round(dist / 6) - 1);
     for (let a = 0; a < arrows; a++) {
       const f = (a + 1) / (arrows + 1);
       Draw.setAlpha(Mathf.absin(a / arrows - Time.time / 100, 0.1, 1) * 0.85);
-      Draw.rect('bridge-conveyor-arrow', Mathf.lerp(this.x, o.x, f), Mathf.lerp(this.y, o.y, f), TS, TS, ang);
+      Draw.rect(spr + '-arrow', Mathf.lerp(this.x, o.x, f), Mathf.lerp(this.y, o.y, f), TS, TS, ang);
     }
     Draw.setAlpha(1);
   }

@@ -12,7 +12,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Procedurally generated map with Mindustry floors, edge blending (from `edge-stencil.png`),
   ores (copper, lead, coal, sand, scrap, titanium, thorium), static walls and wall darkness
 - Alpha core unit: fly, shoot, mine ore, build and deconstruct with build plans
-- Items: conveyor, titanium conveyor, junction, router, sorter, overflow gate, bridge conveyor, unloader
+- Items: conveyor, titanium, plastanium (stack) and armored conveyors, junction, bridge and phase conveyors,
+  sorter + inverted sorter, router + distributor, overflow + underflow gates, mass driver, unloader
 - Liquids: mechanical pump (water from water, oil from tar), conduit, liquid router, liquid junction,
   bridge conduit, liquid tank; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
   oil extractor (sand + water + power on sandy floors)

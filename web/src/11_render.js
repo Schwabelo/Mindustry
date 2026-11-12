@@ -46,8 +46,8 @@ function renderFrame() {
   // blocks: conveyor beds, then items, then the rest
   const vis = [];
   for (const b of Game.buildings) if (inView(v, b.x, b.y, b.hitSize + 8)) vis.push(b);
-  for (const b of vis) if (b instanceof Conveyor) b.drawUnder();
-  for (const b of vis) if (b instanceof Conveyor) b.drawItems();
+  for (const b of vis) if (b instanceof Conveyor || b instanceof StackConveyor) b.drawUnder();
+  for (const b of vis) if (b instanceof Conveyor || b instanceof StackConveyor) b.drawItems();
   const turrets = [];
   for (const b of vis) {
     if (b instanceof Conveyor) continue;

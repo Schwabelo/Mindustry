@@ -159,6 +159,11 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["plastanium-conveyor", "plastanium-conveyor-0", "plastanium-conveyor-1", "plastanium-conveyor-2", "plastanium-conveyor-edge",
+     "plastanium-conveyor-stack", "phase-conveyor", "phase-conveyor-arrow", "phase-conveyor-bridge", "phase-conveyor-end",
+     "inverted-sorter", "underflow-gate", "distributor", "mass-driver-base"])
+add(["mass-driver"], BLOCK_OUTLINE)
+add([f"armored-conveyor-{a}-{b}" for a in range(5) for b in range(4)])
 add(["steam-generator", "steam-generator-liquid", "steam-generator-turbine", "steam-generator-cap", "differential-generator",
      "differential-generator-liquid", "differential-generator-top", "rtg-generator", "rtg-generator-top", "solar-panel-large",
      "thorium-reactor", "thorium-reactor-top", "thorium-reactor-lights", "impact-reactor", "impact-reactor-bottom",

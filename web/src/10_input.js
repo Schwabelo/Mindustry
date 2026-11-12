@@ -125,6 +125,10 @@ const Input = {
         const r = Power.toggleLink(src, b);
         if (r) Audio2.play('click', undefined, undefined, 0.4);
         return;
+      } else if (src instanceof MassDriver && b instanceof MassDriver) {
+        if (src.linkValid(b) || src.link === b) { src.configure(b); Audio2.play('click', undefined, undefined, 0.4); }
+        this.linkSource = null;
+        return;
       } else if (src instanceof ItemBridge && b instanceof ItemBridge) {
         if (src.linkValid(b) || src.link === b) { src.configure(b); Audio2.play('click', undefined, undefined, 0.4); }
         this.linkSource = null;
@@ -132,7 +136,7 @@ const Input = {
       } else this.linkSource = null;
     }
     if (b && b.team === 'sharded' && !(b instanceof ConstructBuild)) {
-      if (b instanceof PowerNode || b instanceof ItemBridge) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
+      if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
       if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory) { UI.openConfig(b); return; }
     }
     // mining
@@ -321,6 +325,10 @@ const Input = {
           Lines.set(linked ? rgba(Pal.place, 0.9) : rgba(Pal.powerLight, 0.45), linked ? 1 : 0.6);
           Lines.square(o.x, o.y, hs);
         }
+      } else if (s instanceof MassDriver) {
+        Lines.set(rgba(Pal.accent, 0.5), 1);
+        Lines.circle(s.x, s.y, s.block.range);
+        for (const o of Game.teamBuildings(s.team)) if (o instanceof MassDriver && o !== s && s.linkValid(o)) { Lines.set(rgba(o === s.link ? Pal.place : Pal.accent, 0.8), 1); Lines.square(o.x, o.y, o.block.size * TS / 2 + 1); }
       } else if (s instanceof ItemBridge) {
         Lines.set(rgba(Pal.accent, 0.6), 1);
         for (let d = 0; d < 4; d++) {

@@ -363,7 +363,7 @@ const UI = {
         if (b.items && !(b instanceof Core) && !(b instanceof Conveyor) && b.total > 0) {
           html += '<div>' + ITEMS.filter(i => b.items[i.id] > 0).map(i => `${b.items[i.id]} ${i.name}`).join(', ') + '</div>';
         }
-        if (b instanceof PowerNode || b instanceof ItemBridge) html += `<div style="color:#999">Click to link</div>`;
+        if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) html += `<div style="color:#999">Click to link</div>`;
         else if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory) html += `<div style="color:#999">Click to configure</div>`;
       }
     } else if (World.inside(tx, ty) && !World.wall[ty * World.w + tx]) {
