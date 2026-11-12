@@ -81,7 +81,7 @@ class Unit {
       if (World.wall[i]) return true;
       if (FLOOR_DEFS[World.floor[i]].isDeep && !this.type.hovering) return true;
       const b = World.build[i];
-      if (b && !this.type.legs && b.block.solid && !(b instanceof ConstructBuild && b.progress < 0.1)) {
+      if (b && !this.type.legs && b.block.solid && !b.open && !(b instanceof ConstructBuild && b.progress < 0.1)) {
         // tile AABB overlap test
         const bx = tx * TS, by = ty * TS;
         if (x + r > bx - 4 && x - r < bx + 4 && y + r > by - 4 && y - r < by + 4) return true;
@@ -415,6 +415,7 @@ const Targeting = {
     for (const b of Game.buildings) {
       if (b.team === team || b.dead) continue;
       if (pred && !pred(b)) continue;
+      if (b.block.targetable === false) continue;
       const d = Math.hypot(b.x - x, b.y - y) - b.hitSize / 2;
       if (d <= range && d < bd) { bd = d; best = b; }
     }
@@ -439,7 +440,7 @@ class FlowField {
     if (World.wall[i] || FLOOR_DEFS[World.floor[i]].isDeep) return Infinity;
     let c = 1;
     const b = World.build[i];
-    if (b && b.block.solid) {
+    if (b && b.block.solid && !b.open) {
       if (b.team === this.team) return Infinity;
       c += 70;
     }
@@ -612,7 +613,7 @@ class SuicideAI {
     const nxt = field.next(u.x, u.y);
     if (nxt) {
       const b = World.buildWorld(nxt[0], nxt[1]);
-      if (b && b.team !== u.team && b.block.solid) blocked = b;
+      if (b && b.team !== u.team && b.block.solid && !b.open) blocked = b;
     }
     // explode on contact with anything enemy nearby
     const near = Targeting.closestTarget(u.team, u.x, u.y, t.explode.triggerRange, false, true);

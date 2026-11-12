@@ -55,7 +55,7 @@ const World = {
     const i = y * this.w + x;
     if (this.wall[i]) return true;
     const b = this.build[i];
-    return !!(b && b.block.solid);
+    return !!(b && b.block.solid && !b.open);
   },
   // passable for ground pathing (deep water impassable)
   groundPassable(x, y) {

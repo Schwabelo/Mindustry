@@ -138,6 +138,7 @@ const Input = {
     if (b && b.team === 'sharded' && !(b instanceof ConstructBuild)) {
       if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
       if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory) { UI.openConfig(b); return; }
+      if (b instanceof Door) { b.toggle(); return; }
     }
     // mining
     const p = Game.player;

@@ -139,7 +139,7 @@ Unit.prototype.collidesAt = function (x, y) {
   for (let ty = y1; ty <= y2; ty++) for (let tx = x1; tx <= x2; tx++) {
     if (!isWaterTile(tx, ty)) return true;
     const b = World.build[ty * World.w + tx];
-    if (b && b.block.solid && !(b instanceof ConstructBuild && b.progress < 0.1)) return true;
+    if (b && b.block.solid && !b.open && !(b instanceof ConstructBuild && b.progress < 0.1)) return true;
   }
   return false;
 };

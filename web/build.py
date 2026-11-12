@@ -159,6 +159,10 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["door", "door-open", "door-large", "door-large-open", "scrap-wall-gigantic", "shock-mine", "shock-mine-team-top",
+     "overdrive-dome", "overdrive-dome-top", "repair-point-base"] + [f"scrap-wall{i}" for i in range(1, 6)]
+    + [f"scrap-wall-large{i}" for i in range(1, 5)] + [f"scrap-wall-huge{i}" for i in range(1, 4)])
+add(["repair-point"], BLOCK_OUTLINE)
 add(["multi-press", "silicon-crucible", "silicon-crucible-top", "melter", "melter-bottom", "separator", "separator-bottom",
      "separator-spinner", "disassembler", "disassembler-bottom", "disassembler-spinner", "coal-centrifuge", "blast-drill", "blast-drill-rim",
      "blast-drill-rotator", "blast-drill-top", "water-extractor", "water-extractor-liquid", "water-extractor-rotator", "water-extractor-top",
