@@ -183,7 +183,9 @@ const UI = {
     const core = Game.playerCore();
     const req = b.requirements.map(r => {
       const have = core ? core.items[r.item.id] : 0;
-      return `<span style="color:${have >= r.amount ? '#fff' : '#e55454'}"><img src="${Assets.url(r.item.icon)}">${r.amount}</span>`;
+      const short = have < r.amount;
+      return `<span style="color:${short ? '#e55454' : '#fff'}"><img src="${Assets.url(r.item.icon)}">${r.amount} ${titleCase(r.item.name)}` +
+        (short ? `<small>(have ${have})</small>` : '') + `</span>`;
     }).join('');
     el.innerHTML = `<div class="name">${titleCase(b.name)}</div><div class="req">${req}</div>` +
       `<div class="stats">${this.blockStats(b).join('<br>')}</div><div class="desc">${DESCRIPTIONS[b.name] || ''}</div>`;
@@ -193,7 +195,10 @@ const UI = {
     const s = [];
     s.push(`Health: ${b.health}` + (b.size > 1 ? ` &middot; Size: ${b.size}x${b.size}` : ''));
     if (b.cls === 'Conveyor') s.push(`Speed: ${b.displayedSpeed} items/s`);
-    if (b.cls === 'Drill') s.push(`Tier: ${b.tier === 2 ? 'copper, lead, sand, coal, scrap' : '+ titanium'} &middot; Base speed: ${(60 / (b.drillTime + 50) * 4).toFixed(2)}/s`);
+    if (b.cls === 'Drill') {
+      const mines = ['copper', 'lead', 'sand', 'coal', 'scrap', 'titanium', 'thorium'].filter(n => Items[n] && Items[n].hardness <= b.tier).map(titleCase);
+      s.push(`Mines: ${mines.join(', ')}`, `Base speed: ${(60 / (b.drillTime + 50) * 4).toFixed(2)}/s`);
+    }
     if (b.cls === 'GenericCrafter') s.push(`${b.consumeItems.map(c => c.amount + ' ' + c.item.name).join(' + ')} &rarr; ${b.outputItem.amount} ${b.outputItem.item.name}`);
     if (b.consumesPower) s.push(`Power use: ${(b.consumesPower * 60).toFixed(0)}/s`);
     if (b.powerProduction) s.push(`Power output: ${(b.powerProduction * 60).toFixed(1)}/s`);
@@ -280,7 +285,7 @@ const UI = {
           const n = core.items[it.id];
           let el = this.itemEls[it.name];
           if (!el && (n > 0 || it === Items.copper || it === Items.lead)) {
-            el = document.createElement('div'); el.className = 'it';
+            el = document.createElement('div'); el.className = 'it'; el.title = titleCase(it.name);
             el.innerHTML = `<img src="${Assets.url(it.icon)}"><span></span>`;
             $('items').appendChild(el);
             this.itemEls[it.name] = el;
