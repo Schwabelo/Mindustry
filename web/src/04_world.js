@@ -10,6 +10,8 @@ const FLOOR_DEFS = [
   { name: 'stone', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'basalt', variants: 3, wall: 'dune-wall', boulder: 'boulder' },
+  { name: 'hotrock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.5 },
+  { name: 'magmarock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.75 },
   { name: 'sand-floor', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'sand-wall', boulder: 'sand-boulder', oil: 0.7 },
   { name: 'darksand', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'dune-wall', boulder: 'sand-boulder', oil: 1.5 },
   { name: 'dirt', variants: 3, wall: 'dirt-wall', boulder: 'boulder' },
@@ -199,6 +201,20 @@ const World = {
       if (!this.wall[i] && !fl.isLiquid && !this.ore[i] && fl.boulder && rand() < 0.012) {
         const x = i % W, y = (i / W) | 0;
         if (Math.hypot(x - core.x, y - core.y) > 6) this.boulder[i] = rand.int(2) + 1;
+      }
+    }
+
+    // geothermal vents: an extra pass with its own noise, run after everything else, so maps from older
+    // versions keep every other tile (and existing saves stay valid). Only basalt and char can heat up.
+    const nVent = makeNoise(seed + 50);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x, fl = FLOOR_DEFS[this.floor[i]];
+      if (this.wall[i] || (fl.name !== 'basalt' && fl.name !== 'char')) continue;
+      if (Math.hypot(x - core.x, y - core.y) < 12) continue;
+      const v = nVent.oct(x, y, 2, 0.5, 6);
+      if (v > 0.66) {
+        this.floor[i] = v > 0.74 ? FLOOR.magmarock.id : FLOOR.hotrock.id;
+        this.variant[i] = ((x * 7 + y * 13) % 3) + 1;
       }
     }
 

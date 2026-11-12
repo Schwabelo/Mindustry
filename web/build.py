@@ -53,7 +53,7 @@ FLOORS = {
     # name: variants
     "deep-water": 0, "shallow-water": 0, "sand-water": 0, "darksand-water": 0, "tar": 0,
     "stone": 3, "basalt": 3, "sand-floor": 3, "darksand": 3, "dirt": 3, "grass": 3,
-    "salt": 0, "snow": 3, "ice": 3, "moss": 3, "char": 3,
+    "salt": 0, "snow": 3, "ice": 3, "moss": 3, "char": 3, "hotrock": 3, "magmarock": 3,
 }
 for f, v in FLOORS.items():
     add([f] if v == 0 else [f"{f}{i}" for i in range(1, v + 1)])
@@ -159,6 +159,8 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["thermal-generator", "illuminator", "illuminator-top", "payload-conveyor", "payload-conveyor-top", "payload-conveyor-icon",
+     "payload-router", "payload-router-top", "payload-router-over", "payload-router-icon"])
 add(["door", "door-open", "door-large", "door-large-open", "scrap-wall-gigantic", "shock-mine", "shock-mine-team-top",
      "overdrive-dome", "overdrive-dome-top", "repair-point-base"] + [f"scrap-wall{i}" for i in range(1, 6)]
     + [f"scrap-wall-large{i}" for i in range(1, 5)] + [f"scrap-wall-huge{i}" for i in range(1, 4)])

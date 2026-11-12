@@ -200,6 +200,11 @@ const Game = {
       if (block.cls === 'Drill') { const it = World.drop(tx, ty); if (it && it.hardness <= block.tier) drillable = true; }
     }
     if (block.cls === 'Drill' && !drillable) return false;
+    if (block.requiresHeat) { // ThermalGenerator.canPlaceOn: needs heat under it
+      let h = 0;
+      for (let dy = 0; dy < s; dy++) for (let dx = 0; dx < s; dx++) h += World.floorAt(x + o + dx, y + o + dy).heat || 0;
+      if (h <= 0.01) return false;
+    }
     if (block.cls === 'Pump' && !pumpable) return false;
     if (block.solid) {
       const cx = x * TS + block.offset, cy = y * TS + block.offset, half = s * TS / 2;

@@ -21,7 +21,7 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   silicon smelter, silicon crucible, melter, separator, disassembler, coal centrifuge (slag as a liquid), kiln,
   pulverizer, incinerator, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
   surge smelter, phase weaver
-- Power: combustion, steam, differential and RTG generators, solar panel (+large), thorium reactor (needs
+- Power: combustion, thermal (on hot rock / magma rock vents), steam, differential and RTG generators, solar panel (+large), thorium reactor (needs
   cryofluid or it melts down), impact reactor, battery (+large), power node (+large), surge tower, diode
 - Defense: doors (click to open/close), scrap walls (4 sizes), shock mines, overdrive dome, repair point;
   copper/titanium/thorium/plastanium/phase/surge walls (+large; plastanium absorbs enemy lasers,
@@ -31,6 +31,7 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Fires: incendiary ammo and burning buildings spread fire; water puts it out; explosive cargo blows up
 - Cores: shard → foundation → nucleus (placed over the old core), with alpha → beta → gamma ships;
   containers and vaults touching the core share its storage
+- Payload conveyor and payload router carry units between factories and reconstructors; illuminator
 - Units: ground factory (dagger, crawler, nova), air factory (flare, mono), and all four
   reconstructors (additive, multiplicative, exponential, tetrative) for tiers 2-5:
   dagger → mace → fortress → scepter → reign, nova → pulsar → quasar → vela → corvus,
