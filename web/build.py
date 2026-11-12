@@ -153,6 +153,14 @@ add(["scepter-weapon", "scepter-mount", "reign-weapon", "repair-beam-weapon-cent
 add(["large-bomb", "large-bomb-back", "exponential-reconstructor", "exponential-reconstructor-top", "tetrative-reconstructor",
      "tetrative-reconstructor-top", "factory-in-7", "factory-out-7", "factory-in-9", "factory-out-9"])
 
+# naval units + naval factory
+NAVAL = ["risso", "minke", "bryde", "sei", "omura", "retusa", "oxynoe", "cyerce", "aegires", "navanax"]
+add(NAVAL, UNIT_OUTLINE)
+add([n + "-cell" for n in NAVAL])
+add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
+     "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["mine-bullet", "mine-bullet-back", "missile-large", "missile-large-back", "circle-bullet", "circle-bullet-back", "naval-factory"])
+
 # effects
 add(["bullet", "bullet-back", "shell", "shell-back", "laser", "laser-end", "minelaser", "minelaser-end",
      "circle-shadow", "particle", "casing", "white", "laser-white", "laser-white-end"])
@@ -263,6 +271,10 @@ SOUNDS = {
     "shootArtillerySap": "shoot/shootArtillerySap", "shootArtillerySapBig": "shoot/shootArtillerySapBig",
     "shootToxopidShotgun": "shoot/shootToxopidShotgun", "walkerStep": "movement/walkerStep", "mechStepHeavy": "movement/mechStepHeavy",
     "unitCreateBig": "block/unitCreateBig",
+    "shootMissileShort": "shoot/shootMissileShort", "shootMissileLong": "shoot/shootMissileLong", "shootOmura": "shoot/shootOmura",
+    "shootRetusa": "shoot/shootRetusa", "shootFlamePlasma": "shoot/shootFlamePlasma", "shootMissilePlasma": "shoot/shootMissilePlasma",
+    "shootNavanax": "shoot/shootNavanax", "explosionNavanax": "explosions/explosionNavanax", "explosionPlasmaSmall": "explosions/explosionPlasmaSmall",
+    "beamPlasmaSmall": "beams/beamPlasmaSmall",
 }
 sounds = {}
 for k, rel in SOUNDS.items():

@@ -83,7 +83,7 @@ const Bullets = {
     b.x += b.vx * Time.delta; b.y += b.vy * Time.delta;
     if (Math.hypot(b.vx, b.vy) > 0.01) b.rotation = Angles.angle(0, 0, b.vx, b.vy);
 
-    if (t.type === 'flame' && Math.random() < 0.6) Fx.create('flameParticle', b.x, b.y, b.rotation);
+    if (t.type === 'flame' && Math.random() < 0.6) Fx.create(t.particle || 'flameParticle', b.x, b.y, b.rotation);
 
     // flak: explode near air units
     if (t.type === 'flak') {
@@ -119,7 +119,7 @@ const Bullets = {
           build.damage(t.damage * t.buildingDamageMultiplier, b.owner);
           if (t.status === 'burning' && Math.random() < 0.3) Fx.create('burning', b.x, b.y);
           if (!t.pierceBuilding || (t.pierceCap > 0 && ++b.pierced >= t.pierceCap)) { this.hit(b, b.x, b.y); b.removed = true; return; }
-        } else if (build.team === b.team && t.healPercent > 0 && build.health < build.maxHealth && !(build instanceof ConstructBuild)) {
+        } else if (build.team === b.team && t.healPercent > 0 && !t.noTeamHit && build.health < build.maxHealth && !(build instanceof ConstructBuild)) {
           b.hit.add(build);
           build.heal(build.maxHealth * t.healPercent / 100);
           Fx.create('healBlockFull', build.x, build.y, build.block.size, Pal.heal);

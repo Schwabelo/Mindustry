@@ -31,7 +31,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   reconstructors (additive, multiplicative, exponential, tetrative) for tiers 2-5:
   dagger → mace → fortress → scepter → reign, nova → pulsar → quasar → vela → corvus,
   crawler → atrax → spiroct → arkyid → toxopid, flare → horizon → zenith → antumbra → eclipse,
-  mono → poly → mega → quad → oct; with their abilities (repair fields, shield regen, force fields,
+  mono → poly → mega → quad → oct; naval factory with risso → minke → bryde → sei → omura and
+  retusa → oxynoe → cyerce → aegires → navanax (ships only move on water and must launch onto it); with their abilities (repair fields, shield regen, force fields,
   vela's healing beam, corvus's charged laser, sapping spiders, quad heal bombs); legged units walk
   over buildings and water; monos auto-mine, polys rebuild destroyed blocks, megas repair
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding

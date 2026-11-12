@@ -327,22 +327,26 @@ Unit.prototype.fireBullet = function (m) {
 
 function beamLine(u, m) {
   const w = m.weapon;
-  const [sx, sy] = u.mountPos(m, w.shootY);
+  let sx, sy, ang = u.rotation;
+  if (w.rotate && m.angle !== undefined) {
+    const [mx, my] = u.mountPos(m);
+    ang = m.angle; sx = mx + Angles.trnsx(ang, w.shootY); sy = my + Angles.trnsy(ang, w.shootY);
+  } else [sx, sy] = u.mountPos(m, w.shootY);
   let len = w.bullet.length;
-  const ex0 = sx + Angles.trnsx(u.rotation, len), ey0 = sy + Angles.trnsy(u.rotation, len);
+  const ex0 = sx + Angles.trnsx(ang, len), ey0 = sy + Angles.trnsy(ang, len);
   for (const o of Game.buildings) {
     if (o.team === u.team || o.dead || !o.block.absorbLasers) continue;
     if (segDist(sx, sy, ex0, ey0, o.x, o.y) <= o.hitSize / 2) len = Math.min(len, Math.max(0, Mathf.dst(sx, sy, o.x, o.y) - o.hitSize / 2));
   }
-  return [sx, sy, len];
+  return [sx, sy, len, ang];
 }
 function updateBeam(u, m) {
   const t = m.weapon.bullet;
   m.beam -= Time.delta;
   if ((m.beamTimer += Time.delta) < 5) return;
   m.beamTimer = 0;
-  const [sx, sy, len] = beamLine(u, m);
-  const r = u.rotation, ex = sx + Angles.trnsx(r, len), ey = sy + Angles.trnsy(r, len);
+  const [sx, sy, len, r] = beamLine(u, m);
+  const ex = sx + Angles.trnsx(r, len), ey = sy + Angles.trnsy(r, len);
   for (const o of Game.units) {
     if (o.team === u.team || o.dead) continue;
     if (segDist(sx, sy, ex, ey, o.x, o.y) <= o.type.hitSize / 2 + 4) { o.damage(t.damage); if (Math.random() < 0.3) Fx.create('hitFlameSmall', o.x, o.y, r); }
@@ -388,7 +392,7 @@ Unit.prototype.draw = function () {
     if (a.type !== 'repairBeam' || !s.target) return;
     const r = this.rotation - 90;
     const mx = this.x + Angles.trnsx(r, a.x, a.y), my = this.y + Angles.trnsy(r, a.x, a.y);
-    Draw.rect('repair-beam-weapon-center-large', mx, my, undefined, undefined, Angles.angle(mx, my, s.target.x, s.target.y) - 90);
+    Draw.rect(a.sprite || 'repair-beam-weapon-center-large', mx, my, undefined, undefined, Angles.angle(mx, my, s.target.x, s.target.y) - 90);
     Draw.setAlpha(0.6 + Mathf.absin(Time.time, 4, 0.3));
     Lines.set(Pal.heal.css, 0.8 + Mathf.absin(Time.time, 3, 0.6));
     Lines.line(mx, my, s.target.x, s.target.y);
@@ -398,11 +402,11 @@ Unit.prototype.draw = function () {
 };
 function drawBeam(u, m) {
   const t = m.weapon.bullet, life = t.lifetime;
-  const [sx, sy, len] = beamLine(u, m);
+  const [sx, sy, len, r] = beamLine(u, m);
   const fade = Mathf.clamp(m.beam > life - 16 ? (life - m.beam) / 16 : m.beam / 16);
-  const r = u.rotation, osc = Mathf.absin(Time.time, 0.8, 1.5);
+  const osc = Mathf.absin(Time.time, 0.8, 1.5) * (t.beamWidth || 9) / 9;
   for (let i = 0; i < t.colors.length; i++) {
-    const w = (9 + osc) * fade * Mathf.lerp(2, 0.5, i / (t.colors.length - 1)) * 0.5;
+    const w = ((t.beamWidth || 9) + osc) * fade * Mathf.lerp(2, 0.5, i / (t.colors.length - 1)) * 0.5;
     Lines.set(t.colors[i], w * 2);
     Lines.lineAngle(sx, sy, r, len * fade);
     Fill.set(t.colors[i]); Fill.circle(sx, sy, w);
