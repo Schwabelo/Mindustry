@@ -134,6 +134,25 @@ add(["missile", "missile-back", "additive-reconstructor", "additive-reconstructo
 add(["mono-cell", "alpha-cell", "mace-cell", "fortress-cell", "crawler-cell", "horizon-cell", "nova-cell"])
 add(["small-basic-weapon", "large-weapon", "flamethrower", "artillery", "heal-weapon"], UNIT_OUTLINE)
 
+# tier 4-5 units, spider line, exponential/tetrative reconstructors
+T45 = {
+    "scepter": ["scepter", "scepter-base", "scepter-leg"], "reign": ["reign", "reign-base", "reign-leg"],
+    "vela": ["vela", "vela-base", "vela-leg"], "antumbra": ["antumbra"], "eclipse": ["eclipse"], "quad": ["quad"], "oct": ["oct"],
+    "corvus": ["corvus", "corvus-leg", "corvus-leg-base", "corvus-foot", "corvus-joint", "corvus-joint-base"],
+    "atrax": ["atrax", "atrax-base", "atrax-leg", "atrax-leg-base", "atrax-foot", "atrax-joint"],
+    "spiroct": ["spiroct", "spiroct-leg", "spiroct-leg-base", "spiroct-foot", "spiroct-joint"],
+    "arkyid": ["arkyid", "arkyid-leg", "arkyid-leg-base", "arkyid-foot", "arkyid-joint-base"],
+    "toxopid": ["toxopid", "toxopid-leg", "toxopid-leg-base", "toxopid-foot", "toxopid-joint-base"],
+}
+for parts in T45.values():
+    add(parts, UNIT_OUTLINE)
+add([n + "-cell" for n in T45])
+add(["scepter-weapon", "scepter-mount", "reign-weapon", "repair-beam-weapon-center-large", "missiles-mount", "large-bullet-mount",
+     "large-laser-mount", "large-artillery", "atrax-weapon", "spiroct-weapon", "mount-purple-weapon", "large-purple-mount",
+     "toxopid-cannon"], UNIT_OUTLINE)
+add(["large-bomb", "large-bomb-back", "exponential-reconstructor", "exponential-reconstructor-top", "tetrative-reconstructor",
+     "tetrative-reconstructor-top", "factory-in-7", "factory-out-7", "factory-in-9", "factory-out-9"])
+
 # effects
 add(["bullet", "bullet-back", "shell", "shell-back", "laser", "laser-end", "minelaser", "minelaser-end",
      "circle-shadow", "particle", "casing", "white", "laser-white", "laser-white-end"])
@@ -237,6 +256,13 @@ SOUNDS = {
     "click": "block/click", "unitCreate": "block/unitCreate", "blockHeal": "block/blockHeal",
     "rotate": "block/blockRotate", "waveSpawn": "ui/waveSpawn", "uiButton": "ui/uiButton",
     "uiNotify": "ui/uiNotify", "coreLand": "block/coreLand",
+    "shootScepter": "shoot/shootScepter", "shootScepterSecondary": "shoot/shootScepterSecondary", "shootReign": "shoot/shootReign",
+    "chargeVela": "charge/chargeVela", "beamPlasma": "beams/beamPlasma", "chargeCorvus": "charge/chargeCorvus",
+    "shootCorvus": "shoot/shootCorvus", "shootEclipse": "shoot/shootEclipse", "shootQuad": "shoot/shootQuad",
+    "explosionQuad": "explosions/explosionQuad", "shootAtrax": "shoot/shootAtrax", "shootSap": "shoot/shootSap",
+    "shootArtillerySap": "shoot/shootArtillerySap", "shootArtillerySapBig": "shoot/shootArtillerySapBig",
+    "shootToxopidShotgun": "shoot/shootToxopidShotgun", "walkerStep": "movement/walkerStep", "mechStepHeavy": "movement/mechStepHeavy",
+    "unitCreateBig": "block/unitCreateBig",
 }
 sounds = {}
 for k, rel in SOUNDS.items():

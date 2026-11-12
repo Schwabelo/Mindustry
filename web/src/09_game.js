@@ -12,7 +12,8 @@ const WAVE_GROUPS = [
   { unit: 'mace', begin: 7, spacing: 3, unitScaling: 2, end: 30 },
   { unit: 'dagger', begin: 12, unitScaling: 1, unitAmount: 4, spacing: 2, shieldScaling: 20, max: 14 },
   { unit: 'mace', begin: 28, spacing: 3, unitScaling: 1, end: 40, shieldScaling: 20 },
-  { unit: 'mace', begin: 45, spacing: 3, unitScaling: 1, max: 10, shieldScaling: 30, shields: 100 }, // spiroct
+  { unit: 'spiroct', begin: 45, spacing: 3, unitScaling: 1, max: 10, shieldScaling: 30, shields: 100 },
+  { unit: 'pulsar', begin: 120, spacing: 2, unitScaling: 3, unitAmount: 5 },
   { unit: 'flare', begin: 16, unitScaling: 1, spacing: 2, shieldScaling: 20, max: 20 },
   { unit: 'quasar', begin: 82, spacing: 3, unitAmount: 4, unitScaling: 3, shieldScaling: 30 },
   { unit: 'pulsar', begin: 41, spacing: 5, unitAmount: 1, unitScaling: 3, shields: 640, max: 25 },
@@ -23,9 +24,15 @@ const WAVE_GROUPS = [
   { unit: 'flare', begin: 50, unitAmount: 4, unitScaling: 3, spacing: 5, shields: 100, shieldScaling: 10, max: 20 },
   { unit: 'zenith', begin: 50, unitAmount: 2, unitScaling: 3, spacing: 5, max: 16, shieldScaling: 30 },
   { unit: 'nova', begin: 53, unitAmount: 2, unitScaling: 3, spacing: 4, shieldScaling: 30 },
-  { unit: 'crawler', begin: 31, unitAmount: 4, unitScaling: 1, spacing: 3, shieldScaling: 10 },        // atrax
-  { unit: 'fortress', begin: 41, unitAmount: 1, unitScaling: 1, spacing: 30, shieldScaling: 30 },      // scepter
-  { unit: 'horizon', begin: 22, unitAmount: 1, unitScaling: 2, spacing: 4, max: 12 },                  // early bombers
+  { unit: 'atrax', begin: 31, unitAmount: 4, unitScaling: 1, spacing: 3, shieldScaling: 10 },
+  { unit: 'scepter', begin: 41, unitAmount: 1, unitScaling: 1, spacing: 30, shieldScaling: 30 },
+  { unit: 'reign', begin: 81, unitAmount: 1, unitScaling: 1, spacing: 40, shieldScaling: 30 },
+  { unit: 'antumbra', begin: 120, unitAmount: 1, unitScaling: 1, spacing: 40, shieldScaling: 30 },
+  { unit: 'vela', begin: 100, unitAmount: 1, unitScaling: 1, spacing: 30, shieldScaling: 30 },
+  { unit: 'corvus', begin: 145, unitAmount: 1, unitScaling: 1, spacing: 35, shieldScaling: 30, shields: 100 },
+  { unit: 'horizon', begin: 90, unitAmount: 2, unitScaling: 3, spacing: 4, shields: 40, shieldScaling: 30 },
+  { unit: 'toxopid', begin: 210, unitAmount: 1, unitScaling: 1, spacing: 35, shields: 1000, shieldScaling: 35 },
+  { unit: 'horizon', begin: 22, unitAmount: 1, unitScaling: 2, spacing: 4, max: 12 },                  // early bombers (Lite only)
 ];
 function groupSpawned(g, wave) {
   const begin = g.begin || 0, end = g.end === undefined ? Infinity : g.end, spacing = g.spacing || 1;

@@ -27,10 +27,13 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Fires: incendiary ammo and burning buildings spread fire; water puts it out; explosive cargo blows up
 - Cores: shard → foundation → nucleus (placed over the old core), with alpha → beta → gamma ships;
   containers and vaults touching the core share its storage
-- Units: ground factory (dagger, crawler, nova), air factory (flare, mono), additive and
-  multiplicative reconstructors (mace, fortress, pulsar, quasar, horizon, zenith, poly, mega)
-  with their abilities (repair fields, shield regen, quasar force field); monos auto-mine,
-  polys rebuild destroyed blocks, megas repair
+- Units: ground factory (dagger, crawler, nova), air factory (flare, mono), and all four
+  reconstructors (additive, multiplicative, exponential, tetrative) for tiers 2-5:
+  dagger → mace → fortress → scepter → reign, nova → pulsar → quasar → vela → corvus,
+  crawler → atrax → spiroct → arkyid → toxopid, flare → horizon → zenith → antumbra → eclipse,
+  mono → poly → mega → quad → oct; with their abilities (repair fields, shield regen, force fields,
+  vela's healing beam, corvus's charged laser, sapping spiders, quad heal bombs); legged units walk
+  over buildings and water; monos auto-mine, polys rebuild destroyed blocks, megas repair
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
 - Save/load: autosave every minute, Continue on the title screen, save file export/import
 

@@ -31,7 +31,7 @@ Unit.prototype.update = function () {
     for (const n in this.statuses) {
       this.statuses[n] -= Time.delta;
       if (this.statuses[n] <= 0) delete this.statuses[n];
-      else if (Math.random() < 0.09 * Time.delta) Fx.create(n === 'wet' ? 'wetDrip' : n === 'tarred' ? 'tarFx' : 'freezeFx', this.x + Mathf.range(this.type.hitSize / 2), this.y + Mathf.range(this.type.hitSize / 2), 0, STATUS[n].color);
+      else if (!STATUS[n].noFx && Math.random() < 0.09 * Time.delta) Fx.create(n === 'wet' ? 'wetDrip' : n === 'tarred' ? 'tarFx' : 'freezeFx', this.x + Mathf.range(this.type.hitSize / 2), this.y + Mathf.range(this.type.hitSize / 2), 0, STATUS[n].color);
     }
   }
   _unitUpdate.call(this);

@@ -79,9 +79,9 @@ class Unit {
       if (!World.inside(tx, ty)) return true;
       const i = ty * World.w + tx;
       if (World.wall[i]) return true;
-      if (FLOOR_DEFS[World.floor[i]].isDeep) return true;
+      if (FLOOR_DEFS[World.floor[i]].isDeep && !this.type.hovering) return true;
       const b = World.build[i];
-      if (b && b.block.solid && !(b instanceof ConstructBuild && b.progress < 0.1)) {
+      if (b && !this.type.legs && b.block.solid && !(b instanceof ConstructBuild && b.progress < 0.1)) {
         // tile AABB overlap test
         const bx = tx * TS, by = ty * TS;
         if (x + r > bx - 4 && x - r < bx + 4 && y + r > by - 4 && y - r < by + 4) return true;
@@ -158,7 +158,7 @@ class Unit {
     if (this.x > maxX) { this.x = maxX; this.vx = 0; } if (this.y > maxY) { this.y = maxY; this.vy = 0; }
 
     // conveyors push ground units (Conveyor.unitOn)
-    if (!this.isFlying) {
+    if (!this.isFlying && !this.type.hovering) {
       const b = World.buildWorld(this.x, this.y);
       if (b instanceof Conveyor && b.clogHeat <= 0.5 && b.len * ITEM_SPACE < 0.9) {
         const ms = b.block.speed * TS * 55 / 60 * 0.4;
@@ -274,7 +274,7 @@ class Unit {
       const [mx, my] = this.mountPos(m);
       bx = mx + Angles.trnsx(m.angle, w.shootY); by = my + Angles.trnsy(m.angle, w.shootY);
     } else [bx, by] = this.mountPos(m, w.shootY);
-    const ang = (w.rotate && m.angle !== undefined ? m.angle : this.rotation) + Mathf.range(w.inaccuracy + (w.bullet.inaccuracy || 0));
+    const ang = (w.rotate && m.angle !== undefined ? m.angle : this.rotation) + (this._angOff || 0) + Mathf.range(w.inaccuracy + (w.bullet.inaccuracy || 0));
     let lifeScl = 1;
     if (w.bullet.scaleLife) {
       const tr = w.bullet.speed * w.bullet.lifetime;
