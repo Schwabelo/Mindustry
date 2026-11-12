@@ -244,6 +244,9 @@ defBlock('pulverizer', 'GenericCrafter', {
   consumesPower: 0.5, consumeItems: [{ item: Items.scrap, amount: 1 }], outputItem: { item: Items.sand, amount: 1 },
   rotator: true, craftEffect: 'pulverize', iconLayers: ['pulverizer', 'pulverizer-rotator', 'pulverizer-top'], flags: ['factory'],
 });
+defBlock('incinerator', 'Incinerator', {
+  requirements: req('graphite', 5, 'lead', 15), health: 90, category: 'crafting', hasPower: true, consumesPower: 0.5, hasLiquids: true,
+});
 
 // --- power
 defBlock('combustion-generator', 'ConsumeGenerator', {
@@ -361,6 +364,7 @@ const DESCRIPTIONS = {
   'silicon-smelter': 'Refines silicon from sand and coal. Requires power.',
   'kiln': 'Smelts sand and lead into metaglass. Requires power.',
   'pulverizer': 'Crushes scrap into fine sand.',
+  'incinerator': 'Vaporizes any item or liquid it receives. Requires power.',
   'combustion-generator': 'Generates power by burning flammable materials, such as coal.',
   'power-node': 'Transmits power to connected nodes. Click a node, then click a block to link or unlink it.',
   'battery': 'Stores power as a buffer in times of surplus energy.',

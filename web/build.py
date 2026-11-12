@@ -99,7 +99,7 @@ add(["junction", "router", "sorter", "overflow-gate", "bridge-conveyor", "bridge
      "mechanical-drill", "mechanical-drill-rotator", "mechanical-drill-top",
      "pneumatic-drill", "pneumatic-drill-rotator", "pneumatic-drill-top", "drill-item-2",
      "graphite-press", "silicon-smelter", "silicon-smelter-top", "kiln", "kiln-top",
-     "pulverizer", "pulverizer-rotator", "pulverizer-top",
+     "pulverizer", "pulverizer-rotator", "pulverizer-top", "incinerator",
      "combustion-generator", "combustion-generator-top", "power-node", "battery", "battery-top", "solar-panel",
      "copper-wall", "copper-wall-large", "titanium-wall", "titanium-wall-large",
      "mender", "mender-top", "core-shard", "core-shard-team", "container", "container-team",

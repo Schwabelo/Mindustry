@@ -606,6 +606,28 @@ class GenericCrafter extends Building {
 
 }
 
+// Incinerator.java: destroys any item or liquid once heated up by power
+class Incinerator extends Building {
+  constructor(...a) { super(...a); this.heat = 0; }
+  update() { this.heat = Mathf.approach(this.heat, this.efficiency, 0.04 * Time.delta); }
+  acceptItem(source, item) { return this.heat > 0.5; }
+  handleItem(source, item) { if (Math.random() < 0.3) Fx.create('fuelburn', this.x, this.y); }
+  acceptLiquid(source, l) { return this.heat > 0.5 && l.incinerable !== false; }
+  handleLiquid(source, l, amount) { if (Math.random() < 0.02) Fx.create('fuelburn', this.x, this.y); }
+  draw() {
+    Draw.rect(this.block.region, this.x, this.y);
+    if (this.heat > 0) {
+      const g = 0.3, r = 0.06;
+      Draw.setAlpha(Mathf.clamp(((1 - g) + Mathf.absin(Time.time, 8, g) + Mathf.random(r) - r) * this.heat));
+      Fill.set('#ffad9d'); Fill.circle(this.x, this.y, 2);
+      Draw.setAlpha(this.heat);
+      Fill.set('#fff'); Fill.circle(this.x, this.y, 1);
+      Draw.setAlpha(1);
+    }
+  }
+  info() { return [this.heat > 0.5 ? 'Burning items and liquids' : 'Needs power']; }
+}
+
 // ================================================================ power
 class PowerBuilding extends Building {
   drawLasers() {}
@@ -1126,7 +1148,7 @@ function predict(sx, sy, target, speed) {
 
 const BuildClasses = {
   Conveyor, Junction, Router, Sorter, OverflowGate, ItemBridge, Unloader, Drill, GenericCrafter, ConsumeGenerator,
-  SolarGenerator, Battery, PowerNode, Wall, MendProjector, ItemTurret, PowerTurret, UnitFactory, StorageBlock, Core,
+  SolarGenerator, Battery, PowerNode, Wall, MendProjector, ItemTurret, PowerTurret, UnitFactory, StorageBlock, Core, Incinerator,
 };
 
 function createBuilding(block, team, tx, ty, rot) {

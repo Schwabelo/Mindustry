@@ -17,7 +17,7 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   bridge conduit, liquid tank; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
   oil extractor (sand + water + power on sandy floors)
 - Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
-  pulverizer, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
+  pulverizer, incinerator, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
   surge smelter, phase weaver
 - Power: combustion generator, solar panel, battery (+large), power node (+large)
 - Defense: copper/titanium/thorium/plastanium/phase/surge walls (+large; plastanium absorbs enemy lasers,
