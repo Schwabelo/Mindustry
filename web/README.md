@@ -41,10 +41,13 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   vela's healing beam, corvus's charged laser, sapping spiders, quad heal bombs); legged units walk
   over buildings and water; monos auto-mine, polys rebuild destroyed blocks, megas repair
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
+- Logic: message, switch, micro/logic/hyper processors running mlog text (paste code copied from Mindustry),
+  memory cell/bank, logic displays; read/write/draw/print/format/sensor/control/radar/op/jump/select/lookup/
+  packcolor/ubind/ucontrol/uradar/ulocate and the rest of the normal-processor instruction set
 - Save/load: autosave every minute, Continue on the title screen, save file export/import
 
-It is not a port of the Java game; there is no campaign, tech tree, multiplayer, logic
-processors, payload blocks, or the Erekir planet.
+It is not a port of the Java game; there is no campaign, tech tree, multiplayer, world processors,
+or the Erekir planet.
 
 ## Controls
 

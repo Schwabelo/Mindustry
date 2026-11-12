@@ -159,6 +159,8 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["message", "switch", "switch-on", "micro-processor", "logic-processor", "hyper-processor", "memory-cell", "memory-bank",
+     "logic-display", "large-logic-display"])
 add(["thermal-generator", "illuminator", "illuminator-top", "payload-conveyor", "payload-conveyor-top", "payload-conveyor-icon",
      "payload-router", "payload-router-top", "payload-router-over", "payload-router-icon"])
 add(["door", "door-open", "door-large", "door-large-open", "scrap-wall-gigantic", "shock-mine", "shock-mine-team-top",
@@ -235,6 +237,7 @@ for n in ICON_NAMES:
     if os.path.exists(p):
         images["icon-" + n] = Image.open(p).convert("RGBA")
 images["logo"] = Image.open(os.path.join(SPR, "ui", "logo.png")).convert("RGBA")
+images["icon-logic"] = Image.open(os.path.join(ICONS, "file-text.png")).convert("RGBA")
 
 
 # ---------------------------------------------------------------- atlas packing (shelf)

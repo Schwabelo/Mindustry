@@ -43,7 +43,7 @@ const Input = {
   },
 
   keyDown(e) {
-    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     this.keys.add(e.code);
     if (Game.state === 'title') return;
     switch (e.code) {
@@ -125,6 +125,9 @@ const Input = {
         const r = Power.toggleLink(src, b);
         if (r) Audio2.play('click', undefined, undefined, 0.4);
         return;
+      } else if (src instanceof LogicProcessor) {
+        if (src.toggleLink(b)) { Audio2.play('click', undefined, undefined, 0.4); UI.openConfig(src); }
+        return;
       } else if (src instanceof MassDriver && b instanceof MassDriver) {
         if (src.linkValid(b) || src.link === b) { src.configure(b); Audio2.play('click', undefined, undefined, 0.4); }
         this.linkSource = null;
@@ -136,9 +139,11 @@ const Input = {
       } else this.linkSource = null;
     }
     if (b && b.team === 'sharded' && !(b instanceof ConstructBuild)) {
+      if (b instanceof LogicProcessor) { this.linkSource = b; UI.openConfig(b); Audio2.play('click', undefined, undefined, 0.3); return; }
+      if (b instanceof MessageBlock) { UI.openConfig(b); return; }
       if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
       if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory) { UI.openConfig(b); return; }
-      if (b instanceof Door || b instanceof Illuminator || (b instanceof PayloadConveyor && b.block.router)) { b.toggle(); return; }
+      if (b instanceof Door || b instanceof SwitchBlock || b instanceof Illuminator || (b instanceof PayloadConveyor && b.block.router)) { b.toggle(); return; }
     }
     // mining
     const p = Game.player;
@@ -326,6 +331,8 @@ const Input = {
           Lines.set(linked ? rgba(Pal.place, 0.9) : rgba(Pal.powerLight, 0.45), linked ? 1 : 0.6);
           Lines.square(o.x, o.y, hs);
         }
+      } else if (s instanceof LogicProcessor) {
+        s.drawSelect();
       } else if (s instanceof MassDriver) {
         Lines.set(rgba(Pal.accent, 0.5), 1);
         Lines.circle(s.x, s.y, s.block.range);

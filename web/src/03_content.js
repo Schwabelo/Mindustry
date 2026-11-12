@@ -164,7 +164,7 @@ defUnit('nova', {
 // ---------------------------------------------------------------- blocks
 const BLOCKS = {};
 const BLOCK_LIST = [];
-const CATEGORIES = ['turret', 'production', 'distribution', 'liquid', 'crafting', 'power', 'defense', 'units', 'effect'];
+const CATEGORIES = ['turret', 'production', 'distribution', 'liquid', 'crafting', 'power', 'defense', 'units', 'effect', 'logic'];
 
 function defBlock(name, cls, props) {
   const b = Object.assign({
