@@ -14,8 +14,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Alpha core unit: fly, shoot, mine ore, build and deconstruct with build plans
 - Items: conveyor, titanium, plastanium (stack) and armored conveyors, junction, bridge and phase conveyors,
   sorter + inverted sorter, router + distributor, overflow + underflow gates, mass driver, unloader
-- Liquids: mechanical pump (water from water, oil from tar), conduit, liquid router, liquid junction,
-  bridge conduit, liquid tank; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
+- Liquids: mechanical, rotary and impulse pumps (water from water, oil from tar), conduit, pulse and plated
+  conduits, liquid router, liquid container, liquid tank, liquid junction, bridge and phase conduits; water boosts drills (1.6x) and cools turrets, cryofluid cools better;
   oil extractor (sand + water + power on sandy floors)
 - Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
   pulverizer, incinerator, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,

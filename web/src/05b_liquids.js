@@ -36,7 +36,7 @@ Object.assign(Building.prototype, {
     if (!next || next.team !== this.team || !next.liquid || this.liquid.amount <= 0) return 0;
     const ocap = next.block.liquidCapacity;
     const ofract = next.liquidAmount(l) / ocap;
-    const fract = this.liquid.amount / this.block.liquidCapacity;
+    const fract = this.liquid.amount / this.block.liquidCapacity * (this.block.liquidPressure || 1); // BuildingComp.moveLiquid
     let flow = Math.min(Mathf.clamp(fract - ofract) * this.block.liquidCapacity, this.liquid.amount);
     flow = Math.min(flow, ocap - next.liquidAmount(l));
     if (flow > 0 && ofract <= fract && next.acceptLiquid(this, l)) {
@@ -92,7 +92,7 @@ class Pump extends Building {
     const out = this.drop ? Liquids[this.drop] : null;
     if (this.pumpTiles > 0 && out) {
       if (lq.type !== out) { lq.type = out; lq.amount = 0; }
-      lq.amount = Math.min(this.block.liquidCapacity, lq.amount + this.block.pumpAmount * this.pumpMult * Time.delta);
+      lq.amount = Math.min(this.block.liquidCapacity, lq.amount + this.block.pumpAmount * this.pumpMult * this.efficiency * Time.delta);
       this.warmup = Mathf.approach(this.warmup, 1, 0.02 * Time.delta);
     }
     if (out) this.dumpLiquid(out);
@@ -102,7 +102,7 @@ class Pump extends Building {
     Draw.rect(this.block.name, this.x, this.y);
     drawLiquidFill(this, this.block.name + '-liquid');
   }
-  info() { return this.pumpTiles ? [`Pumping ${(this.block.pumpAmount * this.pumpMult * 60).toFixed(1)} ${this.drop}/s`] : ['Not on a liquid']; }
+  info() { return this.pumpTiles ? [`Pumping ${(this.block.pumpAmount * this.pumpMult * this.efficiency * 60).toFixed(1)} ${this.drop}/s`].concat(this.block.consumesPower && this.efficiency <= 0 ? ['Needs power'] : []) : ['Not on a liquid']; }
 }
 
 // ---------------------------------------------------------------- conduit
