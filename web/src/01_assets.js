@@ -224,5 +224,15 @@ const Audio2 = {
     next();
   },
 
+  // SoundControl: play a boss track once when a guardian wave arrives, then go back to the normal playlist
+  playBossMusic() {
+    if (!ASSETS.bossMusic || !ASSETS.bossMusic.length || this.musicVol <= 0) return;
+    if (this.music) { this.music.onended = null; this.music.pause(); }
+    const a = new Audio(ASSETS.bossMusic[Math.floor(Math.random() * ASSETS.bossMusic.length)]);
+    a.volume = this.musicVol * 0.6;
+    a.onended = () => { this.music = null; setTimeout(() => { if (!this.stopped && !this.music) this.startMusic(); }, 20000); };
+    this.music = a;
+    a.play().catch(() => {});
+  },
   resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
 };

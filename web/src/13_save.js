@@ -95,7 +95,7 @@ const SaveIO = {
     const units = Game.units.filter(u => !u.dead).map(u => ({
       ty: u.type.name, t: u.team, x: Math.round(u.x * 10) / 10, y: Math.round(u.y * 10) / 10, r: Math.round(u.rotation),
       h: Math.round(u.health * 10) / 10, sh: Math.round(u.shield), p: u.isPlayer ? 1 : 0,
-      st: u.stack.amount ? [u.stack.item.id, u.stack.amount] : null,
+      st: u.stack.amount ? [u.stack.item.id, u.stack.amount] : null, bo: u.boss ? 1 : 0,
     }));
     const p = Game.player;
     return {
@@ -109,6 +109,7 @@ const SaveIO = {
   load(data) {
     if (!data || data.v !== SAVE_VERSION) throw new Error('Unsupported save version');
     Game.seed = data.seed;
+    BOSS_GROUPS = genBossGroups(data.seed);
     Time.time = data.time || 0;
     Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = []; Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
@@ -153,6 +154,7 @@ const SaveIO = {
       const u = Game.spawnUnit(type, o.t, o.x, o.y, o.r);
       u.health = o.h; u.shield = o.sh || 0;
       if (o.st) u.stack = { item: ITEMS[o.st[0]], amount: o.st[1] };
+      if (o.bo) makeBoss(u);
       if (o.p) { u.controller = 'player'; Game.player = u; }
     }
     if (Game.player) Game.player.plans = (data.plans || []).filter(pl => BLOCKS[pl.b]).map(pl => ({ block: BLOCKS[pl.b], x: pl.x, y: pl.y, rotation: pl.r, breaking: pl.br }));

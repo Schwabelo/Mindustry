@@ -41,6 +41,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   vela's healing beam, corvus's charged laser, sapping spiders, quad heal bombs); legged units walk
   over buildings and water; monos auto-mine, polys rebuild destroyed blocks, megas repair
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
+- Guardian (boss) waves: per-map boss groups from `Waves.generate` (tier 4 guardians from about wave 40, final
+  guardians from wave 120+), boss status (1.5x health, 1.3x damage), guardian warnings, health bar and boss music
 - Logic: message, switch, micro/logic/hyper processors running mlog text (paste code copied from Mindustry),
   memory cell/bank, logic displays; read/write/draw/print/format/sensor/control/radar/op/jump/select/lookup/
   packcolor/ubind/ucontrol/uradar/ulocate and the rest of the normal-processor instruction set

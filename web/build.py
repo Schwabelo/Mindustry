@@ -310,6 +310,7 @@ for k, rel in SOUNDS.items():
     sounds[k] = "data:audio/ogg;base64," + base64.b64encode(open(p, "rb").read()).decode()
 
 MUSIC = ["game1", "game2", "game3"]
+boss_music = ["data:audio/ogg;base64," + base64.b64encode(open(os.path.join(ASSETS, "music", "boss1.ogg"), "rb").read()).decode()]
 music = ["data:audio/ogg;base64," + base64.b64encode(open(os.path.join(ASSETS, "music", m + ".ogg"), "rb").read()).decode()
          for m in MUSIC]
 
@@ -335,7 +336,7 @@ except Exception as e:  # font is optional
 srcs = sorted(glob.glob(os.path.join(WEB, "src", "*.js")))
 js = "\n".join(f"// ==== {os.path.basename(s)} ====\n" + open(s).read() for s in srcs)
 assets_js = "const ASSETS = " + json.dumps({
-    "pages": page_uris, "regions": regions, "sounds": sounds, "music": music,
+    "pages": page_uris, "regions": regions, "sounds": sounds, "music": music, "bossMusic": boss_music,
 }, separators=(",", ":")) + ";\n"
 
 tpl = open(os.path.join(WEB, "template.html")).read()
