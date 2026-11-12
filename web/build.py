@@ -159,6 +159,11 @@ add(NAVAL, UNIT_OUTLINE)
 add([n + "-cell" for n in NAVAL])
 add(["mount-weapon", "artillery-mount", "sei-launcher", "omura-cannon", "retusa-weapon", "plasma-mount-weapon", "point-defense-mount",
      "plasma-missile-mount", "emp-cannon-mount", "plasma-laser-mount", "repair-beam-weapon-center"], UNIT_OUTLINE)
+add(["steam-generator", "steam-generator-liquid", "steam-generator-turbine", "steam-generator-cap", "differential-generator",
+     "differential-generator-liquid", "differential-generator-top", "rtg-generator", "rtg-generator-top", "solar-panel-large",
+     "thorium-reactor", "thorium-reactor-top", "thorium-reactor-lights", "impact-reactor", "impact-reactor-bottom",
+     "impact-reactor-plasma-0", "impact-reactor-plasma-1", "impact-reactor-plasma-2", "impact-reactor-plasma-3",
+     "surge-tower", "diode", "diode-arrow"])
 add(["mine-bullet", "mine-bullet-back", "missile-large", "missile-large-back", "circle-bullet", "circle-bullet-back", "naval-factory"])
 
 # effects

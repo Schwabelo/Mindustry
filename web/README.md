@@ -19,7 +19,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Production/crafting: mechanical, pneumatic and laser drills; graphite press, silicon smelter, kiln,
   pulverizer, incinerator, cryofluid mixer, plastanium compressor, cultivator, spore press, pyratite mixer, blast mixer,
   surge smelter, phase weaver
-- Power: combustion generator, solar panel, battery (+large), power node (+large)
+- Power: combustion, steam, differential and RTG generators, solar panel (+large), thorium reactor (needs
+  cryofluid or it melts down), impact reactor, battery (+large), power node (+large), surge tower, diode
 - Defense: copper/titanium/thorium/plastanium/phase/surge walls (+large; plastanium absorbs enemy lasers,
   phase reflects bullets, surge arcs lightning), mender, mend projector, force projector, overdrive projector
   (phase fabric boosts the projectors); turrets duo, scatter, scorch, hail, lancer, arc, wave, salvo, segment,
