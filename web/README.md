@@ -43,6 +43,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
 - Unit command mode: select units, move/attack orders with pathfinding and formations, commands (move, repair,
   rebuild, assist, mine), stances (hold fire, pursue, patrol, ram, boost, hold position), factory rally points
+- Weather: rain (wet status), snow, sandstorm and spore storm (wind, spore-slowed air units), fog; each map gets
+  rain, fog and the storm of its main biome; weather changes solar, water extractor and cultivator output
 - Guardian (boss) waves: per-map boss groups from `Waves.generate` (tier 4 guardians from about wave 40, final
   guardians from wave 120+), boss status (1.5x health, 1.3x damage), guardian warnings, health bar and boss music
 - Logic: message, switch, micro/logic/hyper processors running mlog text (paste code copied from Mindustry),

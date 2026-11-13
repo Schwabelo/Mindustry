@@ -238,6 +238,8 @@ for n in ICON_NAMES:
     if os.path.exists(p):
         images["icon-" + n] = Image.open(p).convert("RGBA")
 images["logo"] = Image.open(os.path.join(SPR, "ui", "logo.png")).convert("RGBA")
+for n in ["noise", "fog"]:
+    images[n] = Image.open(os.path.join(ASSETS, "sprites", n + ".png")).convert("RGBA")
 images["icon-logic"] = Image.open(os.path.join(ICONS, "file-text.png")).convert("RGBA")
 
 
@@ -302,6 +304,7 @@ SOUNDS = {
     "shootRetusa": "shoot/shootRetusa", "shootFlamePlasma": "shoot/shootFlamePlasma", "shootMissilePlasma": "shoot/shootMissilePlasma",
     "shootNavanax": "shoot/shootNavanax", "explosionNavanax": "explosions/explosionNavanax", "explosionPlasmaSmall": "explosions/explosionPlasmaSmall",
     "beamPlasmaSmall": "beams/beamPlasmaSmall",
+    "rain": "environment/rain", "wind": "environment/wind", "windHowl": "environment/windHowl",
 }
 sounds = {}
 for k, rel in SOUNDS.items():

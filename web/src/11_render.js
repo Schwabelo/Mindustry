@@ -90,6 +90,7 @@ function renderFrame() {
 
   Fx.draw();
   Draw.reset();
+  if (Game.state !== 'title') Weather.draw();
 
   // health bars for recently damaged player buildings and all damaged units nearby
   for (const b of vis) {

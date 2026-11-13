@@ -100,7 +100,7 @@ const SaveIO = {
     }));
     const p = Game.player;
     return {
-      v: SAVE_VERSION, seed: Game.seed, wave: Game.wave, wc: Math.round(Game.waveCountdown), time: Math.round(Time.time),
+      v: SAVE_VERSION, seed: Game.seed, wx: Weather.save(), wave: Game.wave, wc: Math.round(Game.waveCountdown), time: Math.round(Time.time),
       cmd: Game.command, stats: Game.stats, builds, units,
       plans: p ? p.plans.map(pl => ({ b: pl.block.name, x: pl.x, y: pl.y, r: pl.rotation, br: !!pl.breaking })) : [],
       cam: [Math.round(Render.camX), Math.round(Render.camY), Render.targetZoom], date: Date.now(),
@@ -115,6 +115,7 @@ const SaveIO = {
     Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = []; Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(data.seed);
+    Weather.load(data.wx, data.seed);
     Game.wave = data.wave; Game.waveCountdown = data.wc; Game.command = data.cmd || 'defend';
     Game.stats = Object.assign({ built: 0, destroyed: 0, kills: 0 }, data.stats);
     Game.lastCoreWarn = -9999;

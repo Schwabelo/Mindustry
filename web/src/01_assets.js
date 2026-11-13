@@ -224,6 +224,22 @@ const Audio2 = {
     next();
   },
 
+  // looping ambient sounds (weather): set a target volume, 0 stops it
+  loops: {},
+  loopSound(name, vol) {
+    if (!this.ctx || !this.buffers[name]) return;
+    let l = this.loops[name];
+    const target = vol * this.sfxVol;
+    if (!l) {
+      if (target <= 0.001) return;
+      const src = this.ctx.createBufferSource(); src.buffer = this.buffers[name]; src.loop = true;
+      const gain = this.ctx.createGain(); gain.gain.value = 0;
+      src.connect(gain); gain.connect(this.master); src.start();
+      l = this.loops[name] = { src, gain };
+    }
+    l.gain.gain.value = Mathf.approach(l.gain.gain.value, target, 0.01);
+    if (target <= 0.001 && l.gain.gain.value <= 0.001) { try { l.src.stop(); } catch (e) { /* ignore */ } delete this.loops[name]; }
+  },
   // SoundControl: play a boss track once when a guardian wave arrives, then go back to the normal playlist
   playBossMusic() {
     if (!ASSETS.bossMusic || !ASSETS.bossMusic.length || this.musicVol <= 0) return;
