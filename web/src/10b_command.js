@@ -135,6 +135,7 @@ class CommandAI {
     if (this.target && this.target.dead) this.target = null;
     if (this.attackTarget && (this.attackTarget.dead || (this.attackTarget.team === u.team))) this.attackTarget = null;
     if (!this.attackTarget && !this.targetPos && this.stances.has('pursuetarget') && this.target) this.attackTarget = this.target;
+    if (t.autoDropBombs) return this.updateBomber(u);
     // move
     let goal = null, within = 0;
     if (this.attackTarget) { goal = [this.attackTarget.x, this.attackTarget.y]; within = u.range * 0.8; }
@@ -150,6 +151,22 @@ class CommandAI {
     const shootAt = this.stances.has('holdfire') ? null : (this.attackTarget && Math.hypot(this.attackTarget.x - u.x, this.attackTarget.y - u.y) <= u.range + 8 ? this.attackTarget : this.target);
     aimAndShoot(u, shootAt, !!shootAt);
     if (!shootAt && Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
+  }
+  // bombers (horizon, quad) have to fly over their target and drop bombs on whatever enemy is under them
+  updateBomber(u) {
+    const t = u.type, hold = this.stances.has('holdposition'), at = this.attackTarget;
+    if (at && !hold) {
+      if (t.circleTarget) circleAttack(u, at, t.circleTargetRadius); else u.moveTo(at.x, at.y, 0);
+    } else if (this.targetPos && !hold) {
+      if (Math.hypot(this.targetPos[0] - u.x, this.targetPos[1] - u.y) <= 6) { u.moveAt(0, 0); this.arrived(); }
+      else u.moveTo(this.targetPos[0], this.targetPos[1], 0);
+    } else u.moveAt(0, 0);
+    const below = World.buildWorld(u.x, u.y);
+    const over = (below && below.team !== u.team && !below.dead) || (at && Math.hypot(at.x - u.x, at.y - u.y) < 12);
+    const shoot = !this.stances.has('holdfire') && !!over;
+    for (const m of u.mounts) m.shoot = shoot;
+    u.aimX = u.x; u.aimY = u.y;
+    if (Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
   arrived() {
     const cur = this.targetPos;
