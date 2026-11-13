@@ -370,7 +370,7 @@ LiquidTurret.prototype.shoot = function (type) {
   if (b.name !== 'tsunami') return _ltShoot.call(this, type);
   for (let i = 0; i < b.shots; i++) {
     if (i > 0 && !this.hasAmmo()) break;
-    const t = i === 0 ? type : this.useAmmo();
+    const t = type; // consumeAmmoOnce: the whole volley uses ammo once
     const side = (this.totalShots % 2) ? 1 : -1;
     const [bx, by] = this.bulletPos(side * b.alternateSpread / 2);
     Bullets.create(t, this, this.team, bx, by, this.turretRotation + Mathf.range(b.inaccuracy), 1 - b.velocityRnd + Math.random() * b.velocityRnd);

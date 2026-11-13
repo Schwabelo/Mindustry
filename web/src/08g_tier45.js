@@ -482,7 +482,7 @@ Bullets.hit = function (b, x, y) {
   _t45Hit.call(this, b, x, y);
   const t = b.type;
   if (t.lightning) {
-    for (let i = 0; i < t.lightning; i++) Lightning.create(b.team, t.lightningColor || t.backColor, t.lightningDamage || t.damage, x, y, Math.random() * 360, t.lightningLength + Math.round(Math.random() * (t.lightningLengthRand || 0)), { collidesAir: true });
+    for (let i = 0; i < t.lightning; i++) Lightning.create(b.team, t.lightningColor || t.backColor, t.lightningDamage || t.damage, x, y, Math.random() * 360, t.lightningLength + Math.round(Math.random() * (t.lightningLengthRand || 0)), { collidesAir: t.collidesAir !== false, collidesGround: t.collidesGround !== false });
   }
   if (t.healPercent && t.splashDamageRadius > 0) {
     // heal bombs (quad) repair friendly blocks in the blast

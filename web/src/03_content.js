@@ -27,7 +27,7 @@ function bullet(type, props) {
     sprite: 'bullet', frontColor: Pal.bulletYellow, backColor: Pal.bulletYellowBack, hitColor: null, trailColor: null,
     collidesAir: true, collidesGround: true, collidesTiles: true, collides: true, pierce: false, pierceCap: -1, pierceBuilding: false,
     splashDamage: 0, splashDamageRadius: -1, knockback: 0, homingPower: 0, homingRange: 50,
-    buildingDamageMultiplier: 1, status: null, statusDuration: 0, ammoMultiplier: 2, reloadMultiplier: 1, rangeChange: 0,
+    buildingDamageMultiplier: 1, status: null, statusDuration: 480, ammoMultiplier: 2, reloadMultiplier: 1, rangeChange: 0,
     trailLength: 0, trailWidth: 2, keepVelocity: true, inaccuracy: 0, healPercent: 0, collidesTeam: false,
     hitEffect: 'hitBulletColor', despawnEffect: 'hitBulletColor', shootEffect: 'shootSmall', smokeEffect: 'shootSmallSmoke',
     drag: 0, scaleLife: false, fragBullets: 0, fragBullet: null, makeFire: false, hitShake: 0, hitSound: null,
@@ -95,6 +95,7 @@ defUnit('dagger', {
 });
 
 defUnit('mace', {
+  immuneBurning: true, // immunities.add(StatusEffects.burning)
   speed: 0.5, hitSize: 10, health: 550, armor: 4, mech: true, cell: true,
   weapons: [weapon('flamethrower', {
     top: false, shootSound: 'shootFlame', shootY: 2, reload: 22, recoil: 1, ejectEffect: null,

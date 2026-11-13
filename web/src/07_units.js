@@ -229,7 +229,7 @@ class Unit {
     const speed = Math.hypot(this.vx, this.vy);
     for (const m of this.mounts) {
       const w = m.weapon;
-      m.reload = Math.max(m.reload - Time.delta, 0);
+      m.reload = Math.max(m.reload - Time.delta * this.statusMul('reloadMultiplier'), 0);
       m.recoil = Mathf.approach(m.recoil, 0, Time.delta / Math.max(w.reload, 1) * 1.5);
       for (let i = m.queued.length - 1; i >= 0; i--) {
         const q = m.queued[i]; q.delay -= Time.delta;

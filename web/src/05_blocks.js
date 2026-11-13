@@ -796,7 +796,7 @@ class Turret extends Building {
     }
     if (!best && b.targetGround) {
       for (const o of Game.buildings) {
-        if (o.team === this.team || o.dead) continue;
+        if (o.team === this.team || o.dead || o.team === 'derelict') continue;
         const d = Math.hypot(o.x - this.x, o.y - this.y) - o.hitSize / 2;
         if (d <= range && d < bd) { best = o; bd = d; }
       }

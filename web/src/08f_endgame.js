@@ -127,7 +127,7 @@ defBlock('spectre', 'ItemTurret', {
   ammo: {
     graphite: basic(7.5, 50, { hitSize: 4.8, width: 15, height: 21, ammoMultiplier: 4, reloadMultiplier: 1.7, knockback: 0.3, lifetime: range(260, 7.5), hitColor: Pal.graphiteAmmoBack, backColor: Pal.graphiteAmmoBack, trailColor: Pal.graphiteAmmoBack, frontColor: Pal.graphiteAmmoFront, shootEffect: 'shootBig' }),
     thorium: basic(8, 80, { hitSize: 5, width: 16, height: 23, pierceCap: 2, pierce: true, pierceBuilding: true, knockback: 0.7, lifetime: range(260, 8), backColor: Pal.thoriumAmmoBack, hitColor: Pal.thoriumAmmoBack, frontColor: Pal.thoriumAmmoFront, shootEffect: 'shootBig' }),
-    pyratite: basic(7, 70, { hitSize: 5, width: 16, height: 21, makeFire: true, pierceCap: 2, pierce: true, pierceBuilding: true, knockback: 0.6, ammoMultiplier: 3, splashDamage: 20, splashDamageRadius: 25, status: 'burning', statusDuration: 300, lifetime: range(260, 7), frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, hitColor: Pal.lightOrange, shootEffect: 'shootBig' }),
+    pyratite: basic(7, 70, { hitSize: 5, width: 16, height: 21, makeFire: true, pierceCap: 2, pierce: true, pierceBuilding: true, knockback: 0.6, ammoMultiplier: 3, splashDamage: 20, splashDamageRadius: 25, status: 'burning', statusDuration: 480, lifetime: range(260, 7), frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, hitColor: Pal.lightOrange, shootEffect: 'shootBig' }),
   },
 });
 
@@ -160,7 +160,7 @@ class LaserTurret extends Turret {
     const lq = this.liquid;
     if (this.reloadCounter < b.reload && lq && lq.type && lq.amount > 0) {
       const used = Math.min(lq.amount, b.coolant * Time.delta);
-      this.reloadCounter += used * lq.type.heatCapacity * (b.coolantMultiplier || 5);
+      this.reloadCounter += used * lq.type.heatCapacity * (b.coolantMultiplier ?? 1); // LaserTurret: coolantMultiplier 1
       this.removeLiquid(used);
     }
     if (this.target && this.reloadCounter >= b.reload && eff > 0 && Angles.within(this.turretRotation, Angles.angle(this.x, this.y, this.target.x, this.target.y), b.shootCone)) {
@@ -220,13 +220,14 @@ class LaserTurret extends Turret {
 class RailTurret extends ItemTurret {
   findTarget() {
     const range = this.range;
-    let best = null, bh = -1;
+    let best = null, bs = Infinity;
     for (const u of Game.units) {
       if (u.team === this.team || u.dead) continue;
       if (Math.hypot(u.x - this.x, u.y - this.y) - u.type.hitSize / 2 > range) continue;
-      if (u.maxHealth > bh) { bh = u.maxHealth; best = u; }
+      const score = -u.maxHealth + Mathf.dst2(u.x, u.y, this.x, this.y) / 6400;
+      if (score < bs) { bs = score; best = u; }
     }
-    this.target = best;
+    this.target = best || Targeting.closestBuilding(this.team, this.x, this.y, range);
   }
   shoot(type) {
     const b = this.block, r = this.turretRotation;
@@ -240,8 +241,8 @@ class RailTurret extends ItemTurret {
     let dmg = type.damage, endT = type.length;
     for (const h of hits) {
       if (dmg <= 0) { endT = h.t; break; }
-      if (h.u) { const hp = h.u.health + h.u.shield; h.u.damage(dmg, true); dmg -= hp; Fx.create('blastExplosion', h.u.x, h.u.y); }
-      else { const hp = h.o.health; h.o.damage(dmg * type.buildingDamageMultiplier); dmg -= hp / type.buildingDamageMultiplier; }
+      if (h.u) { const hp = h.u.health + h.u.shield; h.u.damage(dmg); dmg -= hp; Fx.create('blastExplosion', h.u.x, h.u.y); }
+      else { const hp = h.o.health; h.o.damage(dmg * type.buildingDamageMultiplier); dmg -= hp; }
     }
     Bullets.rails.push({ x: sx, y: sy, angle: r, len: endT, time: 0, lifetime: 24 });
     Fx.create('shootBig', sx, sy, r);
@@ -279,7 +280,7 @@ class PointDefenseTurret extends Building {
       this.retarget = 5;
       let best = null, bd = Infinity;
       for (const bl of Bullets.list) {
-        if (bl.removed || bl.team === this.team || bl.type.type === 'liquid') continue;
+        if (bl.removed || bl.team === this.team || bl.type.hittable === false || ['liquid', 'laser', 'lightning', 'flame', 'continuous', 'rail'].includes(bl.type.type)) continue;
         const d = Mathf.dst(bl.x, bl.y, this.x, this.y);
         if (d < b.range && d < bd) { bd = d; best = bl; }
       }
@@ -292,8 +293,7 @@ class PointDefenseTurret extends Building {
     this.turretRotation = Angles.moveToward(this.turretRotation, tr, b.rotateSpeed * Time.delta);
     if (Angles.within(this.turretRotation, tr, 5) && this.reloadCounter >= b.reload) {
       const t = this.target;
-      const dmg = t.dmgLeft !== undefined ? t.dmgLeft : t.type.damage + (t.type.splashDamage || 0);
-      if (dmg > b.bulletDamage) t.dmgLeft = dmg - b.bulletDamage;
+      if (t.type.damage > b.bulletDamage) t.type = Object.assign({}, t.type, { damage: t.type.damage - b.bulletDamage });
       else t.removed = true;
       this.beam = { x: t.x, y: t.y, time: 0 };
       Fx.create('absorb', t.x, t.y, 0, Pal.white);
@@ -335,7 +335,7 @@ class TractorBeamTurret extends Building {
     t.damage(b.damage * Time.delta * eff, true);
     const d = Math.hypot(t.x - this.x, t.y - this.y);
     const mass = t.type.hitSize * t.type.hitSize * Math.PI;
-    const f = (b.force + (1 - d / b.range) * b.scaledForce) * Time.delta * eff / mass * 20;
+    const f = (b.force + (1 - d / b.range) * b.scaledForce) * Time.delta * eff / mass; // impulseNet / mass
     t.vx -= (t.x - this.x) / d * f; t.vy -= (t.y - this.y) / d * f;
   }
   draw() {

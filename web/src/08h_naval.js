@@ -3,7 +3,7 @@
 
 Pal.missileYellow = col('ffd2ae');
 Pal.missileYellowBack = col('e58956');
-STATUS.electrified = { speedMultiplier: 0.7, healthMultiplier: 1, color: col('98ffa9') };
+STATUS.electrified = { speedMultiplier: 0.7, healthMultiplier: 1, reloadMultiplier: 0.6, color: col('98ffa9') };
 
 const navalMissile = (props) => missile(2.7, 12, Object.assign({
   width: 8, height: 8, drag: -0.003, homingRange: 60, splashDamageRadius: 25, splashDamage: 10, lifetime: 65, trailColor: Pal.gray || col('808080'),

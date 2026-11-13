@@ -100,7 +100,7 @@ Bullets.hit = function (b, x, y) {
       if (Mathf.within(u.x, u.y, x, y, t.splashDamageRadius + u.type.hitSize / 2)) u.applyStatus(t.status, t.statusDuration || 60);
     }
   }
-  if (t.lightning) for (let i = 0; i < t.lightning; i++) Lightning.create(b.team, Pal.surgeAmmoBack, t.lightningDamage || t.damage, x, y, Math.random() * 360, t.lightningLength || 10, { collidesAir: true, buildingDamageMultiplier: 1 });
+  // (bullet lightning is spawned once, in the Bullets.hit wrapper of 08g_tier45.js)
   _hit2.call(this, b, x, y);
 };
 const _ub2 = Bullets.updateBullet;
@@ -225,7 +225,7 @@ defBlock('blast-mixer', 'GenericCrafter', {
 
 // ---------------------------------------------------------------- ammo additions
 BLOCKS.hail.ammo.pyratite = artillery(3, 25, { hitEffect: 'blastExplosion', knockback: 0.8, lifetime: 80, width: 13, height: 13, splashDamageRadius: 25 * 0.75, splashDamage: 45, status: 'burning', statusDuration: 720, frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, hitColor: Pal.lightishOrange, trailColor: Pal.lightishOrange, makeFire: true, ammoMultiplier: 4 });
-BLOCKS.salvo.ammo.pyratite = basic(3.2, 25, { width: 10, height: 12, frontColor: Pal.lightishOrange, hitColor: Pal.lightishOrange, backColor: Pal.lightOrange, status: 'burning', statusDuration: 240, ammoMultiplier: 5, splashDamage: 15, splashDamageRadius: 22, makeFire: true, lifetime: 60 });
+BLOCKS.salvo.ammo.pyratite = basic(3.2, 25, { width: 10, height: 12, frontColor: Pal.lightishOrange, hitColor: Pal.lightishOrange, backColor: Pal.lightOrange, status: 'burning', statusDuration: 480, ammoMultiplier: 5, splashDamage: 15, splashDamageRadius: 22, makeFire: true, lifetime: 60 });
 BLOCKS.ripple.ammo.pyratite = artillery(3, 48, { hitEffect: 'blastExplosion', knockback: 0.8, lifetime: 80, width: 13, height: 15, splashDamageRadius: 30 * 0.75, splashDamage: 90, status: 'burning', statusDuration: 720, frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, hitColor: Pal.lightOrange, makeFire: true, ammoMultiplier: 4, hitShake: 0.6 });
 BLOCKS.ripple.ammo['blast-compound'] = artillery(2, 40, { hitEffect: 'blastExplosion', knockback: 0.8, lifetime: 80, width: 14, height: 16, ammoMultiplier: 4, splashDamageRadius: 50 * 0.75, splashDamage: 90, status: 'blasted', backColor: Pal.blastAmmoBack, hitColor: Pal.blastAmmoBack, frontColor: Pal.blastAmmoFront, hitShake: 0.8 });
 BLOCKS.cyclone.ammo['blast-compound'] = flak(4, 8, { shootEffect: 'shootBig', ammoMultiplier: 5, splashDamage: 45, splashDamageRadius: 60, collidesGround: true, explodeRange: 20, status: 'blasted', backColor: Pal.blastAmmoBack, hitColor: Pal.blastAmmoBack, frontColor: Pal.blastAmmoFront });
@@ -252,7 +252,7 @@ defBlock('swarmer', 'ItemTurret', {
   iconLayers: ['block-2', 'swarmer'],
   ammo: {
     'blast-compound': swarmMissile(10, { splashDamageRadius: 30, splashDamage: 45, ammoMultiplier: 5, status: 'blasted', hitColor: Pal.blastAmmoBack, backColor: Pal.blastAmmoBack, trailColor: Pal.blastAmmoBack, frontColor: Pal.blastAmmoFront }),
-    pyratite: swarmMissile(12, { frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, width: 7, homingPower: 0.08, splashDamageRadius: 20, splashDamage: 45, makeFire: true, ammoMultiplier: 5, status: 'burning', statusDuration: 240 }),
+    pyratite: swarmMissile(12, { frontColor: Pal.lightishOrange, backColor: Pal.lightOrange, width: 7, homingPower: 0.08, splashDamageRadius: 20, splashDamage: 45, makeFire: true, ammoMultiplier: 5, status: 'burning', statusDuration: 480 }),
   },
 });
 // barrels + multiple shots per reload (swarmer); single-shot barrel cycling stays for the cyclone

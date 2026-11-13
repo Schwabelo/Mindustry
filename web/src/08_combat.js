@@ -137,7 +137,7 @@ const Bullets = {
   hitUnit(b, u) {
     const t = b.type;
     u.damage(t.damage);
-    if (t.knockback) { u.vx += Angles.trnsx(b.rotation, t.knockback / Math.max(u.type.hitSize / 8, 1)); u.vy += Angles.trnsy(b.rotation, t.knockback / Math.max(u.type.hitSize / 8, 1)); }
+    if (t.knockback) applyKnockback(b, u);
     if (t.status === 'burning') u.burnTime = Math.max(u.burnTime, t.statusDuration);
   },
 
@@ -151,7 +151,7 @@ const Bullets = {
       if (t.type === 'artillery' || t.type === 'bomb') Decals.add('scorch', x, y, Math.random() * 360, Math.min(t.splashDamageRadius / 30, 1.2), 0.5);
     }
     if (t.fragBullets && t.fragBullet) {
-      for (let i = 0; i < t.fragBullets; i++) this.create(t.fragBullet, b.owner, b.team, x, y, Math.random() * 360, Mathf.random(0.2, 1), Mathf.random(0.75, 1.25));
+      for (let i = 0; i < t.fragBullets; i++) this.create(t.fragBullet, b.owner, b.team, x, y, Math.random() * 360, Mathf.random(0.2, 1), Mathf.random(t.fragLifeMin ?? 1, t.fragLifeMax ?? 1)); // fragLifeMin/Max default 1
     }
   },
 
@@ -235,32 +235,52 @@ const Damage = {
   },
 };
 
+// BulletType.hitEntity knockback: impulse knockback * 80 away from the bullet (or along it for `impact` bullets),
+// divided by the unit's mass (hitSize^2 * pi)
+function applyKnockback(b, u) {
+  const t = b.type, m = u.type.knockbackMultiplier ?? 1;
+  if (m <= 0) return;
+  const ang = t.impact ? b.rotation + (t.knockback < 0 ? 180 : 0) : Angles.angle(b.x, b.y, u.x, u.y);
+  const k = Math.abs(t.knockback) * 80 * m / (u.type.hitSize * u.type.hitSize * Math.PI) * (t.impact ? 1 : Math.sign(t.knockback));
+  u.vx += Angles.trnsx(ang, k); u.vy += Angles.trnsy(ang, k);
+}
+
 const Lightning = {
   list: [],
-  create(team, color, damage, x, y, rotation, length, type) {
-    const pts = [x, y];
-    const hitUnits = new Set(), hitBuilds = new Set();
+  // Lightning.createLightningInternal: length/2 points 15 apart; each point is a damage bullet (Bullets.damageLightning,
+  // shocked 10 ticks); the arc jumps to the furthest enemy within a 30x30 box (up to 60 away, at most 8 jumps), otherwise
+  // it bends up to 20 degrees; insulated blocks stop it.
+  create(team, color, damage, x, y, rotation, length, type = {}) {
+    const air = type.collidesAir !== false, ground = type.collidesGround !== false;
+    const pts = [], chained = new Set();
     let cx = x, cy = y, rot = rotation;
-    // home toward the closest ground target in front
     for (let i = 0; i < length / 2; i++) {
-      const step = 6;
-      const tgt = Targeting.closestUnit(team, cx, cy, 30, type.collidesAir, true);
-      if (tgt) rot = Angles.moveToward(rot, Angles.angle(cx, cy, tgt.x, tgt.y), 15);
-      rot += Mathf.range(25);
-      cx += Angles.trnsx(rot, step); cy += Angles.trnsy(rot, step);
-      pts.push(cx, cy);
+      // damage bullet at this point
       for (const u of Game.units) {
-        if (u.team === team || u.dead || hitUnits.has(u)) continue;
-        if (u.isFlying && !type.collidesAir) continue;
-        if (Mathf.within(cx, cy, u.x, u.y, u.type.hitSize / 2 + 5)) { hitUnits.add(u); u.damage(damage); Fx.create('hitLancer', u.x, u.y, 0, color); }
+        if (u.team === team || u.dead || (u.isFlying ? !air : !ground)) continue;
+        if (Math.abs(u.x - cx) < u.type.hitSize / 2 + 2 && Math.abs(u.y - cy) < u.type.hitSize / 2 + 2) {
+          u.damage(damage); if (STATUS.shocked) u.applyStatus('shocked', 10);
+          Fx.create('hitLancer', u.x, u.y, 0, color);
+        }
       }
-      const b = World.buildWorld(cx, cy);
-      if (b && !hitBuilds.has(b)) {
-        hitBuilds.add(b);
-        if (b.team !== team) b.damage(damage * (type.buildingDamageMultiplier || 1));
-        else if (type.healPercent && b.health < b.maxHealth && !(b instanceof ConstructBuild)) { b.heal(b.maxHealth * type.healPercent / 100); Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal); }
+      const b = ground ? World.buildWorld(cx, cy) : null;
+      if (b && b.team !== team && b.team !== 'derelict' && !b.dead) b.damage(damage * (type.buildingDamageMultiplier ?? 1));
+      else if (b && b.team === team && type.healPercent && b.health < b.maxHealth && !(b instanceof ConstructBuild)) { b.heal(b.maxHealth * type.healPercent / 100); Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal); }
+      pts.push(cx + Mathf.range(3), cy + Mathf.range(3));
+      if (pts.length >= 4) {
+        const ins = World.buildWorld(pts[pts.length - 2], pts[pts.length - 1]);
+        if (ins && ins.block.insulated && ins.team !== team) break;
       }
-      if (World.isWall(Math.round(cx / TS), Math.round(cy / TS))) break;
+      let far = null, fd = -1;
+      if (chained.size < 8) for (const u of Game.units) {
+        if (u.team === team || u.dead || chained.has(u) || (u.isFlying ? !air : !ground)) continue;
+        if (Math.abs(u.x - cx) > 15 || Math.abs(u.y - cy) > 15) continue;
+        const d = Mathf.dst2(cx, cy, u.x, u.y);
+        if (d > fd) { fd = d; far = u; }
+      }
+      if (type.pierceCap > 0 && chained.size >= type.pierceCap) break;
+      if (far && fd <= 60 * 60) { chained.add(far); cx = far.x; cy = far.y; }
+      else { rot += Mathf.range(20); cx += Angles.trnsx(rot, 15); cy += Angles.trnsy(rot, 15); }
     }
     this.list.push({ pts, color, time: 0, lifetime: 10 });
   },

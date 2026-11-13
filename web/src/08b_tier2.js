@@ -18,7 +18,7 @@ Unit.prototype.applyStatus = function (name, duration) {
 };
 Unit.prototype.statusMul = function (key) {
   let m = 1;
-  if (this.statuses) for (const n in this.statuses) m *= STATUS[n][key];
+  if (this.statuses) for (const n in this.statuses) m *= STATUS[n][key] ?? 1;
   return m;
 };
 const _unitSpeed = Unit.prototype.speed;
@@ -36,21 +36,11 @@ Unit.prototype.update = function () {
   }
   _unitUpdate.call(this);
 };
-// wet + shocked (arc lightning) affinity: extra damage
-const _lightningCreate = Lightning.create;
-Lightning.create = function (team, color, damage, x, y, rotation, length, type) {
-  const before = new Map(Game.units.map(u => [u, u.health]));
-  _lightningCreate.call(this, team, color, damage, x, y, rotation, length, type);
-  for (const u of Game.units) if (!u.dead && u.statuses && u.statuses.wet && before.has(u) && u.health < before.get(u)) u.damage(STATUS.wet.transitionDamage, true);
-};
 // bullets apply any status
 Bullets.hitUnit = function (b, u) {
   const t = b.type;
   u.damage(t.damage);
-  if (t.knockback) {
-    const k = t.knockback / Math.max(u.type.hitSize / 8, 1);
-    u.vx += Angles.trnsx(b.rotation, k); u.vy += Angles.trnsy(b.rotation, k);
-  }
+  if (t.knockback) applyKnockback(b, u);
   if (t.status) u.applyStatus(t.status, t.statusDuration);
 };
 
@@ -87,6 +77,31 @@ class LiquidTurret extends Turret {
   peekAmmo() { return this.liquid && this.liquid.type ? this.block.liquidAmmo[this.liquid.type.name] || null : null; }
   useAmmo() { const a = this.peekAmmo(); this.removeLiquid(1 / a.ammoMultiplier); return a; }
   acceptItem() { return false; }
+  // LiquidTurret.findTarget: with an extinguishing liquid, aim at the closest fire in range on your blocks or open ground
+  findTarget() {
+    const lq = this.liquid;
+    if (lq && lq.type && (lq.type.name === 'water' || lq.type.name === 'cryofluid') && Fires.map.size) {
+      let best = null, bd = Infinity;
+      const r = this.range;
+      for (const f of Fires.map.values()) {
+        const fx = f.tx * TS, fy = f.ty * TS, d = Math.hypot(fx - this.x, fy - this.y);
+        if (d > r || d >= bd) continue;
+        const on = World.buildAt(f.tx, f.ty);
+        if (on && on.team !== this.team) continue;
+        best = f; bd = d;
+      }
+      if (best) {
+        this.fireTarget = this.fireTarget && this.fireTarget.f === best ? this.fireTarget : { f: best, x: best.tx * TS, y: best.ty * TS, hitSize: 0 };
+        this.target = this.fireTarget;
+        return;
+      }
+    }
+    super.findTarget();
+  }
+  validTarget(t) {
+    if (t && t.f) return Fires.map.get(t.f.ty * World.w + t.f.tx) === t.f && Math.hypot(t.x - this.x, t.y - this.y) <= this.range;
+    return super.validTarget(t);
+  }
   acceptLiquid(source, l) {
     const lq = this.liquid;
     return !!this.block.liquidAmmo[l.name] && (lq.type === l || lq.amount < 0.2) && lq.amount < this.block.liquidCapacity;
@@ -159,7 +174,8 @@ Turret.prototype.shoot = function (type) {
       const [bx, by] = this.bulletPos(0);
       const tr = type.speed * type.lifetime;
       let lifeScl = 1;
-      if (this.aimX !== undefined) lifeScl = Mathf.clamp(Math.hypot(this.aimX - bx, this.aimY - by) / tr, (b.minRange || 0) / tr, this.range / tr) * Mathf.random(0.95, 1.08);
+      // Turret.shoot: lifeScl = clamp((baseLife + scaleLifetimeOffset) * dst / range, ...), ripple scaleLifetimeOffset 0.1
+      if (this.aimX !== undefined) lifeScl = Mathf.clamp((1 + (b.scaleLifetimeOffset || 0)) * Math.hypot(this.aimX - bx, this.aimY - by) / tr, (b.minRange || 0) / tr, this.range / tr);
       Bullets.create(type, this, this.team, bx, by, this.turretRotation + Mathf.range(b.inaccuracy), 1 - b.velocityRnd + Math.random() * b.velocityRnd, lifeScl, this.aimX, this.aimY);
       Fx.create('shootBig', bx, by, this.turretRotation);
     }
