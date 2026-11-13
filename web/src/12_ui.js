@@ -72,11 +72,10 @@ const UI = {
       const s = JSON.parse(localStorage.getItem('mindustry-lite-settings') || '{}');
       if (s.music !== undefined) { $('musicVol').value = s.music; Audio2.musicVol = s.music / 100; }
       if (s.sfx !== undefined) { $('sfxVol').value = s.sfx; Audio2.sfxVol = s.sfx / 100; }
-      if (s.research !== undefined) $('researchMode').checked = s.research;
     } catch (e) { /* storage unavailable */ }
   },
   saveSettings() {
-    try { localStorage.setItem('mindustry-lite-settings', JSON.stringify({ music: +$('musicVol').value, sfx: +$('sfxVol').value, research: $('researchMode').checked })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('mindustry-lite-settings', JSON.stringify({ music: +$('musicVol').value, sfx: +$('sfxVol').value })); } catch (e) { /* ignore */ }
   },
 
   showTitle() {
@@ -106,7 +105,7 @@ const UI = {
   startGame(resume) {
     this.initAudio();
     if (resume) { if (!SaveIO.loadLocal()) return; }
-    else { Game.researchMode = $('researchMode').checked; Game.newGame(this.seed); }
+    else { Game.researchMode = false; Game.newGame(this.seed); } // free play: everything unlocked, like custom games
     this.enterGame();
   },
 

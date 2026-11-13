@@ -113,7 +113,7 @@ const ResearchUI = {
     if (!this.el) return;
     const all = Object.values(TECH).filter(n => n.name !== 'core-shard');
     this.el.querySelector('#rsCount').textContent = `${all.filter(n => Research.has(n.name)).length} / ${all.length} researched`;
-    this.el.querySelector('#rsMode').textContent = Game.state === 'title' || !Game.state ? '' : Research.active() ? '' : 'Tech tree is off in this game: everything is unlocked';
+    this.el.querySelector('#rsMode').textContent = Game.state === 'title' || !Game.state ? '' : Research.active() ? '' : 'Free play: everything is unlocked. Research applies to the campaign.';
     for (const n of Object.values(TECH)) {
       const st = this.state(n), d = this.nodeEls.get(n.name), img = d.firstChild;
       d.style.borderColor = this.sel === n ? '#fff' : st === 'done' ? 'var(--accent)' : st === 'open' ? (Research.missing(n).length ? '#555' : '#8a8a8a') : '#2c2c2c';
@@ -157,7 +157,7 @@ const ResearchUI = {
         : (TECH[m] && (TECH[m].type === 'i' || TECH[m].type === 'l') ? 'get ' : 'research ') + titleCase(m);
       if (miss.length) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">Requires: ${miss.map(what).join(', ')}</div>`;
       let why = '';
-      if (!Research.active()) why = Game.state === 'title' || !Game.state ? 'Start a game with the tech tree on to research' : 'Tech tree is off in this game';
+      if (!Research.active()) why = Game.state === 'title' || !Game.state ? 'Research items come from your core in a campaign sector' : 'Free play has everything unlocked; research in the campaign';
       else if (!core) why = 'No core';
       else if (miss.length) why = '';
       const off = !!(why || miss.length);
@@ -242,6 +242,5 @@ UI.onResearched = n => {
     $('researchBtn').addEventListener('mousedown', e => e.stopPropagation());
     $('researchPauseBtn').onclick = () => { $('pause').classList.add('hidden'); Game.state = 'playing'; ResearchUI.open(); };
     $('researchTitleBtn').onclick = () => ResearchUI.open();
-    $('researchMode').onchange = () => this.saveSettings();
   };
 })();

@@ -54,7 +54,7 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   summed export rate of every stored sector sending there. In free play a landing pad lands pods endlessly
 - Tech tree (J): Mindustry's Serpulo research tree with its real research costs (exported from `SerpuloTechTree`);
   blocks and units are locked until researched with items from your core (pay in parts), items unlock when they first
-  reach the core. Research is kept across games; untick "Tech tree" on the title screen to play with everything unlocked
+  reach the core. Research is kept across games and only applies to the campaign; free play has everything unlocked, like custom games
 - Schematics: copy areas with their settings (sorter items, bridge / node / processor links and code, factory
   plans...), rotate / flip, save a library, and import / export Mindustry schematic codes
 - Weather: rain (wet status), snow, sandstorm and spore storm (wind, spore-slowed air units), fog; each map gets

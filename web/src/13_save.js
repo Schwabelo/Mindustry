@@ -110,7 +110,7 @@ const SaveIO = {
   load(data) {
     if (!data || data.v !== SAVE_VERSION) throw new Error('Unsupported save version');
     Game.seed = data.seed;
-    Game.researchMode = !!data.rs;
+    Game.researchMode = !!data.rs && !!data.sec;
     BOSS_GROUPS = genBossGroups(data.seed);
     Time.time = data.time || 0;
     Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [], derelict: [] }; Game.rebuildQueue = []; Fires.map.clear();
