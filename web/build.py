@@ -192,7 +192,8 @@ add(["bullet", "bullet-back", "shell", "shell-back", "laser", "laser-end", "mine
 
 ICON_NAMES = ["turret", "production", "distribution", "liquid", "crafting", "power", "defense", "units", "effect",
               "pause", "play", "settings", "hammer", "cancel", "rotate", "trash", "info", "menu", "eye",
-              "refresh", "exit", "home", "map", "item", "power", "check", "add"]
+              "refresh", "exit", "home", "map", "item", "power", "check", "add", "mode-survival", "players", "none",
+              "command-rally", "command-attack", "line", "elevation", "units"]
 
 
 # ---------------------------------------------------------------- image helpers

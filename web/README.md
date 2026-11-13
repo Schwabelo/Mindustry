@@ -41,6 +41,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   vela's healing beam, corvus's charged laser, sapping spiders, quad heal bombs); legged units walk
   over buildings and water; monos auto-mine, polys rebuild destroyed blocks, megas repair
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
+- Unit command mode: select units, move/attack orders with pathfinding and formations, commands (move, repair,
+  rebuild, assist, mine), stances (hold fire, pursue, patrol, ram, boost, hold position), factory rally points
 - Guardian (boss) waves: per-map boss groups from `Waves.generate` (tier 4 guardians from about wave 40, final
   guardians from wave 120+), boss status (1.5x health, 1.3x damage), guardian warnings, health bar and boss music
 - Logic: message, switch, micro/logic/hyper processors running mlog text (paste code copied from Mindustry),
@@ -64,6 +66,7 @@ or the Erekir planet.
 | Q or middle click | pick block under cursor |
 | 1-9 | select block in the current category |
 | G | toggle units attack / defend |
+| Shift (hold) or C | command mode: drag to select units, right-click to move / attack, Ctrl+right-click to queue |
 | N | call the next wave now |
 | X | clear build queue |
 | Space / Esc | pause |

@@ -96,6 +96,7 @@ const SaveIO = {
       ty: u.type.name, t: u.team, x: Math.round(u.x * 10) / 10, y: Math.round(u.y * 10) / 10, r: Math.round(u.rotation),
       h: Math.round(u.health * 10) / 10, sh: Math.round(u.shield), p: u.isPlayer ? 1 : 0,
       st: u.stack.amount ? [u.stack.item.id, u.stack.amount] : null, bo: u.boss ? 1 : 0,
+      cm: u.controller instanceof CommandAI ? { c: u.controller.command, s: [...u.controller.stances], p: u.controller.targetPos } : null,
     }));
     const p = Game.player;
     return {
@@ -155,6 +156,7 @@ const SaveIO = {
       u.health = o.h; u.shield = o.sh || 0;
       if (o.st) u.stack = { item: ITEMS[o.st[0]], amount: o.st[1] };
       if (o.bo) makeBoss(u);
+      if (o.cm) { const ai = commandAI(u); ai.command = o.cm.c; ai.stances = new Set(o.cm.s || []); ai.targetPos = o.cm.p || null; }
       if (o.p) { u.controller = 'player'; Game.player = u; }
     }
     if (Game.player) Game.player.plans = (data.plans || []).filter(pl => BLOCKS[pl.b]).map(pl => ({ block: BLOCKS[pl.b], x: pl.x, y: pl.y, rotation: pl.r, breaking: pl.br }));
