@@ -62,10 +62,6 @@ const Input = {
         }
         break;
       case 'KeyQ': this.pick(); break;
-      case 'KeyG':
-        Game.command = Game.command === 'defend' ? 'attack' : 'defend';
-        UI.toast(Game.command === 'attack' ? 'Units: ATTACK (marching to enemy spawn)' : 'Units: DEFEND (guarding the core)', 2.5);
-        break;
       case 'KeyX':
         if (Game.player) { Game.player.plans = []; UI.toast('Build queue cleared', 1.5); }
         break;
@@ -444,11 +440,7 @@ function builderUpdate(p) {
 
     if (pl.breaking) {
       if (!ex || (ex.team !== 'sharded' && ex.team !== 'derelict')) { p.plans.splice(idx, 1); return pl; }
-      if (ex.team === 'derelict') {
-        // derelict ruins can be cleared, but give nothing back
-        Game.removeBuilding(ex); ex.team = 'sharded'; ex = Game.beginBreak((Game.addBuilding(ex), ex));
-        ex.refunded = ex.refunded.map(() => 1e9);
-      }
+      if (ex.team === 'derelict') { Game.removeBuilding(ex); ex.team = 'sharded'; Game.addBuilding(ex); } // deconstructs like your own block
       if (!(ex instanceof ConstructBuild)) ex = Game.beginBreak(ex);
       ex.deconstruct(p, core, bs);
       if (ex.dead) p.plans.splice(idx, 1);
@@ -457,6 +449,10 @@ function builderUpdate(p) {
 
     if (ex instanceof ConstructBuild && ex.current === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
       // continue (also resumes a deconstruction in reverse)
+    } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y && ex.team === 'derelict') {
+      Game.repairDerelict(ex, pl.rotation);
+      p.plans.splice(idx, 1);
+      return pl;
     } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
       if (pl.block.rotate && ex.rotation !== pl.rotation) { ex.rotation = pl.rotation; Game.refreshAround(ex); Audio2.play('rotate', ex.x, ex.y, 0.3); }
       p.plans.splice(idx, 1);

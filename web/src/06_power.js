@@ -87,8 +87,24 @@ const Power = {
 
   nodeLinkCount(n) { return n.power.links.length; },
 
+  // PowerNode.insulated: a laser can't pass insulated blocks (plastanium walls)
+  insulated(a, b) {
+    let x0 = a.tx, y0 = a.ty;
+    const x1 = b.tx, y1 = b.ty, dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    while (true) {
+      const o = World.buildAt(x0, y0);
+      if (o && o.block.insulated) return true;
+      if (x0 === x1 && y0 === y1) return false;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  },
+
   canLink(node, other) {
     if (!this.isPower(other) || other === node || other.team !== node.team) return false;
+    if (this.insulated(node, other)) return false;
     if (!this.inLaserRange(node, other) && !(other.block.cls === 'PowerNode' && this.inLaserRange(other, node))) return false;
     if (node.power.links.length >= node.block.maxNodes) return false;
     if (other.block.cls === 'PowerNode' && other.power.links.length >= other.block.maxNodes) return false;
@@ -107,7 +123,7 @@ const Power = {
     const own = new Set();
     for (const p of node.proximity) if (this.isPower(p) && p.power.graph) own.add(p.power.graph);
     const cands = Game.teamBuildings(node.team).filter(b => b !== node && this.isPower(b) && this.inLaserRange(node, b) &&
-      !node.proximity.includes(b) && !(b.block.cls === 'PowerNode' && b.power.links.length >= b.block.maxNodes));
+      !node.proximity.includes(b) && !(b.block.cls === 'PowerNode' && b.power.links.length >= b.block.maxNodes) && !this.insulated(node, b));
     cands.sort((a, b) => {
       const an = a.block.cls === 'PowerNode' ? 0 : 1, bn = b.block.cls === 'PowerNode' ? 0 : 1;
       if (an !== bn) return an - bn;
@@ -124,14 +140,21 @@ const Power = {
     this.dirty = true;
   },
 
-  // called when a non-node power building is placed: nearest node in range links to it (PowerNode.getNodeLinks)
+  // called when a non-node power building is placed (PowerNode.getNodeLinks): every node in range whose network isn't
+  // already connected (through this block or its neighbours) links to it, nearest first, one per network
   autoLinkConsumer(b) {
     if (this.dirty) this.rebuild();
-    const g = b.power.graph;
-    const nodes = Game.teamBuildings(b.team).filter(n => n.block.cls === 'PowerNode' && !n.dead && n.power.graph !== g &&
-      this.inLaserRange(n, b) && n.power.links.length < n.block.maxNodes);
+    const graphs = new Set();
+    if (b.power.graph) graphs.add(b.power.graph);
+    for (const p of b.proximity) if (this.isPower(p) && p.power.graph) graphs.add(p.power.graph);
+    const nodes = Game.teamBuildings(b.team).filter(n => n.block.cls === 'PowerNode' && !n.dead && this.inLaserRange(n, b) &&
+      n.power.links.length < n.block.maxNodes && !b.proximity.includes(n) && !this.insulated(n, b));
     nodes.sort((a, c) => Mathf.dst2(b.x, b.y, a.x, a.y) - Mathf.dst2(b.x, b.y, c.x, c.y));
-    if (nodes.length) this.link(nodes[0], b);
+    for (const n of nodes) {
+      if (n.power.graph && graphs.has(n.power.graph)) continue;
+      this.link(n, b);
+      if (n.power.graph) graphs.add(n.power.graph);
+    }
   },
 
   removeBuilding(b) {

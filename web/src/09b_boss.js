@@ -88,7 +88,7 @@ Game.runWave = function () {
   }
 };
 const _bossNewGame = Game.newGame;
-Game.newGame = function (seed) { BOSS_GROUPS = genBossGroups(seed); return _bossNewGame.call(this, seed); };
+Game.newGame = function (seed) { BOSS_GROUPS = []; return _bossNewGame.call(this, seed); }; // free play uses DefaultWaves only (custom games have no generated guardians)
 
 // --- guardian health bar + boss music
 const BossHud = {

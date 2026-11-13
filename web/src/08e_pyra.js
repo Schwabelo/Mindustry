@@ -285,5 +285,6 @@ Object.assign(DESCRIPTIONS, {
   'swarmer': 'Fires homing missile swarms at air and ground. Accepts blast compound and pyratite.',
 });
 
-FLOOR.moss.spores = 0.15; FLOOR['shallow-water'].spores = 0.15; FLOOR['sand-water'].spores = 0.15; FLOOR['darksand-water'].spores = 0.15;
+// Attribute.spores (Blocks.java): moss 0.15, spore moss 0.3, tainted water 0.15, deep tainted water 0.15, darksand tainted water 0.1
+FLOOR.moss.spores = 0.15; FLOOR['spore-moss'].spores = 0.3; FLOOR['tainted-water'].spores = 0.15; FLOOR['deep-tainted-water'].spores = 0.15; FLOOR['darksand-tainted-water'].spores = 0.1;
 BLOCKS.battery.baseExplosiveness = 1; BLOCKS['battery-large'].baseExplosiveness = 5;

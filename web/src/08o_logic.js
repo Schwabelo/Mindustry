@@ -394,7 +394,8 @@ function controlBuilding(p, b, type, v) {
   switch (type) {
     case 'enabled':
       if (b instanceof SwitchBlock) { b.on = lnum(v[0]) !== 0; return; }
-      if (lnum(v[0]) === 0) b.disabledUntil = Time.time + 6 * 60; else b.disabledUntil = 0;
+      // LogicBlock: stays disabled until enabled again, unlinked, or the processor is gone
+      if (lnum(v[0]) === 0) { b.disabledUntil = Infinity; b.disabledBy = p; } else { b.disabledUntil = 0; b.disabledBy = null; }
       return;
     case 'shoot':
       b.logicCtrlUntil = Time.time + 60 * 2;
@@ -513,13 +514,15 @@ function unitControl(prog, type, args) {
     prog.set(args[4], World.inside(x, y) ? { name: World.floorAt(x, y).name } : null);
     return;
   }
-  if (type === 'idle') { if (u && u.controller instanceof LogicAI) u.controller.until = 0; return; }
+  // LExecutor: unbind hands the unit back to its normal AI; idle keeps it logic-controlled, doing nothing
+  if (type === 'unbind') { if (u && u.controller instanceof LogicAI) u.controller.until = 0; return; }
   const c = ctrl(prog);
   if (!c) return;
   switch (type) {
     case 'move': c.move = { x: n(0) * TS, y: n(1) * TS, r: 0 }; break;
     case 'pathfind': c.move = { x: n(0) * TS, y: n(1) * TS, r: 0 }; break;
     case 'approach': c.move = { x: n(0) * TS, y: n(1) * TS, r: n(2) * TS }; break;
+    case 'idle': c.move = null; c.aim = null; break;
     case 'stop': c.move = null; c.aim = null; u.mineTile = null; u.moveAt(0, 0); break;
     case 'boost': c.boost = n(0) !== 0; break;
     case 'target': c.aim = { x: n(0) * TS, y: n(1) * TS, shoot: n(2) !== 0 }; break;

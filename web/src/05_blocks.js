@@ -300,7 +300,7 @@ class Router extends Building {
     if (this.lastItem) {
       this.time += 1 / this.block.speed * Time.delta;
       const target = this.getTarget(this.lastItem, this.lastInput, false);
-      if (target && this.time >= 1) {
+      if (target && (this.time >= 1 || !(target instanceof Router || INSTANT.has(target.block.cls)))) {
         this.getTarget(this.lastItem, this.lastInput, true);
         target.handleItem(this, this.lastItem);
         this.removeItem(this.lastItem);
@@ -422,21 +422,18 @@ class ItemBridge extends Building {
   update() {
     if (this.link && !this.linkValid(this.link)) { this.link.incoming && this.link.incoming.delete(this); this.link = null; }
     if (this.linkValid(this.link)) {
-      if (this.total > 0 && this.buffer.length < this.block.bufferCapacity && this.timer('buf', 3)) {
+      if (this.total > 0 && this.buffer.length < this.block.bufferCapacity) {
         const it = this.firstItem();
         this.removeItem(it);
         this.buffer.push({ item: it, time: Time.time });
       }
-      if (this.buffer.length && Time.time >= this.buffer[0].time + this.block.speed * 0.35) {
+      const ready = this.buffer.length && Time.time >= this.buffer[0].time + this.block.speed;
+      if (this.timer('accept', 4) && ready) {
         const it = this.buffer[0].item;
         if (this.link.acceptItem(this, it)) { this.link.handleItem(this, it); this.buffer.shift(); }
       }
       this.transportTime += Time.delta;
     } else {
-      if (this.buffer.length) { // flush buffer back into inventory
-        for (const e of this.buffer) this.addItem(e.item);
-        this.buffer = [];
-      }
       if (this.timer('dump', 4)) this.dump();
     }
   }
@@ -460,34 +457,61 @@ class ItemBridge extends Building {
   }
 }
 
+const NOT_UNLOADABLE = new Set(['Conveyor', 'Junction', 'Router', 'Sorter', 'OverflowGate', 'ItemBridge', 'Unloader']);
+function canUnloadFrom(b) { return !!b.items && !NOT_UNLOADABLE.has(b.block.cls) && b.block.unloadable !== false; }
+function maxAccepted(b) { return b instanceof Core ? b.storageCapacity() : b.linkedCore && !b.linkedCore.dead ? b.linkedCore.storageCapacity() : b.block.itemCapacity; }
 class Unloader extends Building {
-  constructor(...a) { super(...a); this.sortItem = null; this.rot = 0; this.itemRot = 0; }
+  constructor(...a) { super(...a); this.sortItem = null; this.rotations = -1; this.unloadTimer = 0; this.lastUsed = new Map(); }
   configure(item) { this.sortItem = item; }
   acceptItem() { return false; }
   update() {
-    if (!this.timer('unload', this.block.speed)) return;
-    const sources = this.proximity.filter(b => b.block.storage && b.items);
-    const targets = this.proximity.filter(b => !b.block.storage);
-    if (!sources.length || !targets.length) return;
-    const tryItem = item => {
-      const from = sources.find(s => s.has(item));
-      if (!from) return false;
-      const n = targets.length;
-      for (let i = 0; i < n; i++) {
-        const to = targets[(i + this.rot) % n];
-        if (to.acceptItem(this, item)) {
-          from.removeItem(item); to.handleItem(this, item);
-          this.rot = (this.rot + i + 1) % n;
-          return true;
-        }
-      }
-      return false;
-    };
-    if (this.sortItem) { tryItem(this.sortItem); return; }
-    for (let k = 0; k < ITEMS.length; k++) {
-      const item = ITEMS[(k + this.itemRot) % ITEMS.length];
-      if (tryItem(item)) { this.itemRot = (this.itemRot + k + 1) % ITEMS.length; return; }
+    const speed = this.block.speed;
+    // possible blocks: anything that could take items (not storage) or give them
+    const pbs = [];
+    for (const o of this.proximity) {
+      if (o.team !== this.team || o instanceof ConstructBuild) continue;
+      const notStorage = !(o instanceof Core || o.block.storage);
+      if (notStorage || canUnloadFrom(o)) pbs.push({ b: o, notStorage, canLoad: false, canUnload: false, load: 0 });
     }
+    if ((this.unloadTimer += Time.delta) < speed || pbs.length < 2) return;
+    const possible = item => {
+      let prov = false, recv = false, distinct = false;
+      for (const pb of pbs) {
+        pb.canLoad = pb.notStorage && pb.b.acceptItem(this, item);
+        pb.canUnload = canUnloadFrom(pb.b) && pb.b.items[item.id] > 0;
+        distinct = distinct || (prov && pb.canLoad) || (recv && pb.canUnload);
+        prov = prov || pb.canUnload; recv = recv || pb.canLoad;
+      }
+      return distinct;
+    };
+    let item = null;
+    if (this.sortItem) { if (possible(this.sortItem)) item = this.sortItem; }
+    else for (let k = 0; k < ITEMS.length; k++) { const it = ITEMS[(this.rotations + k + 1 + ITEMS.length) % ITEMS.length]; if (possible(it)) { item = it; break; } }
+    if (!item) { this.unloadTimer = Math.min(this.unloadTimer, speed); return; }
+    this.rotations = item.id;
+    for (const pb of pbs) {
+      const max = maxAccepted(pb.b);
+      pb.load = max === 0 || !pb.b.items ? 0 : pb.b.items[item.id] / max;
+      this.lastUsed.set(pb.b, (this.lastUsed.get(pb.b) || 0) + 1);
+    }
+    const lu = pb => this.lastUsed.get(pb.b) || 0;
+    pbs.sort((x, y) => (+!x.notStorage - +!y.notStorage) || (+(x.canUnload && !x.canLoad) - +(y.canUnload && !y.canLoad))
+      || (+(x.canUnload || !x.canLoad) - +(y.canUnload || !y.canLoad)) || (x.load - y.load) || (lu(y) - lu(x)));
+    let any = false;
+    while (this.unloadTimer >= speed) {
+      const to = pbs.find(pb => pb.canLoad && pb.b.acceptItem(this, item));
+      let from = null;
+      for (let k = pbs.length - 1; k >= 0; k--) if (pbs[k].canUnload && pbs[k].b.items[item.id] > 0) { from = pbs[k]; break; }
+      if (!from || !to) break;
+      const fm = maxAccepted(from.b), tm = maxAccepted(to.b);
+      from.load = fm ? from.b.items[item.id] / fm : 0; to.load = tm ? to.b.items[item.id] / tm : 0;
+      if (from.load !== to.load || !from.canLoad) {
+        to.b.handleItem(this, item); from.b.removeItem(item);
+        this.lastUsed.set(to.b, 0); this.lastUsed.set(from.b, 0);
+        this.unloadTimer -= speed; any = true;
+      } else break;
+    }
+    if (!any) this.unloadTimer = Math.min(this.unloadTimer, speed);
   }
   draw() {
     Draw.rect('unloader', this.x, this.y);
@@ -508,8 +532,11 @@ class Drill extends Building {
       const it = World.drop(x, y);
       if (it && it.hardness <= this.block.tier) counts.set(it, (counts.get(it) || 0) + 1);
     });
+    // Drill.countOre: low-priority items (sand) lose to any ore, then most tiles, then highest id
     let best = null, bc = 0;
-    for (const [it, c] of counts) if (c > bc || (c === bc && best && it.id > best.id)) { best = it; bc = c; }
+    const rank = (it, c) => [it.lowPriority ? 0 : 1, c, it.id];
+    const better = (a, b) => { for (let k = 0; k < 3; k++) if (a[k] !== b[k]) return a[k] > b[k]; return false; };
+    for (const [it, c] of counts) if (!best || better(rank(it, c), rank(best, bc))) { best = it; bc = c; }
     this.dominantItem = best; this.dominantItems = bc;
   }
   getDrillTime(item) { return this.block.drillTime + 50 * item.hardness; }
@@ -520,19 +547,22 @@ class Drill extends Building {
     const delay = this.getDrillTime(this.dominantItem);
     const peff = this.efficiency;
     if (this.total < this.block.itemCapacity && this.dominantItems > 0 && peff > 0) {
-      this.warmup = Mathf.approach(this.warmup, peff, 0.015 * Time.delta);
-      // optional water boost: Mathf.lerp(1, liquidBoostIntensity = 1.6, optionalEfficiency)
+      // Drill.updateTile: speed = lerp(1, liquidBoostIntensity, optionalEfficiency) * efficiency; warmup climbs to speed and
+      // progress grows with speed * warmup, so the water boost (and partial power) count twice
       const use = this.block.liquidUse * Time.delta;
       this.boosted = this.liquid && this.liquid.type === Liquids.water && this.liquid.amount >= use;
       if (this.boosted) this.removeLiquid(use);
-      this.progress += Time.delta * this.dominantItems * this.warmup * (this.boosted ? (this.block.liquidBoost || 1.6) : 1);
+      const speed = (this.boosted ? (this.block.liquidBoost || 1.6) : 1) * peff;
+      this.warmup = Mathf.approach(this.warmup, speed, (this.block.warmupSpeed || 0.015) * Time.delta);
+      this.progress += Time.delta * this.dominantItems * speed * this.warmup;
       if (Math.random() < 0.02 * this.warmup * Time.delta) Fx.create('drillDust', this.x + Mathf.range(this.block.size * 3), this.y + Mathf.range(this.block.size * 3), 0, this.dominantItem.color);
     } else {
       this.warmup = Mathf.approach(this.warmup, 0, 0.015 * Time.delta);
       return;
     }
     if (this.progress >= delay && this.total < this.block.itemCapacity) {
-      this.offload(this.dominantItem);
+      const amount = Math.floor(this.progress / delay);
+      for (let k = 0; k < amount; k++) this.offload(this.dominantItem);
       this.progress %= delay;
       Fx.create('drillDust', this.x + Mathf.range(this.block.size * 2), this.y + Mathf.range(this.block.size * 2), 0, this.dominantItem.color);
     }
@@ -546,7 +576,8 @@ class Drill extends Building {
   }
   info() {
     if (!this.dominantItem) return ['No ore'];
-    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems * (this.boosted ? (this.block.liquidBoost || 1.6) : 1);
+    const lb = this.boosted ? (this.block.liquidBoost || 1.6) : 1;
+    const rate = 60 / this.getDrillTime(this.dominantItem) * this.dominantItems * lb * lb;
     return [`${this.dominantItem.name}: ${rate.toFixed(2)}/s${this.boosted ? ' (water boosted)' : ''}`];
   }
 }
@@ -570,7 +601,7 @@ class GenericCrafter extends Building {
   update() {
     const eff = this.shouldConsume() ? this.efficiency : 0;
     if (eff > 0) {
-      if (this.block.consumeLiquid) this.removeLiquid(this.block.consumeLiquid.amount * Time.delta * eff);
+      if (this.block.consumeLiquid) this.removeLiquid(this.block.consumeLiquid.amount * Time.delta * Math.min(eff, 1)); // attribute boosts don't raise liquid use
       this.progress += Time.delta * eff / this.block.craftTime;
       this.warmup = Mathf.approach(this.warmup, 1, 0.019 * Time.delta);
       if (this.block.flame && Math.random() < 0.05 * Time.delta) Fx.create('smokeSmall', this.x + Mathf.range(3), this.y + Mathf.range(3));
@@ -580,7 +611,8 @@ class GenericCrafter extends Building {
     this.totalProgress += this.warmup * Time.delta;
     if (this.progress >= 1) {
       for (const c of this.block.consumeItems) this.removeItem(c.item, c.amount);
-      this.addItem(this.block.outputItem.item, this.block.outputItem.amount);
+      const os = this.block.outputScale, amt = this.block.outputItem.amount;
+      this.addItem(this.block.outputItem.item, os ? Math.ceil(amt * (1 + Math.min(1, os * (this._heat ?? (this._heat = sumHeat(this)))))) : amt);
       Fx.create(this.block.craftEffect || 'pulverizeMedium', this.x, this.y, 0, this.block.outputItem.item.color);
       this.progress %= 1;
     }
@@ -635,6 +667,14 @@ class PowerBuilding extends Building {
   drawLasers() {}
 }
 
+// ConsumeItemExplode: explosive fuel (explosiveness >= 0.5) randomly damages the generator
+function itemExplodeDamage(b) {
+  if (!b.total) return;
+  for (const it of ITEMS) if (b.items[it.id] > 0 && it.explosiveness >= 0.5) {
+    if (Math.random() < Time.delta * 0.06 * Mathf.clamp(it.explosiveness - 0.5)) { b.damage(4); Fx.create('generatespark', b.x + Mathf.range(4), b.y + Mathf.range(4)); }
+    return;
+  }
+}
 class ConsumeGenerator extends PowerBuilding {
   constructor(...a) { super(...a); this.generateTime = 0; this.productionEfficiency = 0; this.curFlam = 0; }
   acceptItem(source, item) { return item.flammability >= 0.2 && this.total < this.block.itemCapacity; }
@@ -642,14 +682,15 @@ class ConsumeGenerator extends PowerBuilding {
     if (this.generateTime <= 0 && this.total > 0) {
       const it = ITEMS.find(i => this.items[i.id] > 0 && i.flammability >= 0.2);
       if (it) {
-        this.removeItem(it); this.curFlam = it.flammability; this.generateTime = 1;
+        this.removeItem(it); this.curFlam = it.flammability; this.generateTime = 1; this.durMul = (this.block.itemDurationMultipliers || {})[it.name] || 1;
         Fx.create('generatespark', this.x + Mathf.range(3), this.y + Mathf.range(3));
       }
     }
     if (this.generateTime > 0) {
       this.productionEfficiency = this.curFlam;
-      this.generateTime -= Time.delta / this.block.itemDuration;
+      this.generateTime -= Time.delta / (this.block.itemDuration * (this.durMul || 1));
     } else this.productionEfficiency = 0;
+    itemExplodeDamage(this);
     this.warmup = Mathf.approach(this.warmup, this.productionEfficiency > 0 ? 1 : 0, 0.05 * Time.delta);
   }
   get powerOut() { return this.block.powerProduction * this.productionEfficiency; }

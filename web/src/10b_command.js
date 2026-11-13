@@ -87,7 +87,7 @@ function unitStances(t) {
 const CMD_INFO = {
   move: ['command-rally', 'Move'], repair: ['mode-survival', 'Repair'], rebuild: ['hammer', 'Rebuild'], assist: ['players', 'Assist player'], mine: ['production', 'Mine'],
   stop: ['cancel', 'Cancel orders'], holdfire: ['none', 'Stance: hold fire'], pursuetarget: ['command-attack', 'Stance: pursue target'], patrol: ['refresh', 'Stance: patrol path'],
-  ram: ['line', 'Stance: ram (straight line, no pathfinding)'], boost: ['elevation', 'Boost'], holdposition: ['effect', 'Stance: hold position'], auto: ['units', 'Back to automatic (G attack/defend)'],
+  ram: ['line', 'Stance: ram (straight line, no pathfinding)'], boost: ['elevation', 'Boost'], holdposition: ['effect', 'Stance: hold position'],
 };
 
 // ---------------------------------------------------------------- CommandAI
@@ -96,7 +96,7 @@ class CommandAI {
     this.command = defaultCommand(u.type);
     this.stances = new Set();
     this.targetPos = null; this.attackTarget = null; this.queue = [];
-    this.target = null; this.retarget = 0; this.sub = null; this.subKind = null; this.home = [u.x, u.y];
+    this.target = null; this.retarget = 0; this.sub = null; this.subKind = null; this.home = u.x !== undefined ? [u.x, u.y] : null;
   }
   setCommand(u, c) {
     this.command = c; this.sub = null;
@@ -252,7 +252,6 @@ const Command = {
   },
   setCommand(c) {
     for (const u of this.selected) {
-      if (c === 'auto') { u.controller = makeController(u.type, u.team); continue; }
       if (!unitCommands(u.type).includes(c)) continue;
       commandAI(u).setCommand(u, c);
     }
@@ -345,3 +344,13 @@ Object.assign(FX, {
   commandMark: { life: 30, draw(e) { Lines.set(rgba(e.color || Pal.accent, e.fout), 1.5); Lines.square(e.x, e.y, 2 + e.fin * 6, 45); } },
   commandAttack: { life: 30, draw(e) { Lines.set(rgba(e.color || Pal.remove, e.fout), 1.5); Lines.circle(e.x, e.y, 4 + e.fin * 8); } },
 });
+
+// Every player-team unit (except the player's own) runs CommandAI with its type's default command, like Mindustry:
+// it holds position and fires at enemies in range until ordered elsewhere.
+{
+  const _mc = makeController;
+  makeController = function (type, team) {
+    if (team === 'sharded') return new CommandAI({ type });
+    return _mc(type, team);
+  };
+}

@@ -96,9 +96,7 @@ const Sectors = {
     if (core) {
       for (const it of ITEMS) core.items[it.id] = 0;
       core.total = 0;
-      const load = m.loadout.length ? m.loadout : [['copper', 300], ['lead', 100]];
-      for (const [n, a] of load) if (Items[n]) core.addItem(Items[n], Math.min(a, core.block.itemCapacity));
-      if (core.items[Items.copper.id] < 300) core.addItem(Items.copper, 300 - core.items[Items.copper.id]);
+      for (const [n, a] of m.loadout) if (Items[n]) core.addItem(Items[n], Math.min(a, core.block.itemCapacity));
     }
     this.fillEnemyCores();
     Power.dirty = true;

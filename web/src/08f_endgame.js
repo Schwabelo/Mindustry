@@ -49,13 +49,15 @@ Bullets.updateBullet = function (b) {
     if (w && w.team !== b.team && !w.dead && !b.hit.has(w)) {
       const blk = w.block;
       if (blk.chanceDeflect > 0 && Math.hypot(b.vx, b.vy) > 0.1 && Math.random() < blk.chanceDeflect / Math.max(t.damage, 1)) {
-        b.vx = -b.vx; b.vy = -b.vy; b.team = w.team; b.hit.add(w);
+        // Wall.collision: flip the axis the bullet came in on (by penetration), the bullet changes sides
+        if (Math.abs(w.x - b.x) > Math.abs(w.y - b.y)) b.vx = -b.vx; else b.vy = -b.vy;
+        b.team = w.team; b.hit.add(w);
         w.hitTime = 1;
         Fx.create('absorb', b.x, b.y, 0, Pal.accent);
         return _ub3.call(this, b);
       }
       if (blk.lightningChance > 0 && Math.random() < blk.lightningChance) {
-        Lightning.create(w.team, Pal.surgeAmmoBack, 20, b.x, b.y, Math.random() * 360, 17, { collidesAir: true });
+        Lightning.create(w.team, Pal.surgeAmmoBack, 20, w.x, w.y, Angles.angle(0, 0, b.vx, b.vy) + 180, 17, { collidesAir: true }); // from the wall, back at the shooter
         Audio2.play('shootArc', b.x, b.y, 0.4);
       }
     }

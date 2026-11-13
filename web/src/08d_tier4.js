@@ -2,7 +2,7 @@
 // Stats from content/Blocks.java, Items.java, Liquids.java, StatusEffects.java.
 
 defItem('plastanium', 'cbd97f', { cost: 1.3, flammability: 0.1, explosiveness: 0.2 });
-defLiquid('oil', '313131', { heatCapacity: 0.7, coolant: false, flammability: 1.2 });
+defLiquid('oil', '313131', { heatCapacity: 0.7, coolant: false, flammability: 1.2, explosiveness: 1.2, viscosity: 0.75 });
 Pal.plastaniumBack = col('d8d97f');
 Pal.plastaniumFront = col('fffac6');
 Pal.thoriumPink = col('f9a3c7');
@@ -19,7 +19,8 @@ FX.tarFx = { life: 40, draw(e) { Fill.set(rgba(STATUS.tarred.color, e.fout)); Fi
 
 // ---------------------------------------------------------------- per-building time scale (overdrive)
 Building.prototype.applyBoost = function (boost, duration) {
-  if (this.block.noOverdrive) return;
+  if (this.block.noOverdrive || !canOverdrive(this)) return;
+  if (boost < (this.timeScale || 1) - 0.001) return;
   this.timeScale = Math.max(this.timeScale || 1, boost);
   this.timeScaleDuration = Math.max(this.timeScaleDuration || 0, duration);
 };
@@ -108,7 +109,7 @@ class ForceProjector extends Building {
     return dy <= r * 0.8660254 && 1.7320508 * dx + dy <= 1.7320508 * r;
   }
   absorb(bullet) {
-    this.buildup += bullet.type.damage + (bullet.type.splashDamage || 0) * 0.5;
+    this.buildup += bullet.type.damage * (bullet.type.shieldDamageMultiplier ?? 1); // BulletType.shieldDamage
     this.hit = 1;
     Fx.create('absorb', bullet.x, bullet.y, 0, Teams[this.team].color);
   }
@@ -150,7 +151,7 @@ class OverdriveProjector extends Building {
     this.charge += this.heat * Time.delta;
     if (this.charge >= b.reload) {
       this.charge = 0;
-      const boost = 1 + (b.speedBoost - 1) * this.efficiency;
+      const boost = (b.speedBoost + (this.phaseHeat || 0) * (b.phaseSpeedBoost || 0)) * this.efficiency; // OverdriveProjector.realBoost
       for (const o of Game.teamBuildings(this.team)) if (o !== this && !o.dead && circleRect(this.x, this.y, b.range, o)) o.applyBoost(boost, b.reload + 1);
     }
   }
@@ -256,8 +257,8 @@ defBlock('plastanium-compressor', 'GenericCrafter', {
   consumeItems: [{ item: Items.titanium, amount: 2 }], consumeLiquid: { liquid: 'oil', amount: 0.25 }, liquidInputs: ['oil'],
   craftEffect: 'smeltsmoke', fadeTop: true, category: 'crafting', flags: ['factory'],
 });
-defBlock('plastanium-wall', 'Wall', { requirements: req('plastanium', 5, 'metaglass', 2), health: 125 * wallHealthMultiplier, absorbLasers: true, category: 'defense', group: 'walls' });
-defBlock('plastanium-wall-large', 'Wall', { requirements: req('plastanium', 20, 'metaglass', 8), health: 125 * wallHealthMultiplier * 4, size: 2, absorbLasers: true, category: 'defense', group: 'walls' });
+defBlock('plastanium-wall', 'Wall', { requirements: req('plastanium', 5, 'metaglass', 2), health: 125 * wallHealthMultiplier, absorbLasers: true, insulated: true, category: 'defense', group: 'walls' });
+defBlock('plastanium-wall-large', 'Wall', { requirements: req('plastanium', 20, 'metaglass', 8), health: 125 * wallHealthMultiplier * 4, size: 2, absorbLasers: true, insulated: true, category: 'defense', group: 'walls' });
 
 defBlock('mend-projector', 'MendProjector', {
   requirements: req('lead', 100, 'titanium', 25, 'silicon', 40, 'copper', 50), consumesPower: 1.5, size: 2, reload: 250, range: 85,

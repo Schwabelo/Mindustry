@@ -12,7 +12,7 @@ defItem('copper', 'd99d73', { hardness: 1, cost: 0.5 });
 defItem('lead', '8c7fa9', { hardness: 1, cost: 0.7 });
 defItem('metaglass', 'ebeef5', { cost: 1.5 });
 defItem('graphite', 'b2c6d2', { cost: 1 });
-defItem('sand', 'f7cba4', {});
+defItem('sand', 'f7cba4', { lowPriority: true });
 defItem('coal', '272727', { hardness: 2, flammability: 1, explosiveness: 0.2 });
 defItem('titanium', '8da1e3', { hardness: 3, cost: 1 });
 defItem('scrap', '777777', { cost: 0.5 });
@@ -163,12 +163,13 @@ defUnit('nova', {
 
 // ---------------------------------------------------------------- blocks
 const BLOCKS = {};
+const ITEM_HEALTH_SCALING = { thorium: 0.2, plastanium: 0.1, 'phase-fabric': 0.25, 'surge-alloy': 0.25 }; // Items.java healthScaling
 const BLOCK_LIST = [];
 const CATEGORIES = ['turret', 'production', 'distribution', 'liquid', 'crafting', 'power', 'defense', 'units', 'effect', 'logic'];
 
 function defBlock(name, cls, props) {
   const b = Object.assign({
-    name, cls, size: 1, health: -1, scaledHealth: 40, requirements: [], category: 'distribution', buildCostMultiplier: 1,
+    name, cls, size: 1, health: -1, scaledHealth: -1, requirements: [], category: 'distribution', buildCostMultiplier: 1,
     solid: true, rotate: false, hasItems: false, itemCapacity: 10, hasPower: false, consumesPower: 0, outputsPower: false,
     powerProduction: 0, consumeItems: null, outputItem: null, buildable: true, group: null, description: '',
     canReplace: null, flags: [], region: name, iconLayers: null, targetable: true, underBullets: false, conductive: false,
@@ -178,7 +179,15 @@ function defBlock(name, cls, props) {
   if (b.liquidUse) { b.hasLiquids = true; b.liquidInputs = b.liquidInputs || ['water']; }
   // Block.init: liquidCapacity = round(10 * max(1, consumption per second))
   if (b.liquidCapacity < 0) b.liquidCapacity = Math.round(10 * Math.max(1, b.liquidUse * 60, b.coolant * 60));
-  if (b.health < 0) b.health = Math.round(b.size * b.size * b.scaledHealth);
+  // Block.init: default health scales with the build materials (Item.healthScaling), rounded to 5
+  if (b.health < 0) {
+    if (b.scaledHealth < 0) {
+      let scaling = 1;
+      for (const r of b.requirements) scaling += ITEM_HEALTH_SCALING[r.item.name] || 0;
+      b.scaledHealth = 40 * scaling;
+      b.health = Math.round(b.size * b.size * b.scaledHealth / 5) * 5;
+    } else b.health = Math.floor(b.size * b.size * b.scaledHealth);
+  }
   b.offset = ((b.size + 1) % 2) * TS / 2;
   b.sizeOffset = -Math.floor((b.size - 1) / 2);
   let bt = 0;
@@ -205,14 +214,14 @@ defBlock('junction', 'Junction', {
   requirements: req('copper', 3), speed: 26, capacity: 6, health: 30, buildCostMultiplier: 3, solid: false, group: transport,
   hasItems: true, underBullets: true,
 });
-defBlock('router', 'Router', { requirements: req('copper', 3), buildCostMultiplier: 4, group: transport, hasItems: true, itemCapacity: 1, speed: 8, solid: true, underBullets: true });
-defBlock('sorter', 'Sorter', { requirements: req('lead', 2, 'copper', 2), buildCostMultiplier: 3, group: transport, configurable: true, underBullets: true });
-defBlock('overflow-gate', 'OverflowGate', { requirements: req('lead', 2, 'copper', 4), buildCostMultiplier: 3, group: transport, underBullets: true });
+defBlock('router', 'Router', { requirements: req('copper', 3), buildCostMultiplier: 4, group: transport, hasItems: true, itemCapacity: 1, speed: 8, solid: false, underBullets: true });
+defBlock('sorter', 'Sorter', { requirements: req('lead', 2, 'copper', 2), buildCostMultiplier: 3, group: transport, configurable: true, underBullets: true, solid: false });
+defBlock('overflow-gate', 'OverflowGate', { requirements: req('lead', 2, 'copper', 4), buildCostMultiplier: 3, group: transport, underBullets: true, solid: false });
 defBlock('bridge-conveyor', 'ItemBridge', {
   requirements: req('lead', 6, 'copper', 6), range: 4, bufferCapacity: 14, speed: 74, group: transport, hasItems: true,
   itemCapacity: 10, configurable: true, underBullets: true,
 });
-defBlock('unloader', 'Unloader', { requirements: req('titanium', 25, 'silicon', 30), speed: 60 / 11, configurable: true, group: transport, category: 'units' });
+defBlock('unloader', 'Unloader', { requirements: req('titanium', 25, 'silicon', 30), speed: 60 / 11, health: 70, configurable: true, group: transport, category: 'distribution' });
 
 // --- production
 defBlock('mechanical-drill', 'Drill', {
@@ -250,7 +259,7 @@ defBlock('incinerator', 'Incinerator', {
 
 // --- power
 defBlock('combustion-generator', 'ConsumeGenerator', {
-  requirements: req('copper', 25, 'lead', 15), powerProduction: 1, itemDuration: 120, category: 'power', hasItems: true,
+  requirements: req('copper', 25, 'lead', 15), powerProduction: 1, itemDuration: 120, itemDurationMultipliers: { pyratite: 3 }, category: 'power', hasItems: true,
   hasPower: true, outputsPower: true, flags: ['generator'],
 });
 defBlock('power-node', 'PowerNode', {
@@ -258,7 +267,7 @@ defBlock('power-node', 'PowerNode', {
 });
 defBlock('battery', 'Battery', { requirements: req('copper', 5, 'lead', 20), capacity: 4000, category: 'power', hasPower: true, flags: ['battery'] });
 defBlock('solar-panel', 'SolarGenerator', {
-  requirements: req('lead', 10, 'silicon', 8), powerProduction: 0.12, category: 'power', hasPower: true, outputsPower: true, flags: ['generator'],
+  requirements: req('lead', 10, 'silicon', 8), powerProduction: 0.12, category: 'power', hasPower: true, outputsPower: true, flags: [],
 });
 
 // --- defense
@@ -339,7 +348,7 @@ defBlock('air-factory', 'UnitFactory', {
 });
 
 // --- storage / core
-defBlock('container', 'StorageBlock', { requirements: req('lead', 350, 'titanium', 100), size: 2, health: 400, itemCapacity: 300, category: 'effect', hasItems: true, storage: true });
+defBlock('container', 'StorageBlock', { requirements: req('titanium', 100), size: 2, scaledHealth: 55, itemCapacity: 300, category: 'effect', hasItems: true, storage: true });
 defBlock('core-shard', 'Core', {
   requirements: req('copper', 1000, 'lead', 800), health: 1100, itemCapacity: 4000, size: 3, buildCostMultiplier: 2,
   buildable: false, category: 'effect', hasItems: true, unitType: 'alpha', unitCapModifier: 8, storage: true, flags: ['core'],

@@ -7,11 +7,25 @@ class Door extends Wall {
     const half = this.block.size * TS / 2;
     return Game.units.some(u => !u.dead && !u.isFlying && Math.abs(u.x - this.x) < half + u.hitSize / 3 && Math.abs(u.y - this.y) < half + u.hitSize / 3);
   }
-  toggle() {
-    if (this.open && this.blocked()) { UI.toast('Something is in the way', 1); return; }
-    this.open = !this.open;
+  // Door.java: touching doors form a chain that opens / closes together; a door with something in it stays open
+  chain() {
+    const out = [this], seen = new Set(out);
+    for (let i = 0; i < out.length; i++) for (const o of out[i].proximity) if (o instanceof Door && !seen.has(o) && o.team === this.team) { seen.add(o); out.push(o); }
+    return out;
+  }
+  toggle(cooldown = 60) {
+    const chain = this.chain(), head = chain[0];
+    if ((head.lastToggle || -1e9) + cooldown > Time.time) return;
+    head.lastToggle = Time.time;
+    const open = !this.open;
+    let any = false;
+    for (const d of chain) {
+      if (d.open === open || (!open && d.blocked())) continue;
+      d.open = open; any = true;
+      Fx.create('doorToggle', d.x, d.y, 0, null, d.block.size);
+    }
+    if (!any && !open) { UI.toast('Something is in the way', 1); return; }
     Pathfinder.dirty = true;
-    Fx.create('doorToggle', this.x, this.y, 0, null, this.block.size);
     Audio2.play('click', this.x, this.y, 0.5);
   }
   draw() { Draw.rect(this.block.name + (this.open ? '-open' : ''), this.x, this.y); }

@@ -4,12 +4,12 @@
 const LIQUIDS = [];
 const Liquids = {};
 function defLiquid(name, color, props = {}) {
-  const l = Object.assign({ name, id: LIQUIDS.length, color: col(color), heatCapacity: 0.5, coolant: true, icon: 'liquid-' + name }, props);
+  const l = Object.assign({ name, id: LIQUIDS.length, color: col(color), heatCapacity: 0.5, temperature: 0.5, flammability: 0, explosiveness: 0, coolant: true, icon: 'liquid-' + name }, props);
   LIQUIDS.push(l); Liquids[name] = l;
   return l;
 }
 defLiquid('water', '596ab8', { heatCapacity: 0.4 });
-defLiquid('cryofluid', '6ecdec', { heatCapacity: 0.9 });
+defLiquid('cryofluid', '6ecdec', { heatCapacity: 0.9, temperature: 0.25 });
 
 // ---------------------------------------------------------------- shared building behaviour
 Object.assign(Building.prototype, {

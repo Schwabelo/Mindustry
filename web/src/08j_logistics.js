@@ -7,7 +7,7 @@ const _cvAccept = Conveyor.prototype.acceptItem;
 Conveyor.prototype.acceptItem = function (source, item) {
   if (!_cvAccept.call(this, source, item)) return false;
   if (!this.block.armored) return true;
-  return source instanceof Conveyor || source instanceof StackConveyor || source.relativeTo(this) === this.rotation;
+  return source instanceof Conveyor || source.relativeTo(this) === this.rotation; // ArmoredConveyor: plastanium (StackConveyor) isn't a Conveyor
 };
 const _cvBlends = Conveyor.prototype.blendsWith;
 Conveyor.prototype.blendsWith = function (other) {
@@ -66,8 +66,8 @@ class StackConveyor extends Building {
   }
   update() {
     const b = this.block;
-    // eff = efficiency + baseEfficiency (both 1 for this unpowered block), so stacks move at 2x speed
-    if (this.cooldown > 0) this.cooldown = Mathf.clamp(this.cooldown - b.speed * 2 * Time.delta, 0, b.recharge);
+    // StackConveyor: eff = efficiency + baseEfficiency (0) = 1 for this unpowered block
+    if (this.cooldown > 0) this.cooldown = Mathf.clamp(this.cooldown - b.speed * Time.delta, 0, b.recharge);
     if (!this.hasStack || this.cooldown > 0) return;
     if (!this.lastItem || !this.has(this.lastItem)) this.lastItem = this.firstItem();
     if (this.state === STACK_UNLOAD) {
@@ -165,11 +165,11 @@ class MassDriver extends Building {
   }
   receive(bolt) {
     for (let i = 0; i < ITEMS.length; i++) {
-      const n = Math.min(bolt.items[i], this.block.itemCapacity - this.total);
+      const n = Math.min(bolt.items[i], this.block.itemCapacity * 2 - this.total);
       if (n > 0) { this.items[i] += n; this.total += n; }
     }
     this.waiting = this.waiting.filter(s => s !== bolt.from);
-    this.state = 'idle';
+    this.state = 'idle'; this.reloadCounter = 1;
     Fx.create('flakExplosion', this.x, this.y);
   }
   draw() {
@@ -241,13 +241,13 @@ defBlock('phase-conveyor', 'ItemBridge', {
   consumesPower: 0.3, group: transport, hasItems: true, itemCapacity: 10, configurable: true, underBullets: true, category: 'distribution',
 });
 defBlock('inverted-sorter', 'Sorter', {
-  requirements: req('lead', 2, 'copper', 2), buildCostMultiplier: 3, group: transport, configurable: true, underBullets: true, invert: true, category: 'distribution',
+  requirements: req('lead', 2, 'copper', 2), buildCostMultiplier: 3, group: transport, configurable: true, underBullets: true, invert: true, category: 'distribution', solid: false,
 });
 defBlock('underflow-gate', 'OverflowGate', {
-  requirements: req('lead', 2, 'copper', 4), buildCostMultiplier: 3, group: transport, underBullets: true, invert: true, category: 'distribution',
+  requirements: req('lead', 2, 'copper', 4), buildCostMultiplier: 3, group: transport, underBullets: true, invert: true, category: 'distribution', solid: false,
 });
 defBlock('distributor', 'Router', {
-  requirements: req('lead', 4, 'copper', 4), size: 2, buildCostMultiplier: 3, group: transport, hasItems: true, itemCapacity: 1, speed: 8, category: 'distribution',
+  requirements: req('lead', 4, 'copper', 4), size: 2, buildCostMultiplier: 3, group: transport, hasItems: true, itemCapacity: 1, speed: 8, category: 'distribution', solid: false,
 });
 defBlock('mass-driver', 'MassDriver', {
   requirements: req('titanium', 125, 'silicon', 75, 'lead', 125, 'thorium', 50), size: 3, itemCapacity: 120, reload: 200, range: 440,
@@ -258,7 +258,7 @@ defBlock('mass-driver', 'MassDriver', {
 // distribution menu in Mindustry's order
 {
   const order = ['conveyor', 'titanium-conveyor', 'plastanium-conveyor', 'armored-conveyor', 'junction', 'bridge-conveyor', 'phase-conveyor',
-    'sorter', 'inverted-sorter', 'router', 'distributor', 'overflow-gate', 'underflow-gate', 'mass-driver'];
+    'sorter', 'inverted-sorter', 'router', 'distributor', 'overflow-gate', 'underflow-gate', 'mass-driver', 'unloader'];
   const cat = BLOCK_LIST.filter(b => b.category === 'distribution');
   const firstIdx = BLOCK_LIST.findIndex(b => b.category === 'distribution');
   const rest = BLOCK_LIST.filter(b => b.category !== 'distribution');

@@ -32,7 +32,6 @@ const WAVE_GROUPS = [
   { unit: 'corvus', begin: 145, unitAmount: 1, unitScaling: 1, spacing: 35, shieldScaling: 30, shields: 100 },
   { unit: 'horizon', begin: 90, unitAmount: 2, unitScaling: 3, spacing: 4, shields: 40, shieldScaling: 30 },
   { unit: 'toxopid', begin: 210, unitAmount: 1, unitScaling: 1, spacing: 35, shields: 1000, shieldScaling: 35 },
-  { unit: 'horizon', begin: 22, unitAmount: 1, unitScaling: 2, spacing: 4, max: 12 },                  // early bombers (Lite only)
 ];
 function groupSpawned(g, wave) {
   const begin = g.begin || 0, end = g.end === undefined ? Infinity : g.end, spacing = g.spacing || 1;
@@ -73,8 +72,7 @@ const Game = {
     this.stats = { built: 0, destroyed: 0, kills: 0 };
     const core = createBuilding(BLOCKS['core-shard'], 'sharded', World.coreTile.x, World.coreTile.y, 0);
     this.addBuilding(core);
-    core.addItem(Items.copper, 300);
-    core.addItem(Items.lead, 100);
+    core.addItem(Items.copper, 100); // Rules.loadout default
     Power.dirty = true;
     Pathfinder.init();
     this.player = null;
@@ -194,6 +192,7 @@ const Game = {
       for (const sp of World.spawns) if (Math.hypot(tx - sp.x, ty - sp.y) < SPAWN_SAFE_RADIUS) return false;
       const ex = World.build[i];
       if (ex) {
+        if (ex.team === 'derelict' && team !== 'derelict' && ex.block === block && ex.tx === x && ex.ty === y && !(ex instanceof ConstructBuild)) continue; // derelict repair
         if (ex.team !== team) return false;
         if (!this.canReplace(block, rot, ex, x, y)) return false;
       }
@@ -226,6 +225,18 @@ const Game = {
     return !!(block.group && eb.group === block.group);
   },
 
+  // Build.beginPlace: placing the same block on a derelict one repairs it instantly and for free
+  repairDerelict(ex, rot, team = 'sharded') {
+    this.removeBuilding(ex);
+    ex.team = team; ex.rotation = rot;
+    if (ex.power) { for (const o of [...ex.power.links]) Power.unlink(ex, o); }
+    this.addBuilding(ex);
+    this.refreshAround(ex);
+    Power.dirty = true; Pathfinder.dirty = true;
+    Fx.create('placeBlock', ex.x, ex.y, ex.block.size);
+    Audio2.play('place', ex.x, ex.y, 0.5);
+  },
+
   hasResources(block) {
     const core = this.playerCore();
     if (!core) return false;
@@ -235,9 +246,7 @@ const Game = {
   beginPlace(block, x, y, rot, team, config) {
     const ex = World.buildAt(x, y);
     if (ex) {
-      // replace: refund the old block in full, then remove it
-      const core = this.playerCore();
-      if (core && !(ex instanceof ConstructBuild)) for (const r of ex.block.requirements) core.addItem(r.item, Math.min(r.amount, core.block.itemCapacity - core.items[r.item.id]));
+      // replace: the old block is consumed without a refund (Build.beginPlace / ConstructBlock prevBuild)
       this.removeBuilding(ex);
     }
     const cb = new ConstructBuild(null, team, x, y, rot, block, false);
@@ -359,6 +368,7 @@ const Game = {
     for (let i = 0; i < bs.length; i++) {
       const b = bs[i];
       if (b.team === 'derelict') continue; // ruins do nothing
+      if (b.disabledBy && (b.disabledBy.dead || !b.disabledBy.isLinked(b))) { b.disabledUntil = 0; b.disabledBy = null; }
       if (!b.dead && b.disabledUntil > Time.time) { if (b.hitTime > 0) b.hitTime = Math.max(0, b.hitTime - Time.delta / 9); continue; } // disabled by logic
       if (!b.dead) {
         if (b.timeScaleDuration > 0) {

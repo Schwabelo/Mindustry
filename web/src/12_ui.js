@@ -50,8 +50,7 @@ const UI = {
     const controls = [
       ['WASD', 'move'], ['Mouse wheel', 'zoom'], ['Left click', 'build / shoot / mine ore / configure'],
       ['Left drag', 'build in a line'], ['Right click', 'remove (drag for an area) / cancel'], ['R', 'rotate block'],
-      ['Q / middle click', 'pick block under cursor'], ['1-9', 'select block in category'], ['G', 'units: attack / defend'],
-      ['Shift (hold) or C', 'command units: drag to select, right-click to move / attack'],
+      ['Q / middle click', 'pick block under cursor'], ['1-9', 'select block in category'], ['Shift (hold) or C', 'command units: drag to select, right-click to move / attack'],
       ['F (hold) / T', 'copy an area as a schematic / schematic library'],
       ['J', 'research (tech tree)'], ['N', 'call next wave now'], ['X', 'clear build queue'], ['Space / Esc', 'pause'],
     ];
@@ -300,7 +299,7 @@ const UI = {
       }
       const myUnits = Game.units.filter(u => u.team === 'sharded' && !u.isPlayer).length;
       const queue = p ? p.plans.length : 0;
-      $('status').innerHTML = `Units: ${myUnits} &middot; <span style="color:${Game.command === 'attack' ? '#e55454' : '#84f491'}">${Game.command === 'attack' ? 'Attack' : 'Defend'}</span> (G)` +
+      $('status').innerHTML = `Units: ${myUnits} &middot; <span style="color:#999">Shift / C to command</span>` +
         (queue ? `<br>Build queue: ${queue}` : '') + (!p ? '<br><span style="color:#e55454">Respawning...</span>' : '');
       this.refreshBlockButtons();
       // refresh costs (have/need colors) for whatever is shown: hovered button first, else the selection
@@ -328,7 +327,7 @@ const UI = {
       ['wave', () => Game.waveCountdown < 60 * 20 && Game.wave === 1, 'The first wave is coming from the red drop zone. Check the minimap (top right).'],
       ['coal', () => core.items[Items.coal.id] > 0 || has('GenericCrafter'), 'Graphite presses turn coal into graphite: better Duo ammo, and needed for Pneumatic Drills and Hail turrets.'],
       ['power', () => core.items[Items.graphite.id] > 20 && !has('ConsumeGenerator'), 'Combustion generators burn coal for power. Power nodes link them to silicon smelters, menders and lancers.'],
-      ['units', () => has('UnitFactory'), 'Ground factory units defend the core. Press G to send them to attack the enemy drop zone.'],
+      ['units', () => has('UnitFactory'), 'Units hold position and shoot what comes in range. Hold Shift (or press C), drag to select them, right-click to move or attack.'],
     ];
     for (const [id, cond, text] of hints) {
       if (this.hintsSeen.has(id) || !cond()) continue;

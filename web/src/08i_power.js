@@ -38,6 +38,7 @@ class FuelGenerator extends PowerBuilding {
       this.generateTime -= Time.delta / this.duration;
     } else this.productionEfficiency = 0;
     this.warmup = Mathf.approach(this.warmup, this.productionEfficiency > 0 ? 1 : 0, 0.05 * Time.delta);
+    if (b.fuel === 'flammable') itemExplodeDamage(this);
     this.totalTime += this.warmup * Time.delta;
   }
   get powerOut() { return this.block.powerProduction * this.productionEfficiency; }
@@ -74,12 +75,12 @@ class FuelGenerator extends PowerBuilding {
 defBlock('steam-generator', 'FuelGenerator', {
   requirements: req('copper', 35, 'graphite', 25, 'lead', 40, 'silicon', 30), powerProduction: 5.5, itemDuration: 90, size: 2,
   fuel: 'flammable', durationMultipliers: { pyratite: 3 }, consumeLiquid: { liquid: 'water', amount: 0.1 }, hasLiquids: true,
-  liquidInputs: ['water'], liquidCapacity: 10, hasItems: true, hasPower: true, outputsPower: true, category: 'power', flags: ['generator'],
+  liquidInputs: ['water'], liquidCapacity: 60, hasItems: true, hasPower: true, outputsPower: true, category: 'power', flags: ['generator'],
   turbines: true, drawLiquid: true, iconLayers: ['steam-generator', 'steam-generator-turbine', 'steam-generator-cap'],
 });
 defBlock('differential-generator', 'FuelGenerator', {
   requirements: req('copper', 70, 'titanium', 50, 'lead', 100, 'silicon', 65, 'metaglass', 50), powerProduction: 18, itemDuration: 220, size: 3,
-  fuel: 'pyratite', consumeLiquid: { liquid: 'cryofluid', amount: 0.1 }, hasLiquids: true, liquidInputs: ['cryofluid'], liquidCapacity: 10,
+  fuel: 'pyratite', consumeLiquid: { liquid: 'cryofluid', amount: 0.1 }, hasLiquids: true, liquidInputs: ['cryofluid'], liquidCapacity: 60,
   hasItems: true, hasPower: true, outputsPower: true, category: 'power', flags: ['generator'], drawLiquid: true, plainTop: true,
   iconLayers: ['differential-generator', 'differential-generator-top'],
 });
@@ -90,7 +91,7 @@ defBlock('rtg-generator', 'FuelGenerator', {
 });
 defBlock('solar-panel-large', 'SolarGenerator', {
   requirements: req('lead', 60, 'silicon', 70, 'phase-fabric', 15), size: 3, powerProduction: 1.6, category: 'power', hasPower: true,
-  outputsPower: true, flags: ['generator'],
+  outputsPower: true, flags: [],
 });
 
 // ================================================================ thorium reactor (NuclearReactor)
@@ -248,8 +249,10 @@ class Diode extends Building {
     if (!bg || !fg || bg === fg || bg.capacity <= 0 || fg.capacity <= 0) return;
     const bf = bg.stored / bg.capacity, ff = fg.stored / fg.capacity;
     if (bf <= ff) return;
-    let amount = bg.stored * (bf - ff) / 2;
-    amount = Mathf.clamp(amount, 0, fg.capacity * (1 - ff));
+    // PowerDiode: move half the difference to the combined fill level
+    const target = (fg.stored + bg.stored) / (fg.capacity + bg.capacity);
+    let amount = (target * fg.capacity - fg.stored) / 2;
+    amount = Mathf.clamp(amount, 0, Math.min(bg.stored, fg.capacity - fg.stored));
     if (amount <= 0) return;
     for (const bt of bg.batteries) bt.power.stored -= amount * (bt.power.stored / bg.stored);
     const free = fg.capacity - fg.stored;

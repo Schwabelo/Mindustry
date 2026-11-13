@@ -32,7 +32,7 @@ Object.defineProperty(GenericCrafter.prototype, 'efficiency', {
     return base * (1 + Math.min(1, hb * this._heat));
   },
 });
-BLOCKS['silicon-crucible'].heatBoost = 0.15;
+BLOCKS['silicon-crucible'].heatBoost = 0.15; BLOCKS['silicon-crucible'].outputScale = 0.15;
 
 // ---------------------------------------------------------------- illuminator
 const LIGHT_COLORS = ['ffffff', 'ffd37f', 'ff9c5a', 'e55454', 'f4ba6e', '84f491', '6ecdec', 'a9d8ff', 'bf92f9'];
@@ -60,10 +60,9 @@ class Illuminator extends Building {
 class PayloadConveyor extends Building {
   constructor(...a) { super(...a); this.payload = null; this.t = 0; this.inDir = Mathf.mod(this.rotation + 2, 4); this.rr = 0; }
   acceptPayload(source, type) {
-    if (this.payload || !type || source.team !== this.team) return false;
-    const dir = source.relativeTo(this); // direction from source into us
-    if (this.block.router) return dir >= 0;
-    return dir === this.rotation; // plain conveyors only take from behind
+    // PayloadConveyor.acceptPayload: any side, payloads up to 3x3 tiles (unit hitSize / 8 <= payloadLimit 3)
+    if (this.payload || !type || source.team !== this.team || type.hitSize / TS > 3) return false;
+    return source.relativeTo(this) >= 0;
   }
   handlePayload(source, type) {
     this.payload = type; this.t = 0;

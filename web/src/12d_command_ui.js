@@ -31,10 +31,10 @@ UI.commandPanel = function () {
     cmds.map(c => btn(c, all(u => u.controller instanceof CommandAI && u.controller.command === c), 'c')).join('') +
     `<div style="width:8px"></div>` +
     stances.map(s => btn(s, s !== 'stop' && all(u => u.controller instanceof CommandAI && u.controller.stances.has(s)), 's')).join('') +
-    `<div style="width:8px"></div>` + btn('auto', all(u => !(u.controller instanceof CommandAI)), 'a') + `</div>`;
+    `</div>`;
   for (const b of el.querySelectorAll('.bbtn')) b.onclick = () => {
     const k = b.dataset.k, f = b.dataset.f;
-    if (f === 'c') Command.setCommand(k); else if (f === 's') Command.setStance(k); else Command.setCommand('auto');
+    if (f === 'c') Command.setCommand(k); else if (f === 's') Command.setStance(k);
     Audio2.play('click', undefined, undefined, 0.3);
   };
 };

@@ -62,7 +62,7 @@ class Separator extends Building {
 }
 
 // ---------------------------------------------------------------- water extractor (SolidPump)
-const WATER_ATTR = { char: -0.25, basalt: -0.25, hotrock: -0.5, magmarock: -0.75, mud: 1 };
+const WATER_ATTR = { char: -0.25, basalt: -0.25, hotrock: -0.5, magmarock: -0.75, mud: 1, grass: 0.1, salt: -0.3, snow: 0.2, ice: 0.4, 'ice-snow': 0.3 }; // Attribute.water
 class SolidPump extends Building {
   constructor(...a) {
     super(...a);
@@ -110,7 +110,7 @@ Object.assign(BuildClasses, { Melter, Separator, SolidPump });
 defBlock('multi-press', 'GenericCrafter', {
   requirements: req('titanium', 100, 'silicon', 25, 'lead', 100, 'graphite', 50), outputItem: { item: Items.graphite, amount: 2 }, craftTime: 30,
   itemCapacity: 20, size: 3, hasItems: true, hasLiquids: true, hasPower: true, consumesPower: 1.8, consumeItems: [{ item: Items.coal, amount: 3 }],
-  consumeLiquid: { liquid: 'water', amount: 0.1 }, liquidInputs: ['water'], liquidCapacity: 10, craftEffect: 'pulverizeMedium',
+  consumeLiquid: { liquid: 'water', amount: 0.1 }, liquidInputs: ['water'], liquidCapacity: 60, craftEffect: 'pulverizeMedium',
   category: 'crafting', flags: ['factory'],
 });
 defBlock('silicon-crucible', 'GenericCrafter', {
@@ -127,23 +127,23 @@ defBlock('melter', 'Melter', {
 defBlock('separator', 'Separator', {
   requirements: req('copper', 30, 'titanium', 25), results: [{ item: Items.copper, amount: 5 }, { item: Items.lead, amount: 3 },
     { item: Items.graphite, amount: 2 }, { item: Items.titanium, amount: 2 }], hasPower: true, craftTime: 35, size: 2, consumesPower: 1.1,
-  slagUse: 4 / 60, hasLiquids: true, hasItems: true, liquidCapacity: 10, itemCapacity: 10, consumeItems: [], category: 'crafting', flags: ['factory'],
+  slagUse: 4 / 60, hasLiquids: true, hasItems: true, liquidCapacity: 40, itemCapacity: 10, consumeItems: [], category: 'crafting', flags: ['factory'],
   iconLayers: ['separator-bottom', 'separator-spinner', 'separator'],
 });
 defBlock('disassembler', 'Separator', {
   requirements: req('plastanium', 40, 'titanium', 100, 'silicon', 150, 'thorium', 80), results: [{ item: Items.sand, amount: 2 },
     { item: Items.graphite, amount: 1 }, { item: Items.titanium, amount: 1 }, { item: Items.thorium, amount: 1 }], hasPower: true, craftTime: 15,
   size: 3, itemCapacity: 20, consumesPower: 4, consumeItems: [{ item: Items.scrap, amount: 1 }], slagUse: 0.12, hasLiquids: true, hasItems: true,
-  liquidCapacity: 10, category: 'crafting', flags: ['factory'], iconLayers: ['disassembler-bottom', 'disassembler-spinner', 'disassembler'],
+  liquidCapacity: 72, category: 'crafting', flags: ['factory'], iconLayers: ['disassembler-bottom', 'disassembler-spinner', 'disassembler'],
 });
 defBlock('coal-centrifuge', 'GenericCrafter', {
   requirements: req('titanium', 20, 'graphite', 40, 'lead', 30), outputItem: { item: Items.coal, amount: 1 }, craftTime: 30, size: 2,
   hasPower: true, hasItems: true, hasLiquids: true, consumesPower: 0.7, consumeItems: [], consumeLiquid: { liquid: 'oil', amount: 0.1 },
-  liquidInputs: ['oil'], liquidCapacity: 10, craftEffect: 'smeltsmoke', category: 'crafting', flags: ['factory'],
+  liquidInputs: ['oil'], liquidCapacity: 60, craftEffect: 'smeltsmoke', category: 'crafting', flags: ['factory'],
 });
 defBlock('blast-drill', 'Drill', {
   requirements: req('copper', 65, 'silicon', 60, 'titanium', 50, 'thorium', 75), drillTime: 280, size: 4, drawRim: true, hasPower: true,
-  tier: 5, itemCapacity: 20, liquidBoost: 1.8, consumesPower: 3, liquidUse: 0.1, category: 'production', hasItems: true,
+  tier: 5, itemCapacity: 20, liquidBoost: 1.8, warmupSpeed: 0.01, consumesPower: 3, liquidUse: 0.1, category: 'production', hasItems: true,
   iconLayers: ['blast-drill', 'blast-drill-rotator', 'blast-drill-top'],
 });
 defBlock('water-extractor', 'SolidPump', {
