@@ -65,7 +65,7 @@ const Game = {
     this.lastCoreWarn = -9999;
     this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [], derelict: [] };
     this.rebuildQueue = [];
-    Fires.map.clear();
+    Fires.map.clear(); Puddles.map.clear(); Fireballs.list = [];
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(seed);
     this.wave = 1;
@@ -407,6 +407,7 @@ const Game = {
     Decals.update();
     Fires.update();
     Fireballs.update();
+    Puddles.update();
     Pathfinder.update();
     SaveIO.update();
 

@@ -111,10 +111,6 @@ Bullets.hit = function (b, x, y) {
 const _ub2 = Bullets.updateBullet;
 Bullets.updateBullet = function (b) {
   const t = b.type;
-  if (t.type === 'liquid' && t.liquid && t.liquid.coolant) {
-    const tx = Math.round(b.x / TS), ty = Math.round(b.y / TS);
-    if (World.inside(tx, ty) && Fires.map.has(ty * World.w + tx)) { Fires.extinguish(tx, ty); Fx.create('smokeSmall', b.x, b.y); }
-  }
   if (t.status === 'burning' && t.type === 'flame' && Math.random() < 0.02) Fires.createWorld(b.x, b.y);
   _ub2.call(this, b);
 };

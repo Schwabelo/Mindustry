@@ -25,6 +25,7 @@ function renderFrame() {
   World.drawFloors();
   Render.base();
   Decals.draw();
+  Puddles.draw();
 
   // boulders + spawn zone
   const tx1 = Math.max(0, Math.floor(v.x1 / TS)), tx2 = Math.min(World.w - 1, Math.ceil(v.x2 / TS));
