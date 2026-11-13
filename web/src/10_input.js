@@ -464,7 +464,7 @@ function builderUpdate(p) {
         if (pl.stuck > 30 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
         return pl;
       }
-      const config = pl.block.cls === 'ItemBridge' ? null : pl.config;
+      const config = pl.block.cls === 'ItemBridge' && !(pl.config && pl.config.schem) ? null : pl.config;
       ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, 'sharded', config);
     }
     const ok = ex.construct(p, core, bs);

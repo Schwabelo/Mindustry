@@ -43,6 +43,8 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
 - Unit command mode: select units, move/attack orders with pathfinding and formations, commands (move, repair,
   rebuild, assist, mine), stances (hold fire, pursue, patrol, ram, boost, hold position), factory rally points
+- Schematics: copy areas with their settings (sorter items, bridge / node / processor links and code, factory
+  plans...), rotate / flip, save a library, and import / export Mindustry schematic codes
 - Weather: rain (wet status), snow, sandstorm and spore storm (wind, spore-slowed air units), fog; each map gets
   rain, fog and the storm of its main biome; weather changes solar, water extractor and cultivator output
 - Guardian (boss) waves: per-map boss groups from `Waves.generate` (tier 4 guardians from about wave 40, final
@@ -69,6 +71,8 @@ or the Erekir planet.
 | 1-9 | select block in the current category |
 | G | toggle units attack / defend |
 | Shift (hold) or C | command mode: drag to select units, right-click to move / attack, Ctrl+right-click to queue |
+| F (hold) | copy an area as a schematic; then click to place, R rotate, Z / X flip, right-click to drop |
+| T | schematic library: save, use, copy and import codes (Mindustry's base64 format) |
 | N | call the next wave now |
 | X | clear build queue |
 | Space / Esc | pause |

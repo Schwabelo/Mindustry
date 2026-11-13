@@ -52,6 +52,7 @@ const UI = {
       ['Left drag', 'build in a line'], ['Right click', 'remove (drag for an area) / cancel'], ['R', 'rotate block'],
       ['Q / middle click', 'pick block under cursor'], ['1-9', 'select block in category'], ['G', 'units: attack / defend'],
       ['Shift (hold) or C', 'command units: drag to select, right-click to move / attack'],
+      ['F (hold) / T', 'copy an area as a schematic / schematic library'],
       ['N', 'call next wave now'], ['X', 'clear build queue'], ['Space / Esc', 'pause'],
     ];
     $('controls').innerHTML = controls.map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join('');
