@@ -167,7 +167,7 @@ const Game = {
       // builder units (polys) work through; the player isn't assigned anything
       if (b.block.buildable && !(b instanceof ConstructBuild) && b.block.cls !== 'Core') {
         this.rebuildQueue = this.rebuildQueue.filter(g => !(g.x === b.tx && g.y === b.ty));
-        this.rebuildQueue.unshift({ block: b.block, x: b.tx, y: b.ty, rotation: b.rotation });
+        this.rebuildQueue.unshift({ block: b.block, x: b.tx, y: b.ty, rotation: b.rotation, config: typeof blockConfig === 'function' ? blockConfig(b) : null }); // BlockPlan keeps the config
       }
     }
     if (b.block.cls === 'Core') this.checkGameOver();

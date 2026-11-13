@@ -150,56 +150,63 @@ Object.assign(FX, {
 // ---------------------------------------------------------------- builder (poly) and repair (mega) AI
 // BuilderAI (rebuild command): help any unit that is building (if it can get there in time), otherwise take the team's
 // rebuild queue in order (every 2 s, rotating the queue); with nothing to do, back off to the core when enemies are near
+// BuilderAI (rebuild command, poly's default): rebuilds destroyed blocks from the team's rebuild queue (with their
+// settings), helps any teammate who is building, and when idle with an enemy within 370 for 2 seconds retreats to within
+// 110 of the closest core. Doesn't shoot while building.
 class BuilderAI {
-  constructor() { this.retarget = 0; this.target = null; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; }
+  constructor() { this.retarget = 0; this.target = null; this.enemy = null; this.enemyTimer = 0; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; this.retreatTimer = 0; }
   update(u) {
-    if (!u.plans.length) {
+    const planOf = o => o.activePlan || (o.isPlayer ? Input.activePlan : null);
+    if (this.following && (this.following.dead || !planOf(this.following))) { this.following = null; u.plans = []; }
+    if (this.following) {
+      // mimic the followed builder's current plan
+      this.retreatTimer = 0;
+      u.plans = [planOf(this.following)];
+    } else if (!u.plans.length) {
+      if ((this.enemyTimer -= Time.delta) <= 0) { this.enemyTimer = 40; this.enemy = Targeting.closestTarget(u.team, u.x, u.y, 370, true, true); }
+      if (this.enemy && this.enemy.dead) this.enemy = null;
+      if ((this.retreatTimer += Time.delta) >= 120 && this.enemy) {
+        let core = null, cd = Infinity;
+        for (const b of Game.byTeam[u.team] || []) if (b.block.cls === 'Core' && !b.dead) { const d = Mathf.dst2(b.x, b.y, u.x, u.y); if (d < cd) { cd = d; core = b; } }
+        if (core && Math.hypot(core.x - u.x, core.y - u.y) > 110) u.moveTo(core.x, core.y, 110);
+        else u.moveAt(0, 0);
+      } else u.moveAt(0, 0);
+      // follow anyone building (Java's reach check is always true, since min(dst - range, 0) <= 0)
       if ((this.assistTimer -= Time.delta) <= 0) {
-        this.assistTimer = 60;
-        this.following = null;
+        this.assistTimer = 20;
         for (const o of Game.units) {
-          if (o === u || o.team !== u.team || o.dead || !(o.activePlan || (o.isPlayer && Input.activePlan))) continue;
-          const pl = o.activePlan || Input.activePlan;
-          const cb = World.buildAt(pl.x, pl.y);
-          if (!(cb instanceof ConstructBuild)) continue;
-          const dist = Math.max(Math.hypot(cb.x - u.x, cb.y - u.y) - BUILD_RANGE, 0);
-          if (dist / Math.max(u.speed(), 0.01) < cb.current.buildTime * 0.9) { this.following = o; break; }
+          if (o === u || o.team !== u.team || o.dead || !o.type.buildSpeed) continue;
+          const pl = planOf(o);
+          if (pl && World.buildAt(pl.x, pl.y) instanceof ConstructBuild) { this.following = o; break; }
         }
       }
-      const f = this.following && !this.following.dead ? this.following : null;
-      const fp = f && (f.activePlan || (f.isPlayer ? Input.activePlan : null));
-      if (fp) u.plans.push(fp);
-      else if (Game.rebuildQueue.length && (this.rebuildTimer -= Time.delta) <= 0) {
+      if (!this.following && Game.rebuildQueue.length && (this.rebuildTimer -= Time.delta) <= 0) {
         this.rebuildTimer = 120;
         const q = Game.rebuildQueue, g = q[0];
         const there = World.buildAt(g.x, g.y);
         if (there && there.block === g.block && there.tx === g.x && there.ty === g.y) q.shift();
         else {
-          q.push(q.shift());
-          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
+          q.push(q.shift()); // shift to the tail so the next builder takes something else
+          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false, config: g.config ? { schem: g.config } : undefined });
         }
       }
     }
     u.activePlan = null;
     if (u.plans.length) {
+      this.retreatTimer = 0;
       const pl = u.plans[0];
       const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
-      u.moveTo(px, py, BUILD_RANGE * 0.4);
+      u.moveTo(px, py, Math.min(BUILD_RANGE - u.type.hitSize * 2, 1500));
       u.activePlan = builderUpdate(u);
-      // an assisted plan finished or got dropped
       if (this.following && !u.activePlan) u.plans = [];
       u.lookAt(px, py);
       for (const m of u.mounts) m.shoot = false;
       return;
     }
-    // idle: shoot what comes in range; flee toward the core from enemies within 370
-    this.retarget -= Time.delta;
-    if (this.retarget <= 0) { this.retarget = 20; this.target = Targeting.closestTarget(u.team, u.x, u.y, 370, u.type.targetAir, u.type.targetGround); }
-    if (this.target && this.target.dead) this.target = null;
-    const core = Game.playerCore();
-    if (this.target && core && Math.hypot(core.x - u.x, core.y - u.y) > 370 * 0.5) u.moveTo(core.x, core.y, 370 * 0.5);
-    else u.moveAt(0, 0);
-    aimAndShoot(u, this.target && Math.hypot(this.target.x - u.x, this.target.y - u.y) <= u.range + 8 ? this.target : null);
+    // idle: shoot whatever comes within weapon range
+    if ((this.retarget -= Time.delta) <= 0) { this.retarget = this.target ? 90 : 40; this.target = Targeting.closestTarget(u.team, u.x, u.y, u.range, u.type.targetAir, u.type.targetGround); }
+    if (this.target && (this.target.dead || Math.hypot(this.target.x - u.x, this.target.y - u.y) > u.range + 8)) this.target = null;
+    aimAndShoot(u, this.target);
   }
 }
 
