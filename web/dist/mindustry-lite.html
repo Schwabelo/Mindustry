@@ -12,7 +12,7 @@
   modelled on the original Java code.
 -->
 <style>
-@font-face { font-family: "MindustryFont"; src: url("data:font/woff2;base64,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") format("woff2"); }
+@font-face { font-family: "MindustryFont"; src: url("data:font/woff2;base64,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") format("woff2"); }
 :root {
   --accent: #ffd37f;
   --accent-back: #d4816b;
@@ -2498,13 +2498,13 @@ class MendProjector extends Building {
       this.useTime += Time.delta;
       if (this.useTime >= 400) { this.useTime = 0; this.removeItem(Items.silicon); }
     }
-    if (this.charge >= this.block.reload) {
+    if (this.charge >= this.block.reload && !(this.healSuppressedUntil > Time.time)) { // MendProjector: no healing while suppressed
       this.charge = 0;
       const range = this.block.range + this.phaseHeat * this.block.phaseRangeBoost;
       const pct = (this.block.healPercent + this.phaseHeat * this.block.phaseBoost) / 100 * eff;
       let healed = false;
       for (const b of Game.teamBuildings(this.team)) {
-        if (b.health < b.maxHealth && circleRect(this.x, this.y, range, b)) {
+        if (b.health < b.maxHealth && !(b.healSuppressedUntil > Time.time) && circleRect(this.x, this.y, range, b)) {
           b.heal(b.maxHealth * pct);
           Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal);
           healed = true;
@@ -3441,7 +3441,7 @@ class Unit {
     if (!World.inside(tx, ty)) return 1;
     return World.floorAt(tx, ty).speed;
   }
-  speed() { return this.type.speed * this.floorSpeed() * (this.type.canBoost && this.elevation > 0.5 ? 2 : 1); }
+  speed() { return this.type.speed * this.floorSpeed() * (this.type.canBoost && this.elevation > 0.5 ? (this.type.boostMultiplier ?? 1) : 1); }
 
   // UnitComp.moveAt / rotateMove
   moveAt(tx, ty, accel = this.type.accel) {
@@ -3639,14 +3639,14 @@ class Unit {
       if (w.rotate) {
         if (m.angle === undefined) m.angle = this.rotation;
         const [mx, my] = this.mountPos(m);
-        const want = m.shoot ? Angles.angle(mx, my, this.aimX, this.aimY) : this.rotation;
+        const want = m.shoot ? Angles.angle(mx, my, m.aimX ?? this.aimX, m.aimY ?? this.aimY) : this.rotation;
         m.angle = Angles.moveToward(m.angle, want, w.rotateSpeed * Time.delta);
       }
       if (!m.shoot || !w.bullet) continue;
       if (w.minShootVelocity > 0 && speed < w.minShootVelocity) continue;
       if (!w.ignoreRotation) {
         const [mx, my] = w.rotate ? this.mountPos(m) : [this.x, this.y];
-        const ang = Angles.angle(mx, my, this.aimX, this.aimY);
+        const ang = Angles.angle(mx, my, m.aimX ?? this.aimX, m.aimY ?? this.aimY);
         if (!Angles.within(w.rotate ? m.angle : this.rotation, ang, w.shootCone)) continue;
       }
       if (m.reload > 0.0001) continue;
@@ -3679,9 +3679,9 @@ class Unit {
     let lifeScl = 1;
     if (w.bullet.scaleLife) {
       const tr = w.bullet.speed * w.bullet.lifetime;
-      lifeScl = Mathf.clamp(Math.hypot(this.aimX - bx, this.aimY - by) / tr, 0, 1);
+      lifeScl = Mathf.clamp(Math.hypot((m.aimX ?? this.aimX) - bx, (m.aimY ?? this.aimY) - by) / tr, 0, 1);
     }
-    Bullets.create(w.bullet, this, this.team, bx, by, ang, w.velocityRnd ? 1 - w.velocityRnd + Math.random() * w.velocityRnd : 1, lifeScl, this.aimX, this.aimY);
+    Bullets.create(w.bullet, this, this.team, bx, by, ang, w.velocityRnd ? 1 - w.velocityRnd + Math.random() * w.velocityRnd : 1, lifeScl, m.aimX ?? this.aimX, m.aimY ?? this.aimY);
     if (w.bullet.shootEffect) Fx.create(w.bullet.shootEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.bullet.smokeEffect) Fx.create(w.bullet.smokeEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.ejectEffect) Fx.create(w.ejectEffect, bx, by, this.rotation * (m.flip ? -1 : 1));
@@ -3941,16 +3941,17 @@ class GroundAI {
   update(u) {
     const t = u.type;
     const core = Targeting.enemyCore(u.team);
-    let move = true;
-    if (core && Math.hypot(core.x - u.x, core.y - u.y) < u.range / 1.3 + core.block.size * TS / 2) {
-      this.target = core; move = false;
+    let move = !(core && Math.hypot(core.x - u.x, core.y - u.y) < u.range * 0.5);
+    const atCore = core && Math.hypot(core.x - u.x, core.y - u.y) < u.range / 1.3 + core.block.size * TS / 2;
+    if (atCore) {
+      this.target = core;
+      for (const m of u.mounts) if (m.weapon.bullet && m.weapon.bullet.collidesGround !== false) { m.target = core; m.retarget = 20; }
     }
     this.retarget -= Time.delta;
     if (this.retarget <= 0) {
       this.retarget = 20;
       const tgt = Targeting.closestTarget(u.team, u.x, u.y, u.range, t.targetAir, t.targetGround);
-      if (tgt) this.target = tgt;
-      else if (!(core && !move)) this.target = null;
+      if (!atCore) this.target = tgt || null;
     }
     if (this.target && this.target.dead) this.target = null;
     if (move) {
@@ -4017,7 +4018,7 @@ class SuicideAI {
       if (b && b.team !== u.team && b.block.solid && !b.open) blocked = b;
     }
     // explode on contact with anything enemy nearby
-    const near = Targeting.closestTarget(u.team, u.x, u.y, t.explode.triggerRange, false, true);
+    const near = Targeting.closestTarget(u.team, u.x, u.y, t.explode.triggerRange, true, true);
     if (near || (blocked && Math.hypot(blocked.x - u.x, blocked.y - u.y) < t.explode.triggerRange + blocked.hitSize / 2)) {
       u.explode();
       return;
@@ -4047,7 +4048,7 @@ class MinerAI {
       if (this.t1 <= 0 || !this.targetItem) {
         this.t1 = 240;
         let best = null;
-        for (const it of [Items.copper, Items.lead, Items.titanium]) {
+        for (const it of [Items.copper, Items.lead, Items.titanium, Items.thorium]) { // UnitType.mineItems
           if (it.hardness > u.type.mineTier || !World.oreTiles(it).length) continue;
           if (!best || core.items[it.id] < core.items[best.id]) best = it;
         }
@@ -4174,11 +4175,29 @@ function aimAndShoot(u, target, face = true) {
     for (const m of u.mounts) if (m.weapon.bullet) speed = m.weapon.bullet.speed;
     const [px, py] = predict(u.x, u.y, target, speed);
     u.aimX = px; u.aimY = py;
-    const inRange = Math.hypot(px - u.x, py - u.y) - (target.type ? target.type.hitSize / 2 : target.hitSize / 2) < u.range;
-    for (const m of u.mounts) m.shoot = inRange;
+    // AIController.updateWeapons: every mount picks its own closest target within its own weapon range
+    // (singleTarget units share the main target), and only fires when that target is in range
+    for (const m of u.mounts) {
+      const w = m.weapon;
+      if (!w.bullet) { m.shoot = false; continue; }
+      const wr = w.bullet.rangeOverride || w.bullet.speed * w.bullet.lifetime;
+      const [mx, my] = u.mountPos(m);
+      if (t.singleTarget || target.team === u.team) m.target = target; // healing a friendly block: every mount aims at it
+      else if ((m.retarget = (m.retarget || 0) - Time.delta) <= 0 || !m.target || m.target.dead) {
+        m.retarget = 20;
+        const air = w.bullet.collidesAir !== false && t.targetAir !== false, ground = w.bullet.collidesGround !== false && t.targetGround !== false;
+        m.target = Targeting.closestTarget(u.team, mx, my, wr, air, ground);
+      }
+      const mt = m.target && !m.target.dead ? m.target : null;
+      const hs = mt ? (mt.type ? mt.type.hitSize / 2 : mt.hitSize / 2) : 0;
+      m.shoot = !!mt && Math.hypot(mt.x - mx, mt.y - my) <= wr + hs;
+      if (mt) { const [ax, ay] = mt === target ? [px, py] : predict(mx, my, mt, w.bullet.speed); m.aimX = ax; m.aimY = ay; }
+      else { m.aimX = undefined; m.aimY = undefined; }
+      if (m.shoot) { u.aimX = m.aimX; u.aimY = m.aimY; }
+    }
     if (face && t.faceTarget && t.omniMovement) u.lookAt(px, py);
   } else {
-    for (const m of u.mounts) m.shoot = false;
+    for (const m of u.mounts) { m.shoot = false; m.aimX = undefined; m.aimY = undefined; }
     if (Math.hypot(u.vx, u.vy) > 0.02 && t.omniMovement) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
 }
@@ -5147,7 +5166,7 @@ defUnit('mega', {
       bullet: bolt(5.2, 8, { lifetime: 35, healPercent: 3, collidesTeam: true, backColor: Pal.heal, frontColor: Pal.white }) }),
   ],
 });
-UNITS.nova.abilities = [{ type: 'repairField', amount: 20, reload: 120, range: 100 }];
+UNITS.nova.abilities = [{ type: 'repairField', amount: 20, reload: 120, range: 100, sameTypeHealMult: 0.15, maxTargets: 6 }];
 
 // mounts for units defined after Unit construction: recompute range for units with rangeOverride bullets
 for (const n of ['pulsar', 'quasar']) UNITS[n].range = UNITS[n].weapons[0].bullet.rangeOverride;
@@ -5157,7 +5176,7 @@ const _u2update = Unit.prototype.update;
 Unit.prototype.update = function () {
   const abs = this.type.abilities;
   if (abs && !this.dead) {
-    if (!this.abil) this.abil = abs.map(() => ({ timer: Math.random() * 60, radiusScale: 0, broken: false }));
+    if (!this.abil) this.abil = abs.map(() => ({ timer: Math.random() * 60, radiusScale: 0, broken: true })); // ForceFieldAbility.wasBroken starts true
     abs.forEach((a, i) => updateAbility(this, a, this.abil[i]));
   }
   _u2update.call(this);
@@ -5167,10 +5186,14 @@ function updateAbility(u, a, s) {
   if (a.type === 'repairField') {
     s.timer += Time.delta;
     if (s.timer >= a.reload) {
-      s.timer = 0;
-      let any = false;
-      for (const o of Game.units) if (o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { o.heal(a.amount); Fx.create('healUnit', o.x, o.y, 0, Pal.heal, o.type.hitSize); any = true; }
-      if (any) Fx.create('healWave', u.x, u.y, 0, Pal.heal, a.range);
+      let targets = Game.units.filter(o => o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range));
+      const same = a.sameTypeHealMult ?? 1;
+      if (a.maxTargets > 0) {
+        targets.sort((p, q) => (Mathf.dst2(p.x, p.y, u.x, u.y) + (same < 1 && p.type === u.type ? 6400 : 0)) - (Mathf.dst2(q.x, q.y, u.x, u.y) + (same < 1 && q.type === u.type ? 6400 : 0)));
+        targets = targets.slice(0, a.maxTargets);
+      }
+      for (const o of targets) { o.heal(a.amount * (o.type === u.type ? same : 1)); Fx.create('healUnit', o.x, o.y, 0, Pal.heal, o.type.hitSize); }
+      if (targets.length) { s.timer = 0; Fx.create('healWave', u.x, u.y, 0, Pal.heal, a.range); }
     }
   } else if (a.type === 'shieldRegen') {
     s.timer += Time.delta;
@@ -5193,10 +5216,10 @@ function updateAbility(u, a, s) {
       s.radiusScale = Mathf.lerp(s.radiusScale, 1, 0.06 * Time.delta);
       const r = a.radius * s.radiusScale;
       for (const b of Bullets.list) {
-        if (b.removed || b.team === u.team || b.type.type === 'liquid' && false) continue;
+        if (b.removed || b.team === u.team || b.type.absorbable === false) continue;
         if (Mathf.within(b.x, b.y, u.x, u.y, r)) {
           b.removed = true;
-          u.shield -= b.type.damage;
+          u.shield -= b.type.damage * (b.type.shieldDamageMultiplier ?? 1); // BulletType.shieldDamage
           s.alpha = 1;
           Fx.create('absorb', b.x, b.y, 0, Teams[u.team].color);
         }
@@ -5234,18 +5257,37 @@ Object.assign(FX, {
 });
 
 // ---------------------------------------------------------------- builder (poly) and repair (mega) AI
+// BuilderAI (rebuild command): help any unit that is building (if it can get there in time), otherwise take the team's
+// rebuild queue in order (every 2 s, rotating the queue); with nothing to do, back off to the core when enemies are near
 class BuilderAI {
-  constructor() { this.retarget = 0; this.target = null; }
+  constructor() { this.retarget = 0; this.target = null; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; }
   update(u) {
-    const player = Game.player;
-    // take a rebuild job, otherwise help with whatever the player is building
     if (!u.plans.length) {
-      const q = Game.rebuildQueue;
-      if (q.length) {
-        q.sort((a, b) => Math.hypot(a.x * TS - u.x, a.y * TS - u.y) - Math.hypot(b.x * TS - u.x, b.y * TS - u.y));
-        const g = q.shift();
-        if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
-      } else if (player && Input.activePlan) u.plans.push(Input.activePlan);
+      if ((this.assistTimer -= Time.delta) <= 0) {
+        this.assistTimer = 60;
+        this.following = null;
+        for (const o of Game.units) {
+          if (o === u || o.team !== u.team || o.dead || !(o.activePlan || (o.isPlayer && Input.activePlan))) continue;
+          const pl = o.activePlan || Input.activePlan;
+          const cb = World.buildAt(pl.x, pl.y);
+          if (!(cb instanceof ConstructBuild)) continue;
+          const dist = Math.max(Math.hypot(cb.x - u.x, cb.y - u.y) - BUILD_RANGE, 0);
+          if (dist / Math.max(u.speed(), 0.01) < cb.current.buildTime * 0.9) { this.following = o; break; }
+        }
+      }
+      const f = this.following && !this.following.dead ? this.following : null;
+      const fp = f && (f.activePlan || (f.isPlayer ? Input.activePlan : null));
+      if (fp) u.plans.push(fp);
+      else if (Game.rebuildQueue.length && (this.rebuildTimer -= Time.delta) <= 0) {
+        this.rebuildTimer = 120;
+        const q = Game.rebuildQueue, g = q[0];
+        const there = World.buildAt(g.x, g.y);
+        if (there && there.block === g.block && there.tx === g.x && there.ty === g.y) q.shift();
+        else {
+          q.push(q.shift());
+          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
+        }
+      }
     }
     u.activePlan = null;
     if (u.plans.length) {
@@ -5253,23 +5295,20 @@ class BuilderAI {
       const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
       u.moveTo(px, py, BUILD_RANGE * 0.4);
       u.activePlan = builderUpdate(u);
-      // a shared player plan finished or got dropped
-      if (player && !player.plans.includes(pl) && !u.activePlan) u.plans = [];
+      // an assisted plan finished or got dropped
+      if (this.following && !u.activePlan) u.plans = [];
       u.lookAt(px, py);
       for (const m of u.mounts) m.shoot = false;
       return;
     }
-    // idle: follow the player (or the core), shoot enemies and heal damaged blocks
+    // idle: shoot what comes in range; flee toward the core from enemies within 370
     this.retarget -= Time.delta;
-    if (this.retarget <= 0) {
-      this.retarget = 20;
-      this.target = Targeting.closestTarget(u.team, u.x, u.y, u.range, u.type.targetAir, u.type.targetGround) ||
-        damagedBuilding(u.team, u.x, u.y, u.range);
-    }
-    if (this.target && (this.target.dead || (this.target.team === u.team && this.target.health >= this.target.maxHealth))) this.target = null;
-    const follow = player || Game.playerCore();
-    if (follow) u.moveTo(follow.x + Angles.trnsx(u.id * 77 % 360, 20), follow.y + Angles.trnsy(u.id * 77 % 360, 20), 8);
-    aimAndShoot(u, this.target);
+    if (this.retarget <= 0) { this.retarget = 20; this.target = Targeting.closestTarget(u.team, u.x, u.y, 370, u.type.targetAir, u.type.targetGround); }
+    if (this.target && this.target.dead) this.target = null;
+    const core = Game.playerCore();
+    if (this.target && core && Math.hypot(core.x - u.x, core.y - u.y) > 370 * 0.5) u.moveTo(core.x, core.y, 370 * 0.5);
+    else u.moveAt(0, 0);
+    aimAndShoot(u, this.target && Math.hypot(this.target.x - u.x, this.target.y - u.y) <= u.range + 8 ? this.target : null);
   }
 }
 
@@ -5283,22 +5322,33 @@ function damagedBuilding(team, x, y, range) {
   return best;
 }
 
+// RepairAI: fly to the closest damaged block of the team and heal it; never chase enemies; when idle and an enemy is
+// within 310, retreat to within 160 of the core
 class RepairAI {
-  constructor() { this.retarget = 0; this.target = null; }
+  constructor() { this.retarget = 0; this.target = null; this.avoidTimer = 0; this.avoid = null; }
   update(u) {
     this.retarget -= Time.delta;
     if (this.retarget <= 0) {
       this.retarget = 30;
-      this.target = damagedBuilding(u.team, u.x, u.y, 900) || Targeting.closestTarget(u.team, u.x, u.y, 260, true, true);
+      let best = null, bd = Infinity;
+      for (const b of Game.teamBuildings(u.team)) {
+        if (b.dead || b instanceof ConstructBuild || b.health >= b.maxHealth) continue;
+        const d = Mathf.dst2(b.x, b.y, u.x, u.y);
+        if (d < bd) { bd = d; best = b; }
+      }
+      this.target = best;
     }
-    if (this.target && (this.target.dead || (this.target.team === u.team && this.target.health >= this.target.maxHealth))) this.target = null;
+    if (this.target && (this.target.dead || this.target.health >= this.target.maxHealth)) this.target = null;
     if (this.target) {
-      u.moveTo(this.target.x, this.target.y, u.range * 0.65);
-      aimAndShoot(u, this.target, false);
+      if (Math.hypot(this.target.x - u.x, this.target.y - u.y) > u.range * 0.65) u.moveTo(this.target.x, this.target.y, u.range * 0.65);
+      else u.moveAt(0, 0);
+      aimAndShoot(u, Math.hypot(this.target.x - u.x, this.target.y - u.y) <= u.range ? this.target : null, false);
     } else {
       for (const m of u.mounts) m.shoot = false;
+      if ((this.avoidTimer -= Time.delta) <= 0) { this.avoidTimer = 40; this.avoid = Targeting.closestTarget(u.team, u.x, u.y, 310, true, true); }
       const core = Game.playerCore();
-      if (core) u.moveTo(core.x + Angles.trnsx(u.id * 53 % 360, 40), core.y + Angles.trnsy(u.id * 53 % 360, 40), 10);
+      if (this.avoid && !this.avoid.dead && core && Math.hypot(core.x - u.x, core.y - u.y) > 160) u.moveTo(core.x, core.y, 160);
+      else u.moveAt(0, 0);
     }
     if (Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
@@ -6765,7 +6815,7 @@ defUnit('toxopid', {
       ejectEffect: 'casing2',
       bullet: sapArtillery(3, 50, {
         lifetime: 80, width: 25, height: 25, collides: true, splashDamageRadius: 80, splashDamage: 75, lightning: 5, lightningLength: 20,
-        lightningDamage: 20, hitShake: 10, fragBullets: 9,
+        hitShake: 10, fragBullets: 9, // lightningDamage unset: uses the bullet damage
         fragBullet: sapArtillery(2.3, 30, { lifetime: 90, width: 20, height: 20, collidesTiles: false, splashDamageRadius: 70, splashDamage: 40, lightning: 2, lightningLength: 5, lightningDamage: 12, hitShake: 5 }),
       }),
     }),
@@ -6949,10 +6999,9 @@ function updateRepairBeam(u, a, s) {
   s.timer = (s.timer || 0) - Time.delta;
   if (s.timer <= 0) {
     s.timer = 20;
-    let best = null, bf = 1;
-    for (const o of Game.units) if (o !== u && o.team === u.team && !o.dead && o.healthf < bf && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { bf = o.healthf; best = o; }
-    const b = damagedBuilding(u.team, u.x, u.y, a.range);
-    if (b && b.healthf < bf) best = b;
+    // RepairBeamWeapon (targetBuildings = false): the closest damaged ally unit in range
+    let best = null, bd = Infinity;
+    for (const o of Game.units) if (o !== u && o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { const d = Mathf.dst2(o.x, o.y, u.x, u.y); if (d < bd) { bd = d; best = o; } }
     s.target = best;
   }
   const tg = s.target;
@@ -7376,7 +7425,7 @@ function updatePointDefense(u, a, s) {
     s.retarget = 8;
     let best = null, bd = Infinity;
     for (const bl of Bullets.list) {
-      if (bl.removed || bl.team === u.team || bl.type.type === 'liquid') continue;
+      if (bl.removed || bl.team === u.team || bl.type.hittable === false || ['liquid', 'laser', 'lightning', 'flame', 'continuous', 'rail'].includes(bl.type.type)) continue;
       const d = Mathf.dst(bl.x, bl.y, mx, my);
       if (d < a.range && d < bd) { bd = d; best = bl; }
     }
@@ -7387,8 +7436,8 @@ function updatePointDefense(u, a, s) {
   if (s.beam) { s.beam.time += Time.delta; if (s.beam.time > 10) s.beam = null; }
   if (!s.target || s.reload < a.reload) return;
   const b = s.target;
-  const dmg = b.dmgLeft !== undefined ? b.dmgLeft : b.type.damage + (b.type.splashDamage || 0);
-  if (dmg > a.damage) b.dmgLeft = dmg - a.damage; else { b.removed = true; s.target = null; }
+  // PointDefenseWeapon: a hit that doesn't destroy the bullet lowers its damage
+  if (b.type.damage > a.damage) b.type = Object.assign({}, b.type, { damage: b.type.damage - a.damage }); else { b.removed = true; s.target = null; }
   s.beam = { x: b.x, y: b.y, time: 0 };
   Fx.create('absorb', b.x, b.y, 0, Pal.white);
   s.reload = 0;
@@ -7398,28 +7447,26 @@ function updateEnergyField(u, a, s) {
   if (s.arcs) { for (const c of s.arcs) c.time += Time.delta; s.arcs = s.arcs.filter(c => c.time < 12); }
   if (s.timer < a.reload) return;
   s.timer = 0;
-  const hits = [];
-  for (const o of Game.units) if (o.team !== u.team && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range)) hits.push(o);
-  for (const b of Game.buildings) if (b.team !== u.team && !b.dead && Mathf.within(b.x, b.y, u.x, u.y, a.range)) hits.push(b);
-  hits.sort((p, q) => Mathf.dst(p.x, p.y, u.x, u.y) - Mathf.dst(q.x, q.y, u.x, u.y));
+  // EnergyFieldAbility: enemies and damaged allies share one distance-sorted list, capped at maxTargets
+  const all = [];
+  for (const o of Game.units) if (o !== u && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range) && (o.team !== u.team || o.health < o.maxHealth)) all.push(o);
+  for (const b of Game.buildings) if (!b.dead && b.team !== 'derelict' && !(b instanceof ConstructBuild) && Mathf.within(b.x, b.y, u.x, u.y, a.range) && (b.team !== u.team || b.health < b.maxHealth)) all.push(b);
+  all.sort((p, q) => Mathf.dst2(p.x, p.y, u.x, u.y) - Mathf.dst2(q.x, q.y, u.x, u.y));
   s.arcs = s.arcs || [];
-  for (const h of hits.slice(0, a.maxTargets)) {
-    h.damage(a.damage);
-    if (h.applyStatus) h.applyStatus(a.status, a.statusDuration);
+  let any = false;
+  for (const h of all.slice(0, a.maxTargets)) {
+    if (h.team === u.team) {
+      const mult = h instanceof Unit && h.type === u.type ? a.sameTypeHealMult : 1;
+      h.heal(h.maxHealth * a.healPercent / 100 * mult);
+    } else {
+      h.damage(a.damage);
+      if (h.applyStatus) h.applyStatus(a.status, a.statusDuration);
+      Fx.create('hitLaserColor', h.x, h.y, 0, Pal.heal);
+    }
+    any = true;
     s.arcs.push({ x: h.x, y: h.y, time: 0, seed: Math.random() * 1000 });
-    Fx.create('hitLaserColor', h.x, h.y, 0, Pal.heal);
   }
-  // heal allies in range
-  for (const o of Game.units) {
-    if (o.team !== u.team || o.dead || o === u || o.health >= o.maxHealth || !Mathf.within(o.x, o.y, u.x, u.y, a.range)) continue;
-    o.heal(o.maxHealth * a.healPercent / 100 * (o.type === u.type ? a.sameTypeHealMult : 1));
-    s.arcs.push({ x: o.x, y: o.y, time: 0, seed: Math.random() * 1000 });
-  }
-  for (const b of Game.teamBuildings(u.team)) {
-    if (b.dead || b instanceof ConstructBuild || b.health >= b.maxHealth || !Mathf.within(b.x, b.y, u.x, u.y, a.range)) continue;
-    b.heal(b.maxHealth * a.healPercent / 100);
-  }
-  if (hits.length) Audio2.play('shootArc', u.x, u.y, 0.5);
+  if (any) Audio2.play('shootArc', u.x, u.y, 0.5);
 }
 
 const _navDraw = Unit.prototype.draw;
@@ -9314,7 +9361,7 @@ class LogicAI {
     if (a) {
       const tx = a.unit ? a.unit.x : a.x, ty = a.unit ? a.unit.y : a.y;
       if (a.unit && a.unit.dead) this.aim = null;
-      else { u.aimX = tx; u.aimY = ty; u.lookAt(tx, ty); for (const mt of u.mounts) mt.shoot = a.shoot; }
+      else { u.aimX = tx; u.aimY = ty; u.lookAt(tx, ty); for (const mt of u.mounts) { mt.shoot = a.shoot; mt.aimX = mt.aimY = undefined; } }
     } else for (const mt of u.mounts) mt.shoot = false;
     if (Math.hypot(u.vx, u.vy) > 0.05 && !a) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
@@ -9595,7 +9642,7 @@ Object.assign(DESCRIPTIONS, {
 defBlock('advanced-launch-pad', 'LaunchPad', {
   requirements: req('copper', 350, 'silicon', 250, 'lead', 300, 'titanium', 200), size: 4, itemCapacity: 100, hasItems: true,
   launchTime: 60 * 30, hasPower: true, consumesPower: 8, hasLiquids: true, liquidCapacity: 40, liquidInputs: ['oil'],
-  consumeLiquid: { liquid: 'oil', amount: 9 / 60 }, category: 'effect', configurable: true,
+  consumeLiquid: { liquid: 'oil', amount: 9 / 60 }, category: 'effect', configurable: true, flags: ['launchPad'],
 });
 defBlock('landing-pad', 'LandingPad', {
   requirements: req('copper', 200, 'graphite', 100, 'titanium', 100), size: 4, itemCapacity: 100, hasItems: true,
@@ -9819,6 +9866,113 @@ Unit.prototype.applyStatus = function (name, duration) {
 };
 
 if (BLOCKS.cyclone.ammo['blast-compound']) BLOCKS.cyclone.ammo['blast-compound'].explodeRange = 30; // FlakBulletType default
+
+// Status damage multipliers (overdrive 1.4, overclock 1.15): bullets fired by a unit under them use a scaled copy of the
+// bullet type (guardians keep their own weapon copies, so 'boss' is left out here)
+STATUS.overclock = { speedMultiplier: 1.15, damageMultiplier: 1.15, reloadMultiplier: 1.25, healthMultiplier: 1, color: Pal.accent };
+STATUS.overdrive = { speedMultiplier: 1.15, damageMultiplier: 1.4, healthMultiplier: 0.95, color: Pal.accent };
+const _scaledBullets = new Map();
+function scaledBullet(t, m) {
+  let byM = _scaledBullets.get(t);
+  if (!byM) _scaledBullets.set(t, byM = new Map());
+  let c = byM.get(m);
+  if (!c) {
+    c = Object.assign({}, t);
+    for (const k of ['damage', 'splashDamage', 'lightningDamage']) if (c[k]) c[k] *= m;
+    if (c.fragBullet) c.fragBullet = scaledBullet(c.fragBullet, m);
+    c._back = null; c._front = null;
+    byM.set(m, c);
+  }
+  return c;
+}
+{
+  const _bc = Bullets.create;
+  Bullets.create = function (type, owner, team, x, y, angle, velScl, lifeScl, aimX, aimY) {
+    if (owner instanceof Unit && owner.statuses) {
+      let m = 1;
+      for (const n in owner.statuses) if (n !== 'boss' && STATUS[n]) m *= STATUS[n].damageMultiplier ?? 1;
+      if (m !== 1) type = scaledBullet(type, Math.round(m * 1000) / 1000);
+    }
+    return _bc.call(this, type, owner, team, x, y, angle, velScl, lifeScl, aimX, aimY);
+  };
+  // StatusFieldAbility (oxynoe: overclock for 6 s to allies within 60, every 6 s)
+  const _ua = updateAbility;
+  updateAbility = function (u, a, s) {
+    if (a.type !== 'statusField') return _ua(u, a, s);
+    if ((s.timer += Time.delta) < a.reload) return;
+    for (const o of Game.units) if (o.team === u.team && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range)) o.applyStatus(a.effect, a.duration);
+    Fx.create('shieldWave', u.x, u.y, 0, Pal.accent, a.range);
+    s.timer = 0;
+  };
+  UNITS.oxynoe.abilities = (UNITS.oxynoe.abilities || []).concat([{ type: 'statusField', effect: 'overclock', duration: 360, reload: 360, range: 60 }]);
+}
+
+// Unit weapon / stat details from UnitTypes.java
+{
+  const wb = (u, i) => UNITS[u].weapons[i].bullet;
+  wb('fortress', 0).scaleLife = true;                       // ArtilleryBulletType: shells land on the target
+  // scepter: the main bullets spit a lightning arc (damage 5) every 4 ticks
+  wb('scepter', 0).intervalBullet = bullet('lightning', { damage: 5, lightningLength: 3, lightningLengthRand: 4, color: Pal.surgeAmmoBack || col('f3e979'), collidesAir: true });
+  wb('scepter', 0).bulletInterval = 4;
+  for (const w of UNITS.horizon.weapons) if (w.bullet) { w.bullet.status = 'blasted'; w.bullet.statusDuration = 60; }
+  for (const [n, m] of [['nova', 2], ['pulsar', 1.6], ['quasar', 2], ['vela', 2.4]]) UNITS[n].boostMultiplier = m;
+  wb('pulsar', 0).rangeOverride = (8 + 7 / 2) * 6;          // LightningBulletType range
+  wb('spiroct', 0).knockback = -1.24; wb('spiroct', 1).knockback = -0.65;
+  for (const w of UNITS.arkyid.weapons) if (w.bullet && w.bullet.type === 'sap') w.bullet.knockback = -1;
+  for (const n of ['alpha', 'beta', 'gamma']) for (const w of UNITS[n].weapons) if (w.bullet) w.bullet.buildingDamageMultiplier = 0;
+  UNITS.zenith.targetFlags = ['launchPad', 'storage', 'battery'];
+  UNITS.eclipse.targetFlags = ['reactor', 'battery', 'core'];
+  for (const n of ['pulsar']) { const t = UNITS[n]; t.range = 0; for (const w of t.weapons) if (w.bullet) t.range = Math.max(t.range, w.bullet.rangeOverride || w.bullet.speed * w.bullet.lifetime); }
+}
+// BulletType.updateBulletInterval: intervalBullet every bulletInterval ticks, in a random direction (intervalRandomSpread 360)
+{
+  const _ub = Bullets.updateBullet;
+  Bullets.updateBullet = function (b) {
+    const t = b.type;
+    if (t.intervalBullet && !b.removed && (b.intervalTime = (b.intervalTime || 0) + Time.delta) >= t.bulletInterval) {
+      b.intervalTime = 0;
+      Bullets.create(t.intervalBullet, b.owner, b.team, b.x, b.y, Math.random() * 360);
+    }
+    return _ub.call(this, b);
+  };
+}
+
+// Navanax (UnitTypes.java): EmpBulletType shell - allied powered blocks get 3x speed for 20 s and 20% heal; enemy blocks on a
+// producing power network slow to 0.2x for 20 s and take 3x damage. SuppressionFieldAbility: every 1.5 s enemy blocks within
+// 200 can't be healed (menders, mend projectors) for 1.5 s.
+Building.prototype.applySlowdown = function (intensity, duration) {
+  if (this.block.noOverdrive || !canOverdrive(this)) return;
+  this.timeScale = Math.min(this.timeScale || 1, intensity);
+  this.timeScaleDuration = Math.max(this.timeScaleDuration || 0, duration);
+};
+{
+  const emp = UNITS.navanax.weapons[0].bullet;
+  Object.assign(emp, { emp: true, empRadius: 100, timeIncrease: 3, timeDuration: 60 * 20, powerDamageScl: 3, powerSclDecrease: 0.2 });
+  const _hit = Bullets.hit;
+  Bullets.hit = function (b, x, y) {
+    _hit.call(this, b, x, y);
+    const t = b.type;
+    if (!t.emp) return;
+    for (const o of Game.buildings) {
+      if (o.dead || o instanceof ConstructBuild || !circleRect(x, y, t.empRadius, o)) continue;
+      if (o.team === b.team) {
+        if (o.block.hasPower && canOverdrive(o) && (o.timeScale || 1) < t.timeIncrease) o.applyBoost(t.timeIncrease, t.timeDuration);
+        if (o.block.hasPower && o.health < o.maxHealth) { o.heal(t.healPercent / 100 * o.maxHealth); Fx.create('healBlockFull', o.x, o.y, o.block.size, Pal.heal); }
+      } else if (o.team !== 'derelict' && o.power && o.power.graph && o.power.graph.produced > 0) {
+        o.applySlowdown(t.powerSclDecrease, t.timeDuration);
+        o.damage(t.damage * t.powerDamageScl);
+      }
+    }
+  };
+  UNITS.navanax.abilities = (UNITS.navanax.abilities || []).concat([{ type: 'suppression', reload: 90, range: 200 }]);
+  const _ua2 = updateAbility;
+  updateAbility = function (u, a, s) {
+    if (a.type !== 'suppression') return _ua2(u, a, s);
+    if ((s.timer += Time.delta) < a.reload) return;
+    s.timer = 0;
+    for (const o of Game.buildings) if (o.team !== u.team && o.team !== 'derelict' && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range)) o.healSuppressedUntil = Math.max(o.healSuppressedUntil || 0, Time.time + a.reload);
+  };
+}
 
 // ==== 09_game.js ====
 // Game state: buildings, units, waves, placement rules, construction lifecycle.
@@ -11077,6 +11231,18 @@ Sectors.init();
   Game.runWave = function () { if (Sectors.current && Sectors.captured.has(Sectors.current.name)) return; return _rw.apply(this, arguments); };
 }
 
+// ==== 09f_fidelity.js ====
+// Fixes that need Game (see 08z_fidelity.js for content fixes).
+// ForceFieldAbility.created: the field starts at full strength
+{
+  const _su = Game.spawnUnit;
+  Game.spawnUnit = function (type, team, x, y, rot) {
+    const u = _su.apply(this, arguments);
+    for (const a of type.abilities || []) if (a.type === 'forceField') u.shield = Math.max(u.shield || 0, a.max);
+    return u;
+  };
+}
+
 // ==== 10_input.js ====
 // Desktop input (DesktopInput.java-like): WASD movement, mouse building/removal/mining/shooting, config modes.
 
@@ -11742,7 +11908,7 @@ class CommandAI {
     const below = World.buildWorld(u.x, u.y);
     const over = (below && below.team !== u.team && !below.dead) || (at && Math.hypot(at.x - u.x, at.y - u.y) < 12);
     const shoot = !this.stances.has('holdfire') && !!over;
-    for (const m of u.mounts) m.shoot = shoot;
+    for (const m of u.mounts) { m.shoot = shoot; m.aimX = m.aimY = undefined; }
     u.aimX = u.x; u.aimY = u.y;
     if (Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }

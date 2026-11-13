@@ -6,7 +6,7 @@
 defBlock('advanced-launch-pad', 'LaunchPad', {
   requirements: req('copper', 350, 'silicon', 250, 'lead', 300, 'titanium', 200), size: 4, itemCapacity: 100, hasItems: true,
   launchTime: 60 * 30, hasPower: true, consumesPower: 8, hasLiquids: true, liquidCapacity: 40, liquidInputs: ['oil'],
-  consumeLiquid: { liquid: 'oil', amount: 9 / 60 }, category: 'effect', configurable: true,
+  consumeLiquid: { liquid: 'oil', amount: 9 / 60 }, category: 'effect', configurable: true, flags: ['launchPad'],
 });
 defBlock('landing-pad', 'LandingPad', {
   requirements: req('copper', 200, 'graphite', 100, 'titanium', 100), size: 4, itemCapacity: 100, hasItems: true,

@@ -181,7 +181,7 @@ defUnit('toxopid', {
       ejectEffect: 'casing2',
       bullet: sapArtillery(3, 50, {
         lifetime: 80, width: 25, height: 25, collides: true, splashDamageRadius: 80, splashDamage: 75, lightning: 5, lightningLength: 20,
-        lightningDamage: 20, hitShake: 10, fragBullets: 9,
+        hitShake: 10, fragBullets: 9, // lightningDamage unset: uses the bullet damage
         fragBullet: sapArtillery(2.3, 30, { lifetime: 90, width: 20, height: 20, collidesTiles: false, splashDamageRadius: 70, splashDamage: 40, lightning: 2, lightningLength: 5, lightningDamage: 12, hitShake: 5 }),
       }),
     }),
@@ -365,10 +365,9 @@ function updateRepairBeam(u, a, s) {
   s.timer = (s.timer || 0) - Time.delta;
   if (s.timer <= 0) {
     s.timer = 20;
-    let best = null, bf = 1;
-    for (const o of Game.units) if (o !== u && o.team === u.team && !o.dead && o.healthf < bf && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { bf = o.healthf; best = o; }
-    const b = damagedBuilding(u.team, u.x, u.y, a.range);
-    if (b && b.healthf < bf) best = b;
+    // RepairBeamWeapon (targetBuildings = false): the closest damaged ally unit in range
+    let best = null, bd = Infinity;
+    for (const o of Game.units) if (o !== u && o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { const d = Mathf.dst2(o.x, o.y, u.x, u.y); if (d < bd) { bd = d; best = o; } }
     s.target = best;
   }
   const tg = s.target;

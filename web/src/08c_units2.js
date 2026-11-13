@@ -57,7 +57,7 @@ defUnit('mega', {
       bullet: bolt(5.2, 8, { lifetime: 35, healPercent: 3, collidesTeam: true, backColor: Pal.heal, frontColor: Pal.white }) }),
   ],
 });
-UNITS.nova.abilities = [{ type: 'repairField', amount: 20, reload: 120, range: 100 }];
+UNITS.nova.abilities = [{ type: 'repairField', amount: 20, reload: 120, range: 100, sameTypeHealMult: 0.15, maxTargets: 6 }];
 
 // mounts for units defined after Unit construction: recompute range for units with rangeOverride bullets
 for (const n of ['pulsar', 'quasar']) UNITS[n].range = UNITS[n].weapons[0].bullet.rangeOverride;
@@ -67,7 +67,7 @@ const _u2update = Unit.prototype.update;
 Unit.prototype.update = function () {
   const abs = this.type.abilities;
   if (abs && !this.dead) {
-    if (!this.abil) this.abil = abs.map(() => ({ timer: Math.random() * 60, radiusScale: 0, broken: false }));
+    if (!this.abil) this.abil = abs.map(() => ({ timer: Math.random() * 60, radiusScale: 0, broken: true })); // ForceFieldAbility.wasBroken starts true
     abs.forEach((a, i) => updateAbility(this, a, this.abil[i]));
   }
   _u2update.call(this);
@@ -77,10 +77,14 @@ function updateAbility(u, a, s) {
   if (a.type === 'repairField') {
     s.timer += Time.delta;
     if (s.timer >= a.reload) {
-      s.timer = 0;
-      let any = false;
-      for (const o of Game.units) if (o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range)) { o.heal(a.amount); Fx.create('healUnit', o.x, o.y, 0, Pal.heal, o.type.hitSize); any = true; }
-      if (any) Fx.create('healWave', u.x, u.y, 0, Pal.heal, a.range);
+      let targets = Game.units.filter(o => o.team === u.team && !o.dead && o.health < o.maxHealth && Mathf.within(o.x, o.y, u.x, u.y, a.range));
+      const same = a.sameTypeHealMult ?? 1;
+      if (a.maxTargets > 0) {
+        targets.sort((p, q) => (Mathf.dst2(p.x, p.y, u.x, u.y) + (same < 1 && p.type === u.type ? 6400 : 0)) - (Mathf.dst2(q.x, q.y, u.x, u.y) + (same < 1 && q.type === u.type ? 6400 : 0)));
+        targets = targets.slice(0, a.maxTargets);
+      }
+      for (const o of targets) { o.heal(a.amount * (o.type === u.type ? same : 1)); Fx.create('healUnit', o.x, o.y, 0, Pal.heal, o.type.hitSize); }
+      if (targets.length) { s.timer = 0; Fx.create('healWave', u.x, u.y, 0, Pal.heal, a.range); }
     }
   } else if (a.type === 'shieldRegen') {
     s.timer += Time.delta;
@@ -103,10 +107,10 @@ function updateAbility(u, a, s) {
       s.radiusScale = Mathf.lerp(s.radiusScale, 1, 0.06 * Time.delta);
       const r = a.radius * s.radiusScale;
       for (const b of Bullets.list) {
-        if (b.removed || b.team === u.team || b.type.type === 'liquid' && false) continue;
+        if (b.removed || b.team === u.team || b.type.absorbable === false) continue;
         if (Mathf.within(b.x, b.y, u.x, u.y, r)) {
           b.removed = true;
-          u.shield -= b.type.damage;
+          u.shield -= b.type.damage * (b.type.shieldDamageMultiplier ?? 1); // BulletType.shieldDamage
           s.alpha = 1;
           Fx.create('absorb', b.x, b.y, 0, Teams[u.team].color);
         }
@@ -144,18 +148,37 @@ Object.assign(FX, {
 });
 
 // ---------------------------------------------------------------- builder (poly) and repair (mega) AI
+// BuilderAI (rebuild command): help any unit that is building (if it can get there in time), otherwise take the team's
+// rebuild queue in order (every 2 s, rotating the queue); with nothing to do, back off to the core when enemies are near
 class BuilderAI {
-  constructor() { this.retarget = 0; this.target = null; }
+  constructor() { this.retarget = 0; this.target = null; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; }
   update(u) {
-    const player = Game.player;
-    // take a rebuild job, otherwise help with whatever the player is building
     if (!u.plans.length) {
-      const q = Game.rebuildQueue;
-      if (q.length) {
-        q.sort((a, b) => Math.hypot(a.x * TS - u.x, a.y * TS - u.y) - Math.hypot(b.x * TS - u.x, b.y * TS - u.y));
-        const g = q.shift();
-        if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
-      } else if (player && Input.activePlan) u.plans.push(Input.activePlan);
+      if ((this.assistTimer -= Time.delta) <= 0) {
+        this.assistTimer = 60;
+        this.following = null;
+        for (const o of Game.units) {
+          if (o === u || o.team !== u.team || o.dead || !(o.activePlan || (o.isPlayer && Input.activePlan))) continue;
+          const pl = o.activePlan || Input.activePlan;
+          const cb = World.buildAt(pl.x, pl.y);
+          if (!(cb instanceof ConstructBuild)) continue;
+          const dist = Math.max(Math.hypot(cb.x - u.x, cb.y - u.y) - BUILD_RANGE, 0);
+          if (dist / Math.max(u.speed(), 0.01) < cb.current.buildTime * 0.9) { this.following = o; break; }
+        }
+      }
+      const f = this.following && !this.following.dead ? this.following : null;
+      const fp = f && (f.activePlan || (f.isPlayer ? Input.activePlan : null));
+      if (fp) u.plans.push(fp);
+      else if (Game.rebuildQueue.length && (this.rebuildTimer -= Time.delta) <= 0) {
+        this.rebuildTimer = 120;
+        const q = Game.rebuildQueue, g = q[0];
+        const there = World.buildAt(g.x, g.y);
+        if (there && there.block === g.block && there.tx === g.x && there.ty === g.y) q.shift();
+        else {
+          q.push(q.shift());
+          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
+        }
+      }
     }
     u.activePlan = null;
     if (u.plans.length) {
@@ -163,23 +186,20 @@ class BuilderAI {
       const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
       u.moveTo(px, py, BUILD_RANGE * 0.4);
       u.activePlan = builderUpdate(u);
-      // a shared player plan finished or got dropped
-      if (player && !player.plans.includes(pl) && !u.activePlan) u.plans = [];
+      // an assisted plan finished or got dropped
+      if (this.following && !u.activePlan) u.plans = [];
       u.lookAt(px, py);
       for (const m of u.mounts) m.shoot = false;
       return;
     }
-    // idle: follow the player (or the core), shoot enemies and heal damaged blocks
+    // idle: shoot what comes in range; flee toward the core from enemies within 370
     this.retarget -= Time.delta;
-    if (this.retarget <= 0) {
-      this.retarget = 20;
-      this.target = Targeting.closestTarget(u.team, u.x, u.y, u.range, u.type.targetAir, u.type.targetGround) ||
-        damagedBuilding(u.team, u.x, u.y, u.range);
-    }
-    if (this.target && (this.target.dead || (this.target.team === u.team && this.target.health >= this.target.maxHealth))) this.target = null;
-    const follow = player || Game.playerCore();
-    if (follow) u.moveTo(follow.x + Angles.trnsx(u.id * 77 % 360, 20), follow.y + Angles.trnsy(u.id * 77 % 360, 20), 8);
-    aimAndShoot(u, this.target);
+    if (this.retarget <= 0) { this.retarget = 20; this.target = Targeting.closestTarget(u.team, u.x, u.y, 370, u.type.targetAir, u.type.targetGround); }
+    if (this.target && this.target.dead) this.target = null;
+    const core = Game.playerCore();
+    if (this.target && core && Math.hypot(core.x - u.x, core.y - u.y) > 370 * 0.5) u.moveTo(core.x, core.y, 370 * 0.5);
+    else u.moveAt(0, 0);
+    aimAndShoot(u, this.target && Math.hypot(this.target.x - u.x, this.target.y - u.y) <= u.range + 8 ? this.target : null);
   }
 }
 
@@ -193,22 +213,33 @@ function damagedBuilding(team, x, y, range) {
   return best;
 }
 
+// RepairAI: fly to the closest damaged block of the team and heal it; never chase enemies; when idle and an enemy is
+// within 310, retreat to within 160 of the core
 class RepairAI {
-  constructor() { this.retarget = 0; this.target = null; }
+  constructor() { this.retarget = 0; this.target = null; this.avoidTimer = 0; this.avoid = null; }
   update(u) {
     this.retarget -= Time.delta;
     if (this.retarget <= 0) {
       this.retarget = 30;
-      this.target = damagedBuilding(u.team, u.x, u.y, 900) || Targeting.closestTarget(u.team, u.x, u.y, 260, true, true);
+      let best = null, bd = Infinity;
+      for (const b of Game.teamBuildings(u.team)) {
+        if (b.dead || b instanceof ConstructBuild || b.health >= b.maxHealth) continue;
+        const d = Mathf.dst2(b.x, b.y, u.x, u.y);
+        if (d < bd) { bd = d; best = b; }
+      }
+      this.target = best;
     }
-    if (this.target && (this.target.dead || (this.target.team === u.team && this.target.health >= this.target.maxHealth))) this.target = null;
+    if (this.target && (this.target.dead || this.target.health >= this.target.maxHealth)) this.target = null;
     if (this.target) {
-      u.moveTo(this.target.x, this.target.y, u.range * 0.65);
-      aimAndShoot(u, this.target, false);
+      if (Math.hypot(this.target.x - u.x, this.target.y - u.y) > u.range * 0.65) u.moveTo(this.target.x, this.target.y, u.range * 0.65);
+      else u.moveAt(0, 0);
+      aimAndShoot(u, Math.hypot(this.target.x - u.x, this.target.y - u.y) <= u.range ? this.target : null, false);
     } else {
       for (const m of u.mounts) m.shoot = false;
+      if ((this.avoidTimer -= Time.delta) <= 0) { this.avoidTimer = 40; this.avoid = Targeting.closestTarget(u.team, u.x, u.y, 310, true, true); }
       const core = Game.playerCore();
-      if (core) u.moveTo(core.x + Angles.trnsx(u.id * 53 % 360, 40), core.y + Angles.trnsy(u.id * 53 % 360, 40), 10);
+      if (this.avoid && !this.avoid.dead && core && Math.hypot(core.x - u.x, core.y - u.y) > 160) u.moveTo(core.x, core.y, 160);
+      else u.moveAt(0, 0);
     }
     if (Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }

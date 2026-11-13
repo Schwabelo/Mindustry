@@ -214,7 +214,7 @@ function updatePointDefense(u, a, s) {
     s.retarget = 8;
     let best = null, bd = Infinity;
     for (const bl of Bullets.list) {
-      if (bl.removed || bl.team === u.team || bl.type.type === 'liquid') continue;
+      if (bl.removed || bl.team === u.team || bl.type.hittable === false || ['liquid', 'laser', 'lightning', 'flame', 'continuous', 'rail'].includes(bl.type.type)) continue;
       const d = Mathf.dst(bl.x, bl.y, mx, my);
       if (d < a.range && d < bd) { bd = d; best = bl; }
     }
@@ -225,8 +225,8 @@ function updatePointDefense(u, a, s) {
   if (s.beam) { s.beam.time += Time.delta; if (s.beam.time > 10) s.beam = null; }
   if (!s.target || s.reload < a.reload) return;
   const b = s.target;
-  const dmg = b.dmgLeft !== undefined ? b.dmgLeft : b.type.damage + (b.type.splashDamage || 0);
-  if (dmg > a.damage) b.dmgLeft = dmg - a.damage; else { b.removed = true; s.target = null; }
+  // PointDefenseWeapon: a hit that doesn't destroy the bullet lowers its damage
+  if (b.type.damage > a.damage) b.type = Object.assign({}, b.type, { damage: b.type.damage - a.damage }); else { b.removed = true; s.target = null; }
   s.beam = { x: b.x, y: b.y, time: 0 };
   Fx.create('absorb', b.x, b.y, 0, Pal.white);
   s.reload = 0;
@@ -236,28 +236,26 @@ function updateEnergyField(u, a, s) {
   if (s.arcs) { for (const c of s.arcs) c.time += Time.delta; s.arcs = s.arcs.filter(c => c.time < 12); }
   if (s.timer < a.reload) return;
   s.timer = 0;
-  const hits = [];
-  for (const o of Game.units) if (o.team !== u.team && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range)) hits.push(o);
-  for (const b of Game.buildings) if (b.team !== u.team && !b.dead && Mathf.within(b.x, b.y, u.x, u.y, a.range)) hits.push(b);
-  hits.sort((p, q) => Mathf.dst(p.x, p.y, u.x, u.y) - Mathf.dst(q.x, q.y, u.x, u.y));
+  // EnergyFieldAbility: enemies and damaged allies share one distance-sorted list, capped at maxTargets
+  const all = [];
+  for (const o of Game.units) if (o !== u && !o.dead && Mathf.within(o.x, o.y, u.x, u.y, a.range) && (o.team !== u.team || o.health < o.maxHealth)) all.push(o);
+  for (const b of Game.buildings) if (!b.dead && b.team !== 'derelict' && !(b instanceof ConstructBuild) && Mathf.within(b.x, b.y, u.x, u.y, a.range) && (b.team !== u.team || b.health < b.maxHealth)) all.push(b);
+  all.sort((p, q) => Mathf.dst2(p.x, p.y, u.x, u.y) - Mathf.dst2(q.x, q.y, u.x, u.y));
   s.arcs = s.arcs || [];
-  for (const h of hits.slice(0, a.maxTargets)) {
-    h.damage(a.damage);
-    if (h.applyStatus) h.applyStatus(a.status, a.statusDuration);
+  let any = false;
+  for (const h of all.slice(0, a.maxTargets)) {
+    if (h.team === u.team) {
+      const mult = h instanceof Unit && h.type === u.type ? a.sameTypeHealMult : 1;
+      h.heal(h.maxHealth * a.healPercent / 100 * mult);
+    } else {
+      h.damage(a.damage);
+      if (h.applyStatus) h.applyStatus(a.status, a.statusDuration);
+      Fx.create('hitLaserColor', h.x, h.y, 0, Pal.heal);
+    }
+    any = true;
     s.arcs.push({ x: h.x, y: h.y, time: 0, seed: Math.random() * 1000 });
-    Fx.create('hitLaserColor', h.x, h.y, 0, Pal.heal);
   }
-  // heal allies in range
-  for (const o of Game.units) {
-    if (o.team !== u.team || o.dead || o === u || o.health >= o.maxHealth || !Mathf.within(o.x, o.y, u.x, u.y, a.range)) continue;
-    o.heal(o.maxHealth * a.healPercent / 100 * (o.type === u.type ? a.sameTypeHealMult : 1));
-    s.arcs.push({ x: o.x, y: o.y, time: 0, seed: Math.random() * 1000 });
-  }
-  for (const b of Game.teamBuildings(u.team)) {
-    if (b.dead || b instanceof ConstructBuild || b.health >= b.maxHealth || !Mathf.within(b.x, b.y, u.x, u.y, a.range)) continue;
-    b.heal(b.maxHealth * a.healPercent / 100);
-  }
-  if (hits.length) Audio2.play('shootArc', u.x, u.y, 0.5);
+  if (any) Audio2.play('shootArc', u.x, u.y, 0.5);
 }
 
 const _navDraw = Unit.prototype.draw;

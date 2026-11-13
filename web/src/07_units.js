@@ -40,7 +40,7 @@ class Unit {
     if (!World.inside(tx, ty)) return 1;
     return World.floorAt(tx, ty).speed;
   }
-  speed() { return this.type.speed * this.floorSpeed() * (this.type.canBoost && this.elevation > 0.5 ? 2 : 1); }
+  speed() { return this.type.speed * this.floorSpeed() * (this.type.canBoost && this.elevation > 0.5 ? (this.type.boostMultiplier ?? 1) : 1); }
 
   // UnitComp.moveAt / rotateMove
   moveAt(tx, ty, accel = this.type.accel) {
@@ -238,14 +238,14 @@ class Unit {
       if (w.rotate) {
         if (m.angle === undefined) m.angle = this.rotation;
         const [mx, my] = this.mountPos(m);
-        const want = m.shoot ? Angles.angle(mx, my, this.aimX, this.aimY) : this.rotation;
+        const want = m.shoot ? Angles.angle(mx, my, m.aimX ?? this.aimX, m.aimY ?? this.aimY) : this.rotation;
         m.angle = Angles.moveToward(m.angle, want, w.rotateSpeed * Time.delta);
       }
       if (!m.shoot || !w.bullet) continue;
       if (w.minShootVelocity > 0 && speed < w.minShootVelocity) continue;
       if (!w.ignoreRotation) {
         const [mx, my] = w.rotate ? this.mountPos(m) : [this.x, this.y];
-        const ang = Angles.angle(mx, my, this.aimX, this.aimY);
+        const ang = Angles.angle(mx, my, m.aimX ?? this.aimX, m.aimY ?? this.aimY);
         if (!Angles.within(w.rotate ? m.angle : this.rotation, ang, w.shootCone)) continue;
       }
       if (m.reload > 0.0001) continue;
@@ -278,9 +278,9 @@ class Unit {
     let lifeScl = 1;
     if (w.bullet.scaleLife) {
       const tr = w.bullet.speed * w.bullet.lifetime;
-      lifeScl = Mathf.clamp(Math.hypot(this.aimX - bx, this.aimY - by) / tr, 0, 1);
+      lifeScl = Mathf.clamp(Math.hypot((m.aimX ?? this.aimX) - bx, (m.aimY ?? this.aimY) - by) / tr, 0, 1);
     }
-    Bullets.create(w.bullet, this, this.team, bx, by, ang, w.velocityRnd ? 1 - w.velocityRnd + Math.random() * w.velocityRnd : 1, lifeScl, this.aimX, this.aimY);
+    Bullets.create(w.bullet, this, this.team, bx, by, ang, w.velocityRnd ? 1 - w.velocityRnd + Math.random() * w.velocityRnd : 1, lifeScl, m.aimX ?? this.aimX, m.aimY ?? this.aimY);
     if (w.bullet.shootEffect) Fx.create(w.bullet.shootEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.bullet.smokeEffect) Fx.create(w.bullet.smokeEffect, bx, by, ang, w.bullet.hitColor || w.bullet.backColor);
     if (w.ejectEffect) Fx.create(w.ejectEffect, bx, by, this.rotation * (m.flip ? -1 : 1));
@@ -540,16 +540,17 @@ class GroundAI {
   update(u) {
     const t = u.type;
     const core = Targeting.enemyCore(u.team);
-    let move = true;
-    if (core && Math.hypot(core.x - u.x, core.y - u.y) < u.range / 1.3 + core.block.size * TS / 2) {
-      this.target = core; move = false;
+    let move = !(core && Math.hypot(core.x - u.x, core.y - u.y) < u.range * 0.5);
+    const atCore = core && Math.hypot(core.x - u.x, core.y - u.y) < u.range / 1.3 + core.block.size * TS / 2;
+    if (atCore) {
+      this.target = core;
+      for (const m of u.mounts) if (m.weapon.bullet && m.weapon.bullet.collidesGround !== false) { m.target = core; m.retarget = 20; }
     }
     this.retarget -= Time.delta;
     if (this.retarget <= 0) {
       this.retarget = 20;
       const tgt = Targeting.closestTarget(u.team, u.x, u.y, u.range, t.targetAir, t.targetGround);
-      if (tgt) this.target = tgt;
-      else if (!(core && !move)) this.target = null;
+      if (!atCore) this.target = tgt || null;
     }
     if (this.target && this.target.dead) this.target = null;
     if (move) {
@@ -616,7 +617,7 @@ class SuicideAI {
       if (b && b.team !== u.team && b.block.solid && !b.open) blocked = b;
     }
     // explode on contact with anything enemy nearby
-    const near = Targeting.closestTarget(u.team, u.x, u.y, t.explode.triggerRange, false, true);
+    const near = Targeting.closestTarget(u.team, u.x, u.y, t.explode.triggerRange, true, true);
     if (near || (blocked && Math.hypot(blocked.x - u.x, blocked.y - u.y) < t.explode.triggerRange + blocked.hitSize / 2)) {
       u.explode();
       return;
@@ -646,7 +647,7 @@ class MinerAI {
       if (this.t1 <= 0 || !this.targetItem) {
         this.t1 = 240;
         let best = null;
-        for (const it of [Items.copper, Items.lead, Items.titanium]) {
+        for (const it of [Items.copper, Items.lead, Items.titanium, Items.thorium]) { // UnitType.mineItems
           if (it.hardness > u.type.mineTier || !World.oreTiles(it).length) continue;
           if (!best || core.items[it.id] < core.items[best.id]) best = it;
         }
@@ -773,11 +774,29 @@ function aimAndShoot(u, target, face = true) {
     for (const m of u.mounts) if (m.weapon.bullet) speed = m.weapon.bullet.speed;
     const [px, py] = predict(u.x, u.y, target, speed);
     u.aimX = px; u.aimY = py;
-    const inRange = Math.hypot(px - u.x, py - u.y) - (target.type ? target.type.hitSize / 2 : target.hitSize / 2) < u.range;
-    for (const m of u.mounts) m.shoot = inRange;
+    // AIController.updateWeapons: every mount picks its own closest target within its own weapon range
+    // (singleTarget units share the main target), and only fires when that target is in range
+    for (const m of u.mounts) {
+      const w = m.weapon;
+      if (!w.bullet) { m.shoot = false; continue; }
+      const wr = w.bullet.rangeOverride || w.bullet.speed * w.bullet.lifetime;
+      const [mx, my] = u.mountPos(m);
+      if (t.singleTarget || target.team === u.team) m.target = target; // healing a friendly block: every mount aims at it
+      else if ((m.retarget = (m.retarget || 0) - Time.delta) <= 0 || !m.target || m.target.dead) {
+        m.retarget = 20;
+        const air = w.bullet.collidesAir !== false && t.targetAir !== false, ground = w.bullet.collidesGround !== false && t.targetGround !== false;
+        m.target = Targeting.closestTarget(u.team, mx, my, wr, air, ground);
+      }
+      const mt = m.target && !m.target.dead ? m.target : null;
+      const hs = mt ? (mt.type ? mt.type.hitSize / 2 : mt.hitSize / 2) : 0;
+      m.shoot = !!mt && Math.hypot(mt.x - mx, mt.y - my) <= wr + hs;
+      if (mt) { const [ax, ay] = mt === target ? [px, py] : predict(mx, my, mt, w.bullet.speed); m.aimX = ax; m.aimY = ay; }
+      else { m.aimX = undefined; m.aimY = undefined; }
+      if (m.shoot) { u.aimX = m.aimX; u.aimY = m.aimY; }
+    }
     if (face && t.faceTarget && t.omniMovement) u.lookAt(px, py);
   } else {
-    for (const m of u.mounts) m.shoot = false;
+    for (const m of u.mounts) { m.shoot = false; m.aimX = undefined; m.aimY = undefined; }
     if (Math.hypot(u.vx, u.vy) > 0.02 && t.omniMovement) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
 }

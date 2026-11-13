@@ -490,7 +490,7 @@ class LogicAI {
     if (a) {
       const tx = a.unit ? a.unit.x : a.x, ty = a.unit ? a.unit.y : a.y;
       if (a.unit && a.unit.dead) this.aim = null;
-      else { u.aimX = tx; u.aimY = ty; u.lookAt(tx, ty); for (const mt of u.mounts) mt.shoot = a.shoot; }
+      else { u.aimX = tx; u.aimY = ty; u.lookAt(tx, ty); for (const mt of u.mounts) { mt.shoot = a.shoot; mt.aimX = mt.aimY = undefined; } }
     } else for (const mt of u.mounts) mt.shoot = false;
     if (Math.hypot(u.vx, u.vy) > 0.05 && !a) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }

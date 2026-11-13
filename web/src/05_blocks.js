@@ -745,13 +745,13 @@ class MendProjector extends Building {
       this.useTime += Time.delta;
       if (this.useTime >= 400) { this.useTime = 0; this.removeItem(Items.silicon); }
     }
-    if (this.charge >= this.block.reload) {
+    if (this.charge >= this.block.reload && !(this.healSuppressedUntil > Time.time)) { // MendProjector: no healing while suppressed
       this.charge = 0;
       const range = this.block.range + this.phaseHeat * this.block.phaseRangeBoost;
       const pct = (this.block.healPercent + this.phaseHeat * this.block.phaseBoost) / 100 * eff;
       let healed = false;
       for (const b of Game.teamBuildings(this.team)) {
-        if (b.health < b.maxHealth && circleRect(this.x, this.y, range, b)) {
+        if (b.health < b.maxHealth && !(b.healSuppressedUntil > Time.time) && circleRect(this.x, this.y, range, b)) {
           b.heal(b.maxHealth * pct);
           Fx.create('healBlockFull', b.x, b.y, b.block.size, Pal.heal);
           healed = true;

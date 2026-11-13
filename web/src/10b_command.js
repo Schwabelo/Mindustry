@@ -164,7 +164,7 @@ class CommandAI {
     const below = World.buildWorld(u.x, u.y);
     const over = (below && below.team !== u.team && !below.dead) || (at && Math.hypot(at.x - u.x, at.y - u.y) < 12);
     const shoot = !this.stances.has('holdfire') && !!over;
-    for (const m of u.mounts) m.shoot = shoot;
+    for (const m of u.mounts) { m.shoot = shoot; m.aimX = m.aimY = undefined; }
     u.aimX = u.x; u.aimY = u.y;
     if (Math.hypot(u.vx, u.vy) > 0.05) u.lookAngle(Angles.angle(0, 0, u.vx, u.vy));
   }
