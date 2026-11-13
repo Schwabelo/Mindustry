@@ -1,0 +1,815 @@
+[
+ {
+  "name": "groundZero",
+  "title": "Ground Zero",
+  "desc": "The optimal location to begin once more. Low enemy threat. Few resources.\n\nGather as much lead and copper as possible.\nMove on.",
+  "parent": "core-shard",
+  "difficulty": 1.0,
+  "winWave": 10,
+  "attack": false,
+  "w": 256,
+  "h": 256,
+  "resources": [
+   "copper",
+   "lead",
+   "scrap"
+  ],
+  "research": [],
+  "sectors": []
+ },
+ {
+  "name": "frozenForest",
+  "title": "Frozen Forest",
+  "desc": "Even here, closer to mountains, the spores have spread. The frigid temperatures cannot contain them forever.\n\nBegin the venture into power. Build combustion generators. Learn to use menders.",
+  "parent": "groundZero",
+  "difficulty": 2.0,
+  "winWave": 15,
+  "attack": false,
+  "w": 200,
+  "h": 200,
+  "resources": [
+   "coal",
+   "copper",
+   "lead"
+  ],
+  "research": [
+   "junction",
+   "router"
+  ],
+  "sectors": [
+   "groundZero"
+  ]
+ },
+ {
+  "name": "crateredBattleground",
+  "title": "Cratered Battleground",
+  "desc": "Water has accumulated in this crater, relic of the old wars. Reclaim the area. Collect sand. Smelt metaglass. Pump water to cool turrets and drills.",
+  "parent": "frozenForest",
+  "difficulty": 2.0,
+  "winWave": 20,
+  "attack": false,
+  "w": 256,
+  "h": 256,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap"
+  ],
+  "research": [
+   "mender",
+   "combustion-generator"
+  ],
+  "sectors": [
+   "frozenForest"
+  ]
+ },
+ {
+  "name": "ruinousShores",
+  "title": "Ruinous Shores",
+  "desc": "Past the wastes, is the shoreline. Once, this location housed a coastal defense array. Not much of it remains. Only the most basic defense structures have remained unscathed, everything else reduced to scrap.\n\nContinue the expansion outwards. Rediscover the technology.",
+  "parent": "crateredBattleground",
+  "difficulty": 3.0,
+  "winWave": 30,
+  "attack": false,
+  "w": 298,
+  "h": 298,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap"
+  ],
+  "research": [
+   "graphite-press",
+   "kiln",
+   "mechanical-pump"
+  ],
+  "sectors": [
+   "crateredBattleground"
+  ]
+ },
+ {
+  "name": "windsweptIslands",
+  "title": "Windswept Islands",
+  "desc": "Further past the shoreline is this remote chain of islands. Records show they once had structures producing Plastanium.\n\nFend off the enemy's naval units. Establish a base on the islands. Research these factories.",
+  "parent": "ruinousShores",
+  "difficulty": 4.0,
+  "winWave": 30,
+  "attack": false,
+  "w": 400,
+  "h": 400,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "pneumatic-drill",
+   "hail",
+   "silicon-smelter",
+   "steam-generator"
+  ],
+  "sectors": [
+   "ruinousShores"
+  ]
+ },
+ {
+  "name": "saltFlats",
+  "title": "Salt Flats",
+  "desc": "On the outskirts of the desert lie the Salt Flats. Few resources can be found in this location.\n\nThe enemy has erected a resource storage complex here. Eradicate their core. Leave nothing standing.",
+  "parent": "windsweptIslands",
+  "difficulty": 5.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 300,
+  "h": 300,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "ground-factory",
+   "additive-reconstructor",
+   "air-factory",
+   "door"
+  ],
+  "sectors": [
+   "windsweptIslands",
+   "fungalPass",
+   "frontier"
+  ]
+ },
+ {
+  "name": "tarFields",
+  "title": "Tar Fields",
+  "desc": "The outskirts of an oil production zone, between the mountains and desert. One of the few areas with usable tar reserves.\nAlthough abandoned, this area has some dangerous enemy forces nearby. Do not underestimate them.\n\nResearch oil processing technology if possible.",
+  "parent": "saltFlats",
+  "difficulty": 5.0,
+  "winWave": 40,
+  "attack": false,
+  "w": 260,
+  "h": 260,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "coal-centrifuge",
+   "conduit",
+   "wave"
+  ],
+  "sectors": [
+   "saltFlats"
+  ]
+ },
+ {
+  "name": "impact0078",
+  "title": "Impact 0078",
+  "desc": "Here lie remnants of the interstellar transport vessel that first entered this system.\n\nSalvage as much as possible from the wreckage. Research any intact technology.",
+  "parent": "tarFields",
+  "difficulty": 7.0,
+  "winWave": 45,
+  "attack": false,
+  "w": 300,
+  "h": 300,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "thorium",
+   "lancer",
+   "salvo",
+   "core-foundation"
+  ],
+  "sectors": [
+   "tarFields"
+  ]
+ },
+ {
+  "name": "desolateRift",
+  "title": "Desolate Rift",
+  "desc": "An extremely dangerous zone. Plentiful resources, but little space. High risk of destruction.\n\nBuild air and ground defenses as soon as possible. Do not be fooled by the infrequent nature of enemy attacks.",
+  "parent": "impact0078",
+  "difficulty": 8.0,
+  "winWave": 18,
+  "attack": false,
+  "w": 110,
+  "h": 400,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "thermal-generator",
+   "thorium-reactor",
+   "core-nucleus"
+  ],
+  "sectors": [
+   "impact0078"
+  ]
+ },
+ {
+  "name": "planetaryTerminal",
+  "title": "Planetary Launch Terminal",
+  "desc": "The final objective.\n\nThis coastal base contains a structure capable of launching Cores to local planets. It is extremely well guarded.\n\nProduce naval units. Eliminate the enemy as quickly as possible. Research the launch structure.",
+  "parent": "desolateRift",
+  "difficulty": 10.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 512,
+  "h": 512,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "omura",
+   "advanced-launch-pad",
+   "mass-driver",
+   "impact-reactor",
+   "tetrative-reconstructor"
+  ],
+  "sectors": [
+   "desolateRift",
+   "nuclearComplex",
+   "extractionOutpost",
+   "mycelialBastion",
+   "littoralShipyard"
+  ]
+ },
+ {
+  "name": "coastline",
+  "title": "Humid Coastline",
+  "desc": "Remnants of alloy synthesis technology have been detected at this location.\n\nRepel the enemy attacks, capture this sector, and acquire the technology.",
+  "parent": "saltFlats",
+  "difficulty": 5.0,
+  "winWave": 30,
+  "attack": false,
+  "w": 432,
+  "h": 432,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "naval-factory",
+   "payload-conveyor"
+  ],
+  "sectors": [
+   "tarFields",
+   "saltFlats"
+  ]
+ },
+ {
+  "name": "testingGrounds",
+  "title": "Testing Grounds",
+  "desc": "[optional objective]\nA crater-riddled desert valley, formerly used as a testing ground for military projects.\n\nDue to lack of water, establishing a presence in this location may pose a challenge. Be prepared for attacks from multiple directions.",
+  "parent": "coastline",
+  "difficulty": 7.0,
+  "winWave": 33,
+  "attack": false,
+  "w": 300,
+  "h": 300,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "cryofluid-mixer",
+   "cryofluid",
+   "water-extractor",
+   "ripple"
+  ],
+  "sectors": [
+   "coastline"
+  ]
+ },
+ {
+  "name": "navalFortress",
+  "title": "Naval Fortress",
+  "desc": "The enemy has established a base on a remote, naturally-fortified island. Destroy this outpost. Acquire their advanced naval craft technology, and research it.",
+  "parent": "coastline",
+  "difficulty": 8.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 400,
+  "h": 400,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "core-nucleus",
+   "mass-driver",
+   "oxynoe",
+   "minke",
+   "bryde",
+   "cyclone",
+   "ripple"
+  ],
+  "sectors": [
+   "coastline",
+   "extractionOutpost"
+  ]
+ },
+ {
+  "name": "sunkenPier",
+  "title": "Sunken Pier",
+  "desc": "[optional objective]\nOnce an offshore oil platform, this facility has long-since fallen into disrepair.\n\nHigh amounts of enemy naval units detected. Be prepared for attacks from multiple directions.",
+  "parent": "navalFortress",
+  "difficulty": 8.0,
+  "winWave": 50,
+  "attack": false,
+  "w": 450,
+  "h": 450,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "multiplicative-reconstructor"
+  ],
+  "sectors": [
+   "navalFortress",
+   "coastline"
+  ]
+ },
+ {
+  "name": "weatheredChannels",
+  "title": "Weathered Channels",
+  "desc": "[optional objective]\nThis channel system harbors abundant resources. Land your core. Fend off the enemy waves to claim them.\n\nThe enemy will take multiple routes to assault your infrastructure. Look for signs of a possible ambush and defend accordingly.",
+  "parent": "navalFortress",
+  "difficulty": 9.0,
+  "winWave": 40,
+  "attack": false,
+  "w": 500,
+  "h": 500,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "bryde",
+   "surge-smelter",
+   "overdrive-projector"
+  ],
+  "sectors": [
+   "impact0078",
+   "navalFortress"
+  ]
+ },
+ {
+  "name": "biomassFacility",
+  "title": "Biomass Synthesis Facility",
+  "desc": "The origin of spores. This is the facility in which they were researched and initially produced.\nResearch the technology contained within. Cultivate spores for the production of fuel and plastics.\n\nUpon this facility's demise, the spores were released. Nothing in the local ecosystem could compete with such an invasive organism.",
+  "parent": "crateredBattleground",
+  "difficulty": 3.0,
+  "winWave": 20,
+  "attack": false,
+  "w": 250,
+  "h": 250,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap"
+  ],
+  "research": [
+   "power-node",
+   "steam-generator",
+   "scatter",
+   "graphite-press"
+  ],
+  "sectors": [
+   "crateredBattleground"
+  ]
+ },
+ {
+  "name": "stainedMountains",
+  "title": "Stained Mountains",
+  "desc": "Further inland lie the mountains, yet untainted by spores.\nExtract the abundant titanium in this area. Learn how to use it.\n\nThe enemy presence is greater here. Do not give them time to send their strongest units.",
+  "parent": "biomassFacility",
+  "difficulty": 3.0,
+  "winWave": 30,
+  "attack": false,
+  "w": 300,
+  "h": 300,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "pneumatic-drill",
+   "silicon-smelter"
+  ],
+  "sectors": [
+   "biomassFacility"
+  ]
+ },
+ {
+  "name": "facility32m",
+  "title": "Facility 32 M",
+  "desc": "This sector contains the moldering remnants of an explosives production facility.\n\nCapture this area. Research the Blast Mixer. Produce Blast Compound for use as turret ammunition.",
+  "parent": "stainedMountains",
+  "difficulty": 4.0,
+  "winWave": 25,
+  "attack": false,
+  "w": 220,
+  "h": 280,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "plastanium-compressor",
+   "lancer",
+   "salvo"
+  ],
+  "sectors": [
+   "stainedMountains",
+   "windsweptIslands"
+  ]
+ },
+ {
+  "name": "infestedCanyons",
+  "title": "Infested Canyons",
+  "desc": "Beyond the mountains lies a winding river valley, now covered in layers of spore moss.\n\nHold your ground against the enemy onslaught. Construct naval units. Eliminate all enemy cores.",
+  "parent": "stainedMountains",
+  "difficulty": 4.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 200,
+  "h": 265,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "naval-factory",
+   "risso",
+   "minke",
+   "additive-reconstructor"
+  ],
+  "sectors": [
+   "stainedMountains",
+   "fungalPass",
+   "frontier"
+  ]
+ },
+ {
+  "name": "nuclearComplex",
+  "title": "Nuclear Production Complex",
+  "desc": "A former facility for the production and processing of thorium, reduced to ruins.\nResearch the Thorium Reactor, and utilize it for advanced power generation.\n\nThe enemy is present here in great numbers, constantly scouting for attackers.",
+  "parent": "infestedCanyons",
+  "difficulty": 7.0,
+  "winWave": 50,
+  "attack": false,
+  "w": 250,
+  "h": 250,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "thermal-generator",
+   "laser-drill",
+   "plastanium",
+   "swarmer"
+  ],
+  "sectors": [
+   "infestedCanyons"
+  ]
+ },
+ {
+  "name": "taintedWoods",
+  "title": "Tainted Woods",
+  "desc": "[optional objective]\nRich in oil reserves, this sector contains large masses of fungal growth, making it difficult to traverse.\n\nUtilize its resources to produce Plastanium. Fend off the enemy.",
+  "parent": "infestedCanyons",
+  "difficulty": 5.0,
+  "winWave": 33,
+  "attack": false,
+  "w": 280,
+  "h": 280,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "titanium"
+  ],
+  "research": [
+   "spore-pod",
+   "plastanium",
+   "wave"
+  ],
+  "sectors": [
+   "infestedCanyons"
+  ]
+ },
+ {
+  "name": "fungalPass",
+  "title": "Fungal Pass",
+  "desc": "A transition area between high mountains and lower, spore-ridden lands. A small enemy reconnaissance base is located here.\n\nUtilize Dagger units. Destroy the enemy outpost.",
+  "parent": "biomassFacility",
+  "difficulty": 2.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 150,
+  "h": 250,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand"
+  ],
+  "research": [
+   "ground-factory",
+   "dagger"
+  ],
+  "sectors": [
+   "biomassFacility"
+  ]
+ },
+ {
+  "name": "frontier",
+  "title": "Frontier",
+  "desc": "A small enemy outpost has been detected here.\n\nBuild Mono units in order to harvest resources more effectively. Utilize the Additive Reconstructor to construct stronger units.",
+  "parent": "fungalPass",
+  "difficulty": 4.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 320,
+  "h": 320,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "titanium"
+  ],
+  "research": [
+   "ground-factory",
+   "air-factory",
+   "additive-reconstructor",
+   "mace",
+   "mono"
+  ],
+  "sectors": [
+   "biomassFacility",
+   "fungalPass"
+  ]
+ },
+ {
+  "name": "perilousHarbor",
+  "title": "Perilous Harbor",
+  "desc": "Multiple enemy bases have been established across this treacherous coastal region.\n\nConstruct naval units, and crush their fortifications.",
+  "parent": "frontier",
+  "difficulty": 4.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 380,
+  "h": 380,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "titanium"
+  ],
+  "research": [
+   "naval-factory",
+   "risso",
+   "retusa",
+   "steam-generator",
+   "cultivator",
+   "coal-centrifuge"
+  ],
+  "sectors": [
+   "biomassFacility",
+   "frontier"
+  ]
+ },
+ {
+  "name": "extractionOutpost",
+  "title": "Extraction Outpost",
+  "desc": "A remote outpost, constructed by the enemy for the purpose of launching resources to other sectors.\n\nCross-sector transport technology is essential for further conquest. Destroy the base. Research their Launch Pads.",
+  "parent": "perilousHarbor",
+  "difficulty": 5.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 360,
+  "h": 400,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "multiplicative-reconstructor",
+   "risso",
+   "minke",
+   "fortress"
+  ],
+  "sectors": [
+   "windsweptIslands",
+   "perilousHarbor",
+   "facility32m"
+  ]
+ },
+ {
+  "name": "atolls",
+  "title": "Atolls",
+  "desc": "[optional objective]\nMultiple enemy naval bases have been detected at this location.\n\nUtilize Mega payload units to transport ground forces into attack positions. Build naval units to destroy the peripheral outposts.",
+  "parent": "extractionOutpost",
+  "difficulty": 7.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 432,
+  "h": 432,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "poly",
+   "mega"
+  ],
+  "sectors": [
+   "extractionOutpost"
+  ]
+ },
+ {
+  "name": "overgrowth",
+  "title": "Overgrowth",
+  "desc": "This area is overgrown, closer to the origin of the spores.\n\nThe enemy has established an outpost here. Build Mace units. Destroy it.",
+  "parent": "frontier",
+  "difficulty": 5.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 344,
+  "h": 344,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "multiplicative-reconstructor",
+   "fortress",
+   "ripple",
+   "salvo",
+   "cultivator",
+   "spore-press"
+  ],
+  "sectors": [
+   "frontier",
+   "windsweptIslands"
+  ]
+ },
+ {
+  "name": "mycelialBastion",
+  "title": "Mycelial Bastion",
+  "desc": " This fortified complex lies deep within the fungal regions, threatening neighboring sectors with advanced insectoid units.\n\nAssault the complex. Obtain the technology within. Utilize units capable of traversing walls.",
+  "parent": "overgrowth",
+  "difficulty": 8.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 300,
+  "h": 300,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "atrax",
+   "spiroct",
+   "arkyid",
+   "multiplicative-reconstructor",
+   "exponential-reconstructor"
+  ],
+  "sectors": [
+   "overgrowth"
+  ]
+ },
+ {
+  "name": "littoralShipyard",
+  "title": "Littoral Shipyard",
+  "desc": "Located upon the far reaches of the central sea, this naval production facility contains technology for building advanced units.\n\nDestroy this facility, and use its technology to further assist in the completion of the final objective.",
+  "parent": "mycelialBastion",
+  "difficulty": 9.0,
+  "winWave": 0,
+  "attack": true,
+  "w": 600,
+  "h": 600,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "research": [
+   "risso",
+   "minke",
+   "bryde",
+   "sei",
+   "spectre",
+   "additive-reconstructor",
+   "exponential-reconstructor"
+  ],
+  "sectors": [
+   "desolateRift",
+   "navalFortress",
+   "mycelialBastion"
+  ]
+ }
+]

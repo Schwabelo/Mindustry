@@ -413,7 +413,7 @@ const Targeting = {
   closestBuilding(team, x, y, range, pred) {
     let best = null, bd = Infinity;
     for (const b of Game.buildings) {
-      if (b.team === team || b.dead) continue;
+      if (b.team === team || b.dead || b.team === 'derelict') continue;
       if (pred && !pred(b)) continue;
       if (b.block.targetable === false) continue;
       const d = Math.hypot(b.x - x, b.y - y) - b.hitSize / 2;
@@ -425,7 +425,7 @@ const Targeting = {
     return this.closestUnit(team, x, y, range, air, ground) || (ground ? this.closestBuilding(team, x, y, range) : null);
   },
   enemyCore(team) {
-    return Game.buildings.find(b => b.block.cls === 'Core' && b.team !== team && !b.dead) || null;
+    return Game.buildings.find(b => b.block.cls === 'Core' && b.team !== team && b.team !== 'derelict' && !b.dead) || null;
   },
 };
 
@@ -441,7 +441,7 @@ class FlowField {
     let c = 1;
     const b = World.build[i];
     if (b && b.block.solid && !b.open) {
-      if (b.team === this.team) return Infinity;
+      if (b.team === this.team || b.team === 'derelict') return Infinity;
       c += 70;
     }
     // near walls penalty (PathTile.nearSolid)
@@ -508,12 +508,12 @@ const Pathfinder = {
   init() {
     const coreTiles = team => () => {
       const out = [];
-      for (const b of Game.buildings) if (b.block.cls === 'Core' && b.team !== team && !b.dead) b.eachTile((x, y) => out.push([x, y]));
+      for (const b of Game.buildings) if (b.block.cls === 'Core' && b.team !== team && b.team !== 'derelict' && !b.dead) b.eachTile((x, y) => out.push([x, y]));
       if (!out.length) out.push([World.coreTile.x, World.coreTile.y]);
       return out;
     };
     this.fields.crux = new FlowField('crux', coreTiles('crux'));
-    this.fields.toSpawn = new FlowField('sharded', () => [[World.spawn.x, World.spawn.y]]);
+    this.fields.toSpawn = new FlowField('sharded', () => (World.spawns.length ? World.spawns : [World.spawn]).map(s => [s.x, s.y]));
     this.fields.toCore = new FlowField('sharded', () => {
       const out = [];
       for (const b of Game.buildings) if (b.block.cls === 'Core' && b.team === 'sharded') {

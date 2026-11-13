@@ -47,7 +47,7 @@ const ResearchUI = {
     let el = this.el;
     if (!el) {
       el = this.el = document.createElement('div'); el.id = 'researchDialog';
-      el.style.cssText = 'position:fixed;inset:0;z-index:25;background:rgba(14,14,18,0.97);display:none;user-select:none';
+      el.style.cssText = 'position:fixed;inset:0;z-index:26;background:rgba(14,14,18,0.97);display:none;user-select:none';
       el.innerHTML = `<div style="position:absolute;left:0;right:0;top:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:3px solid var(--line);background:#141418">
           <span style="color:var(--accent);font-size:18px">Research</span><span id="rsCount" style="color:#aaa;font-size:13px"></span><span id="rsMode" style="font-size:12px;color:#e55454"></span>
           <span style="flex:1"></span><button id="rsReset">Reset research</button><button id="rsClose">Close</button></div>
@@ -153,7 +153,9 @@ const ResearchUI = {
           <div style="height:4px;background:#333;margin-top:2px"><div style="height:4px;width:${Math.min(100, paid / r.amount * 100)}%;background:var(--accent)"></div></div></div>`;
       }
       const miss = Research.missing(n);
-      if (miss.length) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">Requires: ${miss.map(m => (TECH[m] && (TECH[m].type === 'i' || TECH[m].type === 'l') ? 'get ' : 'research ') + titleCase(m)).join(', ')}</div>`;
+      const what = m => m.startsWith('sector:') ? 'capture ' + Sectors.title(m.slice(7)) : m.startsWith('on:') ? 'be on ' + Sectors.title(m.slice(3)) + ' (or capture it)'
+        : (TECH[m] && (TECH[m].type === 'i' || TECH[m].type === 'l') ? 'get ' : 'research ') + titleCase(m);
+      if (miss.length) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">Requires: ${miss.map(what).join(', ')}</div>`;
       let why = '';
       if (!Research.active()) why = Game.state === 'title' || !Game.state ? 'Start a game with the tech tree on to research' : 'Tech tree is off in this game';
       else if (!core) why = 'No core';

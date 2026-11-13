@@ -113,7 +113,7 @@ const SaveIO = {
     Game.researchMode = !!data.rs;
     BOSS_GROUPS = genBossGroups(data.seed);
     Time.time = data.time || 0;
-    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = []; Fires.map.clear();
+    Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [], derelict: [] }; Game.rebuildQueue = []; Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(data.seed);
     Weather.load(data.wx, data.seed);

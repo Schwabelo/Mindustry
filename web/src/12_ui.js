@@ -280,10 +280,10 @@ const UI = {
     this.frame++;
     const core = Game.playerCore();
     if (this.frame % 6 === 0) {
-      $('waveTitle').textContent = `Wave ${Game.wave}`;
+      $('waveTitle').textContent = `Wave ${Game.wave}` + (Game.winWave ? ` / ${Game.winWave}` : '');
       const secs = Math.max(0, Math.ceil(Game.waveCountdown / 60));
       const enemies = Game.enemiesAlive();
-      $('waveSub').textContent = `Next in ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}` + (enemies ? ` · ${enemies} enem${enemies === 1 ? 'y' : 'ies'}` : '');
+      $('waveSub').textContent = (Game.waveCountdown === Infinity ? (Game.waveStatus || 'No more waves') : `Next in ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`) + (enemies ? ` · ${enemies} enem${enemies === 1 ? 'y' : 'ies'}` : '');
       const p = Game.player;
       $('playerHealth').firstChild.style.width = (p ? p.healthf * 100 : 0) + '%';
       if (core) {
@@ -412,7 +412,7 @@ const UI = {
       g.fillRect(Math.round(u.x / TS) - 1, H - 1 - Math.round(u.y / TS) - 1, 2, 2);
     }
     g.fillStyle = Teams.crux.color.css;
-    g.fillRect(World.spawn.x - 2, H - 1 - World.spawn.y - 2, 5, 5);
+    for (const sp of World.spawns) g.fillRect(sp.x - 2, H - 1 - sp.y - 2, 5, 5);
     const v = Render.view();
     g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 1;
     g.strokeRect(v.x1 / TS + 0.5, H - 1 - v.y2 / TS + 0.5, (v.x2 - v.x1) / TS, (v.y2 - v.y1) / TS);

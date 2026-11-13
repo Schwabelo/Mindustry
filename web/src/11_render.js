@@ -34,13 +34,15 @@ function renderFrame() {
     const bo = World.boulder[i];
     if (bo) {
       const f = FLOOR_DEFS[World.floor[i]];
-      Draw.rect((f.boulder || 'boulder') + bo, tx * TS, ty * TS);
+      Draw.rect((World.bkind && World.bkind[i] ? BOULDER_KINDS[World.bkind[i] - 1] : f.boulder || 'boulder') + bo, tx * TS, ty * TS);
     }
   }
-  const sx = World.spawn.x * TS, sy = World.spawn.y * TS;
-  if (inView(v, sx, sy, SPAWN_SAFE_RADIUS * TS + 20)) {
-    Lines.set(rgba(Teams.crux.color, 0.5 + Mathf.absin(Time.time, 10, 0.3)), 1.5);
-    Lines.dashCircle(sx, sy, SPAWN_SAFE_RADIUS * TS, -Time.time / 120);
+  for (const sp of World.spawns) {
+    const sx = sp.x * TS, sy = sp.y * TS;
+    if (inView(v, sx, sy, SPAWN_SAFE_RADIUS * TS + 20)) {
+      Lines.set(rgba(Teams.crux.color, 0.5 + Mathf.absin(Time.time, 10, 0.3)), 1.5);
+      Lines.dashCircle(sx, sy, SPAWN_SAFE_RADIUS * TS, -Time.time / 120);
+    }
   }
 
   // blocks: conveyor beds, then items, then the rest

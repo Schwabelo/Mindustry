@@ -54,13 +54,23 @@ FLOORS = {
     "deep-water": 0, "shallow-water": 0, "sand-water": 0, "darksand-water": 0, "tar": 0,
     "stone": 3, "basalt": 3, "sand-floor": 3, "darksand": 3, "dirt": 3, "grass": 3,
     "salt": 0, "snow": 3, "ice": 3, "moss": 3, "char": 3, "hotrock": 3, "magmarock": 3,
+    # sector maps
+    "tainted-water": 0, "deep-tainted-water": 0, "darksand-tainted-water": 0, "crater-stone": 3, "dacite": 3, "ice-snow": 3,
+    "shale": 3, "core-zone": 0, "spore-moss": 3, "metal-floor": 0, "metal-floor-damaged": 3, "metal-floor-2": 0,
+    "metal-floor-3": 0, "metal-floor-4": 0, "metal-floor-5": 0, "dark-panel-1": 0, "dark-panel-2": 0, "dark-panel-3": 0,
+    "dark-panel-4": 0, "dark-panel-5": 0, "dark-panel-6": 0,
 }
 for f, v in FLOORS.items():
     add([f] if v == 0 else [f"{f}{i}" for i in range(1, v + 1)])
 
-WALLS = ["stone-wall", "dune-wall", "sand-wall", "snow-wall", "ice-wall", "dirt-wall"]
+WALLS = ["stone-wall", "dune-wall", "sand-wall", "snow-wall", "ice-wall", "dirt-wall",
+         "shale-wall", "salt-wall", "red-ice-wall", "red-stone-wall", "spore-wall", "dark-metal", "dacite-wall", "carbon-wall",
+         "crystalline-stone-wall"]
 for w in WALLS:
     add([f"{w}1", f"{w}2", f"{w}-large"])
+add(["metal-wall-1", "metal-wall-2", "metal-wall-3", "spore-pine", "snow-pine", "white-tree", "white-tree-dead",
+     "white-tree-shadow", "white-tree-dead-shadow", "basalt-boulder1", "basalt-boulder2", "shale-boulder1", "shale-boulder2",
+     "dacite-boulder1", "dacite-boulder2", "spore-cluster1", "spore-cluster2", "spore-cluster3"])
 
 ORES = ["copper", "lead", "coal", "titanium", "scrap", "thorium"]
 for o in ORES:
@@ -342,6 +352,14 @@ js = "\n".join(f"// ==== {os.path.basename(s)} ====\n" + open(s).read() for s in
 assets_js = "const ASSETS = " + json.dumps({
     "pages": page_uris, "regions": regions, "sounds": sounds, "music": music, "bossMusic": boss_music,
 }, separators=(",", ":")) + ";\n"
+
+# ---------------------------------------------------------------- sector maps (tools/compact_maps.py), zlib + base64
+import zlib
+sector_files = sorted(glob.glob(os.path.join(WEB, "sectors", "*.json")))
+sector_index = json.load(open(os.path.join(WEB, "sectors", "index.json")))
+sector_maps = {os.path.basename(f)[:-5]: open(f).read() for f in sector_files if not f.endswith("index.json")}
+assets_js += "const SECTOR_INDEX = " + json.dumps(sector_index, separators=(",", ":")) + ";\n"
+assets_js += "const SECTOR_PACK = '" + base64.b64encode(zlib.compress(json.dumps(sector_maps, separators=(",", ":")).encode(), 9)).decode() + "';\n"
 
 tpl = open(os.path.join(WEB, "template.html")).read()
 html = (tpl.replace("/*__FONT__*/", font_uri)

@@ -44,7 +44,7 @@ function groupShield(g, wave) { return Math.max((g.shields || 0) + (g.shieldScal
 
 const Game = {
   state: 'title',
-  buildings: [], units: [], byTeam: { sharded: [], crux: [] },
+  buildings: [], units: [], byTeam: { sharded: [], crux: [], derelict: [] },
   player: null, respawnTimer: 0,
   wave: 1, waveCountdown: 0, waveSpacing: 2 * 60 * 60,
   command: 'defend',
@@ -62,7 +62,7 @@ const Game = {
     this.seed = seed;
     Time.time = 0;
     this.lastCoreWarn = -9999;
-    this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [] };
+    this.buildings = []; this.units = []; this.byTeam = { sharded: [], crux: [], derelict: [] };
     this.rebuildQueue = [];
     Fires.map.clear();
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
@@ -191,7 +191,7 @@ const Game = {
       if (World.wall[i]) return false;
       if (FLOOR_DEFS[World.floor[i]].isDeep && !block.floating) return false;
       if (FLOOR_DEFS[World.floor[i]].liquidDrop) pumpable = true;
-      if (Math.hypot(tx - World.spawn.x, ty - World.spawn.y) < SPAWN_SAFE_RADIUS) return false;
+      for (const sp of World.spawns) if (Math.hypot(tx - sp.x, ty - sp.y) < SPAWN_SAFE_RADIUS) return false;
       const ex = World.build[i];
       if (ex) {
         if (ex.team !== team) return false;
@@ -297,16 +297,24 @@ const Game = {
   },
 
   // ------------------------------------------------------------ waves
+  // WaveSpawner: every group spawns its count at each spawn point (or only at its own spawn); in attack sectors also at enemy cores
+  waveGroups() { return WAVE_GROUPS; },
+  spawnPoints(g) {
+    const pts = World.spawns.map(s => [s.x * TS, s.y * TS]);
+    if (this.attackMode) for (const b of this.byTeam.crux) if (b.block.cls === 'Core' && !b.dead) pts.push([b.x, b.y]);
+    if (g && g.spawn) { const own = pts.filter(([x, y]) => Math.round(x / TS) === g.spawn[0] && Math.round(y / TS) === g.spawn[1]); return own.length ? own : pts.slice(0, 1); }
+    return pts;
+  },
   runWave() {
     const w = this.wave - 1;
-    const sx = World.spawn.x * TS, sy = World.spawn.y * TS;
     let total = 0;
-    for (const g of WAVE_GROUPS) {
+    for (const g of this.waveGroups()) {
       const n = groupSpawned(g, w);
       if (!n) continue;
       const type = UNITS[g.unit];
+      if (!type) continue;
       const shield = groupShield(g, w);
-      for (let i = 0; i < n; i++) {
+      for (const [sx, sy] of this.spawnPoints(g)) for (let i = 0; i < n; i++) {
         const spread = type.flying ? 40 : 14;
         const a = Math.random() * 360, d = Math.random() * spread;
         const u = this.spawnUnit(type, 'crux', sx + Angles.trnsx(a, d), sy + Angles.trnsy(a, d), Angles.angle(sx, sy, World.coreTile.x * TS, World.coreTile.y * TS));
@@ -315,10 +323,13 @@ const Game = {
         total++;
       }
     }
-    Fx.create('spawnShockwave', sx, sy, 0, null, 120);
+    for (const sp of World.spawns) {
+      const sx = sp.x * TS, sy = sp.y * TS;
+      Fx.create('spawnShockwave', sx, sy, 0, null, 120);
+      // wave spawn kills player units in the drop zone
+      for (const u of this.units) if (u.team === 'sharded' && !u.isFlying && Math.hypot(u.x - sx, u.y - sy) < SPAWN_SAFE_RADIUS * TS) u.kill();
+    }
     Audio2.play('waveSpawn', undefined, undefined, 0.7);
-    // wave spawn kills player units in the drop zone
-    for (const u of this.units) if (u.team === 'sharded' && !u.isFlying && Math.hypot(u.x - sx, u.y - sy) < SPAWN_SAFE_RADIUS * TS) u.kill();
     this.wave++;
     this.waveCountdown = this.waveSpacing;
     UI.toast(`Wave ${this.wave - 1}: ${total} enem${total === 1 ? 'y' : 'ies'} incoming`, 3);
@@ -347,6 +358,7 @@ const Game = {
     const bs = this.buildings;
     for (let i = 0; i < bs.length; i++) {
       const b = bs[i];
+      if (b.team === 'derelict') continue; // ruins do nothing
       if (!b.dead && b.disabledUntil > Time.time) { if (b.hitTime > 0) b.hitTime = Math.max(0, b.hitTime - Time.delta / 9); continue; } // disabled by logic
       if (!b.dead) {
         if (b.timeScaleDuration > 0) {

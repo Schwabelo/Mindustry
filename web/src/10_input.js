@@ -226,7 +226,7 @@ const Input = {
     const seen = new Set();
     for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) {
       const bd = World.buildAt(x, y);
-      if (!bd || seen.has(bd) || bd.team !== 'sharded') continue;
+      if (!bd || seen.has(bd) || (bd.team !== 'sharded' && bd.team !== 'derelict')) continue;
       seen.add(bd);
       const blk = bd.current || bd.block;
       if (blk.cls === 'Core') continue;
@@ -443,7 +443,12 @@ function builderUpdate(p) {
     let ex = World.buildAt(pl.x, pl.y);
 
     if (pl.breaking) {
-      if (!ex || ex.team !== 'sharded') { p.plans.splice(idx, 1); return pl; }
+      if (!ex || (ex.team !== 'sharded' && ex.team !== 'derelict')) { p.plans.splice(idx, 1); return pl; }
+      if (ex.team === 'derelict') {
+        // derelict ruins can be cleared, but give nothing back
+        Game.removeBuilding(ex); ex.team = 'sharded'; ex = Game.beginBreak((Game.addBuilding(ex), ex));
+        ex.refunded = ex.refunded.map(() => 1e9);
+      }
       if (!(ex instanceof ConstructBuild)) ex = Game.beginBreak(ex);
       ex.deconstruct(p, core, bs);
       if (ex.dead) p.plans.splice(idx, 1);

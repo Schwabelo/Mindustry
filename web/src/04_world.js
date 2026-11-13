@@ -1,29 +1,59 @@
 // World: tiles, procedural map generation, cached floor rendering (floors + edges + ores + static walls + darkness).
 
 const FLOOR_DEFS = [
-  // order = blend priority (Mindustry block id order): higher draws its edges onto lower
+  // order = blend priority (Mindustry block id order): higher draws its edges onto lower; blend = Floor.blendGroup
   { name: 'deep-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.2, liquidDrop: 'water', liquidMultiplier: 1.5 },
   { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water' },
+  { name: 'tainted-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water', wall: 'spore-wall' },
+  { name: 'deep-tainted-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.18, liquidDrop: 'water', liquidMultiplier: 1.5, wall: 'spore-wall' },
+  { name: 'darksand-tainted-water', variants: 0, isLiquid: true, speed: 0.75, liquidDrop: 'water', wall: 'dune-wall' },
   { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
   { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
   { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall', liquidDrop: 'oil', isLiquid: true },
   { name: 'stone', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
-  { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
+  { name: 'crater-stone', variants: 3, wall: 'stone-wall', boulder: 'boulder', blend: 'stone' },
+  { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder', blend: 'stone' },
   { name: 'basalt', variants: 3, wall: 'dune-wall', boulder: 'boulder' },
-  { name: 'hotrock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.5 },
-  { name: 'magmarock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.75 },
+  { name: 'hotrock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.5, blend: 'basalt' },
+  { name: 'magmarock', variants: 3, wall: 'dune-wall', boulder: 'boulder', heat: 0.75, blend: 'basalt' },
   { name: 'sand-floor', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'sand-wall', boulder: 'sand-boulder', oil: 0.7 },
   { name: 'darksand', variants: 3, itemDrop: 'sand', playerUnmineable: true, wall: 'dune-wall', boulder: 'sand-boulder', oil: 1.5 },
   { name: 'dirt', variants: 3, wall: 'dirt-wall', boulder: 'boulder' },
+  { name: 'dacite', variants: 3, wall: 'dacite-wall', boulder: 'dacite-boulder' },
   { name: 'grass', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'salt', variants: 0, wall: 'sand-wall', oil: 0.3 },
   { name: 'snow', variants: 3, wall: 'snow-wall', boulder: 'snow-boulder' },
-  { name: 'ice', variants: 3, wall: 'ice-wall', boulder: 'snow-boulder' },
+  { name: 'ice', variants: 3, wall: 'ice-wall', boulder: 'snow-boulder', speed: 0.9 },
+  { name: 'ice-snow', variants: 3, wall: 'ice-wall', boulder: 'snow-boulder' },
+  { name: 'shale', variants: 3, wall: 'shale-wall', boulder: 'shale-boulder', oil: 2 },
   { name: 'moss', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
+  { name: 'core-zone', variants: 0 },
+  { name: 'spore-moss', variants: 3, wall: 'spore-wall', spores: 0.3 },
+  { name: 'metal-floor', variants: 0, wall: 'dark-metal' },
+  { name: 'metal-floor-damaged', variants: 3, wall: 'dark-metal' },
+  { name: 'metal-floor-2', variants: 0, wall: 'dark-metal' },
+  { name: 'metal-floor-3', variants: 0, wall: 'dark-metal' },
+  { name: 'metal-floor-4', variants: 0, wall: 'dark-metal' },
+  { name: 'metal-floor-5', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-1', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-2', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-3', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-4', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-5', variants: 0, wall: 'dark-metal' },
+  { name: 'dark-panel-6', variants: 0, wall: 'dark-metal' },
 ];
 const FLOOR = {};
 FLOOR_DEFS.forEach((f, i) => { f.id = i; f.speed = f.speed || 1; FLOOR[f.name] = f; });
-const WALL_DEFS = ['stone-wall', 'dune-wall', 'sand-wall', 'snow-wall', 'ice-wall', 'dirt-wall'];
+FLOOR_DEFS.forEach(f => { f.blendId = FLOOR[f.blend || f.name].id; });
+const WALL_DEFS = ['stone-wall', 'dune-wall', 'sand-wall', 'snow-wall', 'ice-wall', 'dirt-wall',
+  // sector maps
+  'shale-wall', 'salt-wall', 'red-ice-wall', 'red-stone-wall', 'spore-wall', 'dark-metal', 'dacite-wall', 'carbon-wall',
+  'crystalline-stone-wall', 'metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine', 'white-tree', 'white-tree-dead'];
+// walls drawn from one sprite (no variants / large version); TreeBlocks: big canopy, solid, no wall darkness
+const WALL_SINGLE = new Set(['metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine']);
+const WALL_TREE = new Set(['white-tree', 'white-tree-dead']);
+const WALL_IS_TREE = WALL_DEFS.map(n => WALL_TREE.has(n));
+const BOULDER_KINDS = ['boulder', 'sand-boulder', 'snow-boulder', 'basalt-boulder', 'shale-boulder', 'dacite-boulder', 'spore-cluster'];
 const ORE_ITEMS = ['copper', 'lead', 'coal', 'titanium', 'scrap', 'thorium'];
 
 const MAP_W = 150, MAP_H = 150, CHUNK = 16;
@@ -69,9 +99,11 @@ const World = {
   // ------------------------------------------------------------ generation
   generate(seed) {
     this.seed = seed;
+    this.w = MAP_W; this.h = MAP_H;
     const W = this.w, H = this.h, N = W * H;
     this.floor = new Uint8Array(N); this.variant = new Uint8Array(N); this.ore = new Uint8Array(N);
     this.wall = new Uint8Array(N); this.boulder = new Uint8Array(N); this.dark = new Uint8Array(N);
+    this.bkind = null; this.hasTrees = false; this.sector = null;
     this.build = new Array(N).fill(null);
     this.chunks.clear();
 
@@ -83,7 +115,7 @@ const World = {
     // core & spawn
     const core = { x: 22 + rand.int(6), y: 30 + rand.int(H - 60) };
     const spawn = { x: W - 24 - rand.int(6), y: 25 + rand.int(H - 50) };
-    this.coreTile = core; this.spawn = spawn;
+    this.coreTile = core; this.spawn = spawn; this.spawns = [spawn];
 
     const elev = new Float32Array(N), water = new Float32Array(N);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -223,6 +255,43 @@ const World = {
     this._oreTiles = {};
   },
 
+  // ------------------------------------------------------------ sector maps (tools/compact_maps.py)
+  loadSector(m) {
+    const W = m.w, H = m.h, N = W * H;
+    this.w = W; this.h = H; this.seed = 1; this.sector = m.name;
+    const rle = (str, pal, map) => {
+      const out = new Uint8Array(N); let i = 0;
+      for (const tok of str.split(',')) {
+        const k = tok.indexOf('*'), v = map[+(k < 0 ? tok : tok.slice(0, k))], n = k < 0 ? 1 : +tok.slice(k + 1);
+        out.fill(v, i, i + n); i += n;
+      }
+      return out;
+    };
+    this.floor = rle(m.floor, m.pal.floor, m.pal.floor.map(n => FLOOR[n].id));
+    this.ore = rle(m.ore, m.pal.ore, m.pal.ore.map(n => n ? Items[n].id + 1 : 0));
+    this.wall = rle(m.wall, m.pal.wall, m.pal.wall.map(n => n ? WALL_DEFS.indexOf(n) + 1 : 0));
+    this.bkind = rle(m.boulder, m.pal.boulder, m.pal.boulder.map(n => n ? BOULDER_KINDS.indexOf(n) + 1 : 0));
+    this.boulder = new Uint8Array(N); this.variant = new Uint8Array(N); this.dark = new Uint8Array(N);
+    this.build = new Array(N).fill(null);
+    this.chunks.clear();
+    this.hasTrees = m.pal.wall.some(n => WALL_TREE.has(n));
+    for (let i = 0; i < N; i++) {
+      const x = i % W, y = (i / W) | 0, h = (x * 73856093 ^ y * 19349663) >>> 0;
+      const fl = FLOOR_DEFS[this.floor[i]];
+      this.variant[i] = this.ore[i] ? h % 3 + 1 : fl.variants ? h % fl.variants + 1 : 0;
+      if (this.bkind[i]) this.boulder[i] = (h >>> 3) % (BOULDER_KINDS[this.bkind[i] - 1] === 'spore-cluster' ? 3 : 2) + 1;
+    }
+    this.spawns = m.spawns.map(([x, y]) => ({ x, y }));
+    const core = m.builds.find(b => b[0] === 0 && b[1].startsWith('core-'));
+    this.coreTile = core ? { x: core[2], y: core[3] } : { x: W >> 1, y: H >> 1 };
+    // attack sectors without drop zones spawn their waves at the enemy cores (Game.spawnPoints)
+    const ecore = m.builds.find(b => b[0] === 1 && b[1].startsWith('core-'));
+    this.spawn = this.spawns[0] || (ecore ? { x: ecore[2], y: ecore[3] } : { x: -999, y: -999 });
+    this.computeDarkness();
+    this.buildMinimapBase();
+    this._oreTiles = {};
+  },
+
   // all ore tiles of an item, sorted by distance to the starting core
   oreTiles(item) {
     let t = this._oreTiles[item.id];
@@ -284,10 +353,10 @@ const World = {
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
       let dark = 0;
-      if (this.wall[i]) {
+      if (this.wall[i] && !WALL_IS_TREE[this.wall[i] - 1]) {
         let minDst = R + 1;
         for (let cy = y - R; cy <= y + R; cy++) for (let cx = x - R; cx <= x + R; cx++) {
-          if (this.inside(cx, cy) && !this.wall[cy * W + cx]) minDst = Math.min(minDst, Math.abs(cx - x) + Math.abs(cy - y));
+          if (this.inside(cx, cy) && (!this.wall[cy * W + cx] || WALL_IS_TREE[this.wall[cy * W + cx] - 1])) minDst = Math.min(minDst, Math.abs(cx - x) + Math.abs(cy - y));
         }
         dark = Math.max(minDst - 1, 0);
       }
@@ -327,15 +396,15 @@ const World = {
       for (const [dx, dy] of Geometry.d8) {
         const nx = tx + dx, ny = ty + dy;
         if (!this.inside(nx, ny)) continue;
-        const of = this.floor[ny * W + nx];
-        if (of > fl.id && !blenders.includes(of)) blenders.push(of);
+        const of = FLOOR_DEFS[this.floor[ny * W + nx]].blendId;
+        if (of > fl.blendId && !blenders.includes(of)) blenders.push(of);
       }
       blenders.sort((a, b) => a - b);
       for (const bid of blenders) {
         const edge = Assets.get(FLOOR_DEFS[bid].name + '-edge');
         for (const [dx, dy] of Geometry.d8) {
           const nx = tx + dx, ny = ty + dy;
-          if (!this.inside(nx, ny) || this.floor[ny * W + nx] !== bid) continue;
+          if (!this.inside(nx, ny) || FLOOR_DEFS[this.floor[ny * W + nx]].blendId !== bid) continue;
           putPart(edge, 1 - dx, 1 + dy, tx, ty);
         }
       }
@@ -347,8 +416,9 @@ const World = {
       if (!this.inside(tx, ty)) continue;
       const i = ty * W + tx;
       const wl = this.wall[i];
-      if (!wl || done.has(i)) continue;
+      if (!wl || done.has(i) || WALL_IS_TREE[wl - 1]) continue;
       const name = WALL_DEFS[wl - 1];
+      if (WALL_SINGLE.has(name)) { put(Assets.get(name), tx, ty); continue; }
       if (tx % 2 === 0 && ty % 2 === 0 && this.inside(tx + 1, ty + 1) &&
         this.wall[i + 1] === wl && this.wall[i + W] === wl && this.wall[i + W + 1] === wl && ((tx * 7 + ty * 13 + this.seed) % 5) < 2) {
         put(Assets.get(name + '-large'), tx, ty, 2);
@@ -366,8 +436,24 @@ const World = {
         g.fillRect((tx - x0) * 32, (CHUNK - 1 - (ty - y0)) * 32, 32, 32);
       }
     }
-    // spawn marker
-    if (Math.floor(this.spawn.x / CHUNK) === cx && Math.floor(this.spawn.y / CHUNK) === cy) put(Assets.get('spawn'), this.spawn.x, this.spawn.y);
+    if (this.hasTrees) {
+      const R = 6;
+      for (let ty = y0 + CHUNK - 1 + R; ty >= y0 - R; ty--) for (let tx = x0 - R; tx < x0 + CHUNK + R; tx++) {
+        if (!this.inside(tx, ty)) continue;
+        const wl = this.wall[ty * W + tx];
+        if (!wl || !WALL_IS_TREE[wl - 1]) continue;
+        const name = WALL_DEFS[wl - 1], h = (tx * 92821 + ty * 68917) >>> 0;
+        const rot = (h % 4) * 90 * DEG;
+        for (const [reg, off] of [[Assets.get(name + '-shadow'), -6], [Assets.get(name), 0]]) {
+          const cxp = (tx - x0) * 32 + 16 + off, cyp = (CHUNK - 1 - (ty - y0)) * 32 + 16 - off;
+          g.save(); g.translate(cxp, cyp); g.rotate(rot);
+          g.drawImage(reg.img, reg.x, reg.y, reg.w, reg.h, -reg.w / 2, -reg.h / 2, reg.w, reg.h);
+          g.restore();
+        }
+      }
+    }
+    // spawn markers
+    for (const sp of this.spawns) if (Math.floor(sp.x / CHUNK) === cx && Math.floor(sp.y / CHUNK) === cy) put(Assets.get('spawn'), sp.x, sp.y);
     return c;
   },
 
@@ -420,7 +506,7 @@ const World = {
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x;
       let c;
-      if (this.wall[i]) { c = avg(WALL_DEFS[this.wall[i] - 1] + '1'); c = [c[0] * 0.75, c[1] * 0.75, c[2] * 0.75]; }
+      if (this.wall[i]) { const wn = WALL_DEFS[this.wall[i] - 1]; c = avg(WALL_SINGLE.has(wn) || WALL_TREE.has(wn) ? wn : wn + '1'); c = [c[0] * 0.75, c[1] * 0.75, c[2] * 0.75]; }
       else if (this.ore[i]) { const it = ITEMS[this.ore[i] - 1]; c = [it.color.r, it.color.g, it.color.b]; }
       else { const f = FLOOR_DEFS[this.floor[i]]; c = avg(f.variants ? f.name + '1' : f.name); }
       const d = this.dark[i];

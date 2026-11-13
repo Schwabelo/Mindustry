@@ -43,6 +43,11 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
 - Unit command mode: select units, move/attack orders with pathfinding and formations, commands (move, repair,
   rebuild, assist, mine), stances (hold fire, pursue, patrol, ram, boost, hold position), factory rally points
+- Campaign: the 29 Serpulo sectors of the tech tree with their real maps (exported from `core/assets/maps` with
+  `tools/MapExport.java`), terrain, ores, derelict ruins, enemy bases, drop zones, wave tables, weather and launch loadouts.
+  Sectors unlock like in the tech tree (parent captured + research); capture by surviving the win wave or by destroying
+  every enemy core (enemy cores stay full of items, as with Serpulo's enemyInfiniteItems). Sector requirements in the
+  tech tree (e.g. Pneumatic Drill needs Frozen Forest) apply. One sector is played at a time (the autosave slot)
 - Tech tree (J): Mindustry's Serpulo research tree with its real research costs (exported from `SerpuloTechTree`);
   blocks and units are locked until researched with items from your core (pay in parts), items unlock when they first
   reach the core. Research is kept across games; untick "Tech tree" on the title screen to play with everything unlocked

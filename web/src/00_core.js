@@ -131,6 +131,7 @@ const Pal = {
 const Teams = {
   sharded: { id: 1, name: 'sharded', color: col('ffd37f'), palette: [col('ffd37f'), col('eab678'), col('d4816b')] },
   crux: { id: 2, name: 'crux', color: col('f25555'), palette: [col('fc8e6c'), col('f25555'), col('a04553')] },
+  derelict: { id: 0, name: 'derelict', color: col('4d4e58'), palette: [col('4d4e58'), col('4d4e58'), col('4d4e58')] },
 };
 
 // Fixed-step clock

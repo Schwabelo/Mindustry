@@ -145,10 +145,11 @@ button.accent { border-color: var(--accent); }
   <img class="logo" id="logoImg" alt="Mindustry">
   <div class="box panel">
     <button class="accent hidden" id="continueBtn">Continue</button>
-    <button class="accent" id="playBtn">New game</button>
+    <button class="accent" id="campaignBtn">Campaign</button>
+    <button id="playBtn">Free play</button>
     <button id="newMapBtn">New map seed</button>
     <button id="importBtn">Import save file</button>
-    <label class="settingRow" style="justify-content:flex-start;gap:8px;cursor:pointer"><input type="checkbox" id="researchMode" checked> Tech tree: research blocks and units</label>
+    <label class="settingRow" style="justify-content:flex-start;gap:8px;cursor:pointer"><input type="checkbox" id="researchMode" checked> Free play with the tech tree</label>
     <button id="researchTitleBtn">Research</button>
     <p id="seedText"></p>
     <div id="controls"></div>
@@ -164,7 +165,7 @@ button.accent { border-color: var(--accent); }
     <div class="settingRow"><span>Sound</span><input type="range" id="sfxVol" min="0" max="100" value="70"></div>
     <div class="row2"><button id="saveBtn">Save game</button><button id="loadBtn">Load save</button></div>
     <div class="row2"><button id="exportBtn">Export save</button><button id="importBtn2">Import save</button></div>
-    <button id="researchPauseBtn">Research</button>
+    <div class="row2"><button id="campaignPauseBtn">Campaign</button><button id="researchPauseBtn">Research</button></div>
     <button id="restartBtn">Restart</button>
     <button id="quitBtn">Quit to title</button>
   </div>
