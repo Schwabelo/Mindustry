@@ -47,7 +47,11 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   `tools/MapExport.java`), terrain, ores, derelict ruins, enemy bases, drop zones, wave tables, weather and launch loadouts.
   Sectors unlock like in the tech tree (parent captured + research); capture by surviving the win wave or by destroying
   every enemy core (enemy cores stay full of items, as with Serpulo's enemyInfiniteItems). Sector requirements in the
-  tech tree (e.g. Pneumatic Drill needs Frozen Forest) apply. One sector is played at a time (the autosave slot)
+  tech tree (e.g. Pneumatic Drill needs Frozen Forest) apply. Sectors you leave are stored (IndexedDB) and resume where you
+  left them; you can also restart one from scratch
+- Launch pads: advanced launch pad (power + oil) fires 100-item pods to the sector's destination; the export rate is
+  averaged over a minute like SectorInfo, and landing pads (1500 water per landing) in the destination receive pods at the
+  summed export rate of every stored sector sending there. In free play a landing pad lands pods endlessly
 - Tech tree (J): Mindustry's Serpulo research tree with its real research costs (exported from `SerpuloTechTree`);
   blocks and units are locked until researched with items from your core (pay in parts), items unlock when they first
   reach the core. Research is kept across games; untick "Tech tree" on the title screen to play with everything unlocked

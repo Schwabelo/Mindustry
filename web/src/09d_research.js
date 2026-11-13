@@ -5,6 +5,8 @@ const TECH_DATA = [
   ["conveyor", "b", "core-shard", "copper:5", ""],
   ["junction", "b", "conveyor", "copper:100", ""],
   ["router", "b", "junction", "copper:100", ""],
+  ["advanced-launch-pad", "b", "router", "copper:13000 lead:11000 titanium:7200 silicon:9200", "sector:extractionOutpost"],
+  ["landing-pad", "b", "advanced-launch-pad", "copper:7200 graphite:3300 titanium:3300", ""],
   ["distributor", "b", "router", "copper:100 lead:100", ""],
   ["sorter", "b", "router", "copper:100 lead:100", ""],
   ["inverted-sorter", "b", "sorter", "copper:100 lead:100", ""],

@@ -173,6 +173,7 @@ add(["message", "switch", "switch-on", "micro-processor", "logic-processor", "hy
      "logic-display", "large-logic-display"])
 add(["thermal-generator", "illuminator", "illuminator-top", "payload-conveyor", "payload-conveyor-top", "payload-conveyor-icon",
      "payload-router", "payload-router-top", "payload-router-over", "payload-router-icon"])
+add(["advanced-launch-pad", "advanced-launch-pad-light", "advanced-launch-pad-pod", "landing-pad"])
 add(["door", "door-open", "door-large", "door-large-open", "scrap-wall-gigantic", "shock-mine", "shock-mine-team-top",
      "overdrive-dome", "overdrive-dome-top", "repair-point-base"] + [f"scrap-wall{i}" for i in range(1, 6)]
     + [f"scrap-wall-large{i}" for i in range(1, 5)] + [f"scrap-wall-huge{i}" for i in range(1, 4)])
@@ -302,7 +303,7 @@ SOUNDS = {
     "place": "block/blockPlace1", "place2": "block/blockPlace2", "break": "block/blockBreak1",
     "click": "block/click", "unitCreate": "block/unitCreate", "blockHeal": "block/blockHeal",
     "rotate": "block/blockRotate", "waveSpawn": "ui/waveSpawn", "uiButton": "ui/uiButton",
-    "uiNotify": "ui/uiNotify", "uiUnlock": "ui/uiUnlock", "coreLand": "block/coreLand",
+    "uiNotify": "ui/uiNotify", "padLaunch": "block/padLaunch", "padLand": "block/padLand", "uiUnlock": "ui/uiUnlock", "coreLand": "block/coreLand",
     "shootScepter": "shoot/shootScepter", "shootScepterSecondary": "shoot/shootScepterSecondary", "shootReign": "shoot/shootReign",
     "chargeVela": "charge/chargeVela", "beamPlasma": "beams/beamPlasma", "chargeCorvus": "charge/chargeCorvus",
     "shootCorvus": "shoot/shootCorvus", "shootEclipse": "shoot/shootEclipse", "shootQuad": "shoot/shootQuad",

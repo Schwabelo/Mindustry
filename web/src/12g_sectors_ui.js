@@ -140,6 +140,7 @@ const SectorUI = {
       d.style.borderColor = this.sel === n ? '#fff' : st === 'captured' ? '#84f491' : st === 'open' ? 'var(--accent)' : '#333';
       d.firstChild.style.filter = st === 'locked' ? 'grayscale(1) brightness(0.35)' : '';
       d.lastChild.style.color = st === 'locked' ? '#666' : st === 'captured' ? '#84f491' : '#fff';
+      d.lastChild.textContent = Sectors.title(n) + (Sectors.bases.has(n) || (Sectors.current && Sectors.current.name === n && Game.state !== 'title') ? ' \u25cf' : '');
       const line = this.lineEls.get(n);
       if (line) line.setAttribute('stroke', st === 'locked' ? '#333' : st === 'captured' ? '#84f491' : '#ffd37f');
     }
@@ -160,24 +161,39 @@ const SectorUI = {
       <div style="font-size:13px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:4px">Resources: ${m.resources.map(r => `<img src="${Assets.url('item-' + r)}" title="${titleCase(r)}" style="width:16px;height:16px;image-rendering:pixelated">`).join('')}</div>`;
     const miss = Sectors.missing(n);
     if (miss.length) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">Requires: ${miss.map(x => x.kind === 'sector' ? 'capture ' + Sectors.title(x.name) : 'research ' + titleCase(x.name)).join(', ')}</div>`;
-    const other = Sectors.current && Game.state !== 'title' && !playing && !Sectors.captured.has(Sectors.current.name) ? Sectors.current.name : null;
+    // launch pad trade
+    const ex = Object.entries(Sectors.exportsOf(n)), dest = Sectors.destination(n);
+    const icon = it => `<img src="${Assets.url('item-' + it)}" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle">`;
+    if (Sectors.bases.has(n) || playing) {
+      html += `<div style="font-size:13px;margin-top:6px">Exports: ${ex.length ? ex.map(([k, v]) => `${icon(k)} ${Math.round(v * 60)}/min`).join(' ') : 'none'}${ex.length || dest ? ` &rarr; ${dest ? Sectors.title(dest) : 'no destination'}` : ''}</div>`;
+      const into = [...Sectors.bases].filter(s => s !== n && Sectors.destination(s) === n);
+      const imp = {};
+      for (const s of into) for (const [k, v] of Object.entries(Sectors.exportsOf(s))) imp[k] = (imp[k] || 0) + v;
+      if (Object.keys(imp).length) html += `<div style="font-size:13px">Imports: ${Object.entries(imp).map(([k, v]) => `${icon(k)} ${Math.round(v * 60)}/min`).join(' ')} (needs landing pads)</div>`;
+    }
+    const based = Sectors.bases.has(n) && !playing;
+    const leaving = Sectors.current && (Game.state === 'playing' || Game.state === 'paused') && !playing ? Sectors.current.name : null;
     if (st !== 'locked') {
-      html += `<button id="scLaunch" class="accent" style="margin-top:10px;width:100%">${playing ? 'Restart sector' : st === 'captured' ? 'Revisit' : 'Launch'}</button>`;
-      if (other) html += `<div style="font-size:12px;color:#e5a454;margin-top:4px">Launching leaves ${Sectors.title(other)} unfinished; you'd have to start it over.</div>`;
+      html += `<button id="scLaunch" class="accent" style="margin-top:10px;width:100%">${playing ? 'Return' : based ? 'Resume base' : st === 'captured' ? 'Revisit' : 'Launch'}</button>`;
+      if (based || playing) html += `<button id="scFresh" style="margin-top:6px;width:100%">Restart sector from scratch</button>`;
+      if (leaving) html += `<div style="font-size:12px;color:#aaa;margin-top:4px">${Sectors.title(leaving)} is kept and paused while you're away.</div>`;
     }
     box.innerHTML = html;
     box.querySelector('#scInfoClose').onclick = () => { this.sel = null; this.render(); };
-    const btn = box.querySelector('#scLaunch');
-    if (btn) btn.onclick = () => {
-      if ((playing || other) && !confirm(playing ? 'Restart this sector from the beginning?' : `Leave ${Sectors.title(other)} and launch to ${m.title}?`)) return;
+    const go = async fresh => {
+      if (fresh && !confirm(`Throw away everything built on ${m.title} and start it over?`)) return;
       UI.initAudio();
-      if (Sectors.launch(n)) {
+      if (playing && !fresh) { this.close(); return; }
+      if (await Sectors.launch(n, { fresh })) {
         this.close();
         $('pause').classList.add('hidden'); $('gameover').classList.add('hidden');
         UI.enterGame();
         SaveIO.saveLocal(true);
       }
     };
+    const btn = box.querySelector('#scLaunch'), fb = box.querySelector('#scFresh');
+    if (btn) btn.onclick = () => go(false);
+    if (fb) fb.onclick = () => go(true);
   },
 };
 

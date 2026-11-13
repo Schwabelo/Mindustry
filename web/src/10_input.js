@@ -142,7 +142,7 @@ const Input = {
       if (b instanceof LogicProcessor) { this.linkSource = b; UI.openConfig(b); Audio2.play('click', undefined, undefined, 0.3); return; }
       if (b instanceof MessageBlock) { UI.openConfig(b); return; }
       if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
-      if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory) { UI.openConfig(b); return; }
+      if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory || b instanceof LaunchPad || b instanceof LandingPad) { UI.openConfig(b); return; }
       if (b instanceof Door || b instanceof SwitchBlock || b instanceof Illuminator || (b instanceof PayloadConveyor && b.block.router)) { b.toggle(); return; }
     }
     // mining
