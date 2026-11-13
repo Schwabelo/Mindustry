@@ -193,7 +193,7 @@ add(["bullet", "bullet-back", "shell", "shell-back", "laser", "laser-end", "mine
 ICON_NAMES = ["turret", "production", "distribution", "liquid", "crafting", "power", "defense", "units", "effect",
               "pause", "play", "settings", "hammer", "cancel", "rotate", "trash", "info", "menu", "eye",
               "refresh", "exit", "home", "map", "item", "power", "check", "add", "mode-survival", "players", "none",
-              "command-rally", "command-attack", "line", "elevation", "units"]
+              "command-rally", "command-attack", "line", "elevation", "units", "tree", "lock"]
 
 
 # ---------------------------------------------------------------- image helpers
@@ -292,7 +292,7 @@ SOUNDS = {
     "place": "block/blockPlace1", "place2": "block/blockPlace2", "break": "block/blockBreak1",
     "click": "block/click", "unitCreate": "block/unitCreate", "blockHeal": "block/blockHeal",
     "rotate": "block/blockRotate", "waveSpawn": "ui/waveSpawn", "uiButton": "ui/uiButton",
-    "uiNotify": "ui/uiNotify", "coreLand": "block/coreLand",
+    "uiNotify": "ui/uiNotify", "uiUnlock": "ui/uiUnlock", "coreLand": "block/coreLand",
     "shootScepter": "shoot/shootScepter", "shootScepterSecondary": "shoot/shootScepterSecondary", "shootReign": "shoot/shootReign",
     "chargeVela": "charge/chargeVela", "beamPlasma": "beams/beamPlasma", "chargeCorvus": "charge/chargeCorvus",
     "shootCorvus": "shoot/shootCorvus", "shootEclipse": "shoot/shootEclipse", "shootQuad": "shoot/shootQuad",

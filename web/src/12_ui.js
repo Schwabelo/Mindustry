@@ -53,7 +53,7 @@ const UI = {
       ['Q / middle click', 'pick block under cursor'], ['1-9', 'select block in category'], ['G', 'units: attack / defend'],
       ['Shift (hold) or C', 'command units: drag to select, right-click to move / attack'],
       ['F (hold) / T', 'copy an area as a schematic / schematic library'],
-      ['N', 'call next wave now'], ['X', 'clear build queue'], ['Space / Esc', 'pause'],
+      ['J', 'research (tech tree)'], ['N', 'call next wave now'], ['X', 'clear build queue'], ['Space / Esc', 'pause'],
     ];
     $('controls').innerHTML = controls.map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join('');
 
@@ -72,10 +72,11 @@ const UI = {
       const s = JSON.parse(localStorage.getItem('mindustry-lite-settings') || '{}');
       if (s.music !== undefined) { $('musicVol').value = s.music; Audio2.musicVol = s.music / 100; }
       if (s.sfx !== undefined) { $('sfxVol').value = s.sfx; Audio2.sfxVol = s.sfx / 100; }
+      if (s.research !== undefined) $('researchMode').checked = s.research;
     } catch (e) { /* storage unavailable */ }
   },
   saveSettings() {
-    try { localStorage.setItem('mindustry-lite-settings', JSON.stringify({ music: +$('musicVol').value, sfx: +$('sfxVol').value })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('mindustry-lite-settings', JSON.stringify({ music: +$('musicVol').value, sfx: +$('sfxVol').value, research: $('researchMode').checked })); } catch (e) { /* ignore */ }
   },
 
   showTitle() {
@@ -105,7 +106,7 @@ const UI = {
   startGame(resume) {
     this.initAudio();
     if (resume) { if (!SaveIO.loadLocal()) return; }
-    else Game.newGame(this.seed);
+    else { Game.researchMode = $('researchMode').checked; Game.newGame(this.seed); }
     this.enterGame();
   },
 
@@ -149,7 +150,9 @@ const UI = {
     const blocks = $('blocks');
     blocks.innerHTML = '';
     this.hoverBlock = null;
-    BLOCK_LIST.filter(b => b.category === c).forEach((b, i) => {
+    const shown = BLOCK_LIST.filter(b => b.category === c && !Research.locked(b));
+    if (!shown.length) blocks.innerHTML = `<div style="font-size:12px;color:#999;padding:6px">Nothing researched here yet. Press J to research.</div>`;
+    shown.forEach((b, i) => {
       const btn = document.createElement('div');
       btn.className = 'bbtn'; btn.dataset.block = b.name;
       btn.innerHTML = `<img src="${Assets.url('icon:' + b.name)}">`;
@@ -165,7 +168,7 @@ const UI = {
   },
 
   selectIndex(i) {
-    const list = BLOCK_LIST.filter(b => b.category === this.category);
+    const list = BLOCK_LIST.filter(b => b.category === this.category && !Research.locked(b));
     if (list[i]) Input.select(Input.selected === list[i] ? null : list[i]);
   },
 
@@ -173,6 +176,7 @@ const UI = {
     const core = Game.playerCore();
     for (const el of $('blocks').children) {
       const b = BLOCKS[el.dataset.block];
+      if (!b) continue;
       el.classList.toggle('sel', Input.selected === b);
       el.classList.toggle('locked', !!core && !b.requirements.every(r => core.items[r.item.id] >= r.amount));
     }
@@ -232,7 +236,7 @@ const UI = {
     if (b instanceof UnitFactory) {
       const head = document.createElement('div'); head.className = 'wide'; head.textContent = 'Unit to produce';
       el.appendChild(head);
-      b.block.plans.forEach((p, i) => addBtn(Assets.url(p.unit), titleCase(p.unit) + ': ' + p.requirements.map(r => r.amount + ' ' + r.item.name).join(', '), b.currentPlan === i, () => b.configure(i)));
+      b.block.plans.forEach((p, i) => { if (!Research.locked(p.unit)) addBtn(Assets.url(p.unit), titleCase(p.unit) + ': ' + p.requirements.map(r => r.amount + ' ' + r.item.name).join(', '), b.currentPlan === i, () => b.configure(i)); });
       addBtn(null, 'None', b.currentPlan === -1, () => b.configure(-1));
     } else {
       const head = document.createElement('div'); head.className = 'wide'; head.textContent = b instanceof Sorter ? 'Sort item' : 'Unload item';

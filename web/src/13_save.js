@@ -100,7 +100,7 @@ const SaveIO = {
     }));
     const p = Game.player;
     return {
-      v: SAVE_VERSION, seed: Game.seed, wx: Weather.save(), wave: Game.wave, wc: Math.round(Game.waveCountdown), time: Math.round(Time.time),
+      v: SAVE_VERSION, seed: Game.seed, rs: Game.researchMode ? 1 : 0, wx: Weather.save(), wave: Game.wave, wc: Math.round(Game.waveCountdown), time: Math.round(Time.time),
       cmd: Game.command, stats: Game.stats, builds, units,
       plans: p ? p.plans.map(pl => ({ b: pl.block.name, x: pl.x, y: pl.y, r: pl.rotation, br: !!pl.breaking })) : [],
       cam: [Math.round(Render.camX), Math.round(Render.camY), Render.targetZoom], date: Date.now(),
@@ -110,6 +110,7 @@ const SaveIO = {
   load(data) {
     if (!data || data.v !== SAVE_VERSION) throw new Error('Unsupported save version');
     Game.seed = data.seed;
+    Game.researchMode = !!data.rs;
     BOSS_GROUPS = genBossGroups(data.seed);
     Time.time = data.time || 0;
     Game.buildings = []; Game.units = []; Game.byTeam = { sharded: [], crux: [] }; Game.rebuildQueue = []; Fires.map.clear();

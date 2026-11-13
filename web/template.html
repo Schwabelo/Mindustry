@@ -42,6 +42,8 @@ button.accent { border-color: var(--accent); }
 #wave .sub { color: #ddd; font-size: 13px; margin-top: 2px; }
 #skipWave { border: none; border-left: 3px solid var(--line); padding: 0 12px; display: flex; align-items: center; justify-content: center; }
 #skipWave img { width: 28px; height: 28px; image-rendering: pixelated; }
+#researchBtn { border: none; border-left: 3px solid var(--line); padding: 0 10px; display: flex; align-items: center; justify-content: center; }
+#researchBtn img { width: 26px; height: 26px; image-rendering: pixelated; }
 #playerHealth { height: 6px; background: #3a3a3a; }
 #playerHealth div { height: 100%; background: var(--accent); width: 100%; }
 #items { margin-top: 6px; padding: 6px 10px; display: grid; grid-template-columns: repeat(2, auto); gap: 2px 14px; }
@@ -121,6 +123,7 @@ button.accent { border-color: var(--accent); }
     <div class="panel">
       <div class="row">
         <div class="info"><div class="title" id="waveTitle">Wave 1</div><div class="sub" id="waveSub"></div></div>
+        <button id="researchBtn" title="Research (J)"></button>
         <button id="skipWave" title="Skip wave"></button>
       </div>
       <div id="playerHealth"><div></div></div>
@@ -145,6 +148,8 @@ button.accent { border-color: var(--accent); }
     <button class="accent" id="playBtn">New game</button>
     <button id="newMapBtn">New map seed</button>
     <button id="importBtn">Import save file</button>
+    <label class="settingRow" style="justify-content:flex-start;gap:8px;cursor:pointer"><input type="checkbox" id="researchMode" checked> Tech tree: research blocks and units</label>
+    <button id="researchTitleBtn">Research</button>
     <p id="seedText"></p>
     <div id="controls"></div>
   </div>
@@ -159,6 +164,7 @@ button.accent { border-color: var(--accent); }
     <div class="settingRow"><span>Sound</span><input type="range" id="sfxVol" min="0" max="100" value="70"></div>
     <div class="row2"><button id="saveBtn">Save game</button><button id="loadBtn">Load save</button></div>
     <div class="row2"><button id="exportBtn">Export save</button><button id="importBtn2">Import save</button></div>
+    <button id="researchPauseBtn">Research</button>
     <button id="restartBtn">Restart</button>
     <button id="quitBtn">Quit to title</button>
   </div>

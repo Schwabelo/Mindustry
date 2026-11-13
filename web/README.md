@@ -43,6 +43,9 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Enemies follow the wave table from `game/Waves.java` with flow-field pathfinding
 - Unit command mode: select units, move/attack orders with pathfinding and formations, commands (move, repair,
   rebuild, assist, mine), stances (hold fire, pursue, patrol, ram, boost, hold position), factory rally points
+- Tech tree (J): Mindustry's Serpulo research tree with its real research costs (exported from `SerpuloTechTree`);
+  blocks and units are locked until researched with items from your core (pay in parts), items unlock when they first
+  reach the core. Research is kept across games; untick "Tech tree" on the title screen to play with everything unlocked
 - Schematics: copy areas with their settings (sorter items, bridge / node / processor links and code, factory
   plans...), rotate / flip, save a library, and import / export Mindustry schematic codes
 - Weather: rain (wet status), snow, sandstorm and spore storm (wind, spore-slowed air units), fog; each map gets
@@ -73,6 +76,7 @@ or the Erekir planet.
 | Shift (hold) or C | command mode: drag to select units, right-click to move / attack, Ctrl+right-click to queue |
 | F (hold) | copy an area as a schematic; then click to place, R rotate, Z / X flip, right-click to drop |
 | T | schematic library: save, use, copy and import codes (Mindustry's base64 format) |
+| J | research (tech tree) |
 | N | call the next wave now |
 | X | clear build queue |
 | Space / Esc | pause |

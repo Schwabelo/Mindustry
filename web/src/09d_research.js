@@ -1,0 +1,297 @@
+// Generated from SerpuloTechTree.java via TechTree node requirements (sector objectives dropped).
+// [name, type (b block, u unit, i item, l liquid), parent, research cost, extra objectives]
+const TECH_DATA = [
+  ["conveyor", "b", "core-shard", "copper:5", ""],
+  ["junction", "b", "conveyor", "copper:100", ""],
+  ["router", "b", "junction", "copper:100", ""],
+  ["distributor", "b", "router", "copper:100 lead:100", ""],
+  ["sorter", "b", "router", "copper:100 lead:100", ""],
+  ["inverted-sorter", "b", "sorter", "copper:100 lead:100", ""],
+  ["overflow-gate", "b", "sorter", "copper:100 lead:100", ""],
+  ["underflow-gate", "b", "overflow-gate", "copper:100 lead:100", ""],
+  ["container", "b", "router", "titanium:3300", ""],
+  ["unloader", "b", "container", "titanium:700 silicon:900", ""],
+  ["vault", "b", "container", "titanium:9200 thorium:4300", ""],
+  ["bridge-conveyor", "b", "router", "copper:200 lead:200", ""],
+  ["titanium-conveyor", "b", "bridge-conveyor", "copper:80 lead:80 titanium:80", ""],
+  ["mass-driver", "b", "titanium-conveyor", "lead:4300 titanium:4300 thorium:1500 silicon:2400", ""],
+  ["phase-conveyor", "b", "mass-driver", "lead:300 graphite:300 silicon:200 phase-fabric:100", ""],
+  ["payload-conveyor", "b", "titanium-conveyor", "copper:300 graphite:300", ""],
+  ["payload-router", "b", "payload-conveyor", "copper:300 graphite:400", ""],
+  ["plastanium-conveyor", "b", "titanium-conveyor", "graphite:80 silicon:80 plastanium:80", ""],
+  ["armored-conveyor", "b", "plastanium-conveyor", "metaglass:80 thorium:80 plastanium:80", ""],
+  ["core-foundation", "b", "core-shard", "copper:10000 lead:10000 silicon:6400", ""],
+  ["core-nucleus", "b", "core-foundation", "copper:47000 lead:47000 thorium:21000 silicon:28000", ""],
+  ["mechanical-drill", "b", "core-shard", "copper:10", ""],
+  ["mechanical-pump", "b", "mechanical-drill", "copper:400 metaglass:300", ""],
+  ["conduit", "b", "mechanical-pump", "metaglass:80", ""],
+  ["liquid-junction", "b", "conduit", "metaglass:200 graphite:100", ""],
+  ["liquid-router", "b", "liquid-junction", "metaglass:100 graphite:100", ""],
+  ["liquid-container", "b", "liquid-router", "metaglass:400 titanium:300", ""],
+  ["liquid-tank", "b", "liquid-container", "metaglass:1200 titanium:900", ""],
+  ["bridge-conduit", "b", "liquid-router", "metaglass:200 graphite:100", ""],
+  ["pulse-conduit", "b", "liquid-router", "metaglass:80 titanium:100", ""],
+  ["phase-conduit", "b", "pulse-conduit", "metaglass:600 titanium:300 silicon:200 phase-fabric:100", ""],
+  ["plated-conduit", "b", "pulse-conduit", "metaglass:80 thorium:100 plastanium:80", ""],
+  ["rotary-pump", "b", "pulse-conduit", "copper:2200 metaglass:1500 titanium:1000 silicon:600", ""],
+  ["impulse-pump", "b", "rotary-pump", "copper:2600 metaglass:3000 titanium:1200 thorium:1000 silicon:900", ""],
+  ["graphite-press", "b", "mechanical-drill", "copper:2400 lead:900", "coal"],
+  ["pneumatic-drill", "b", "graphite-press", "copper:500 graphite:300", ""],
+  ["cultivator", "b", "pneumatic-drill", "copper:700 lead:700 silicon:300", ""],
+  ["laser-drill", "b", "pneumatic-drill", "copper:1000 graphite:900 titanium:600 silicon:900", ""],
+  ["blast-drill", "b", "laser-drill", "copper:2100 titanium:1500 thorium:2400 silicon:1900", ""],
+  ["water-extractor", "b", "laser-drill", "copper:900 lead:900 metaglass:900 graphite:900", ""],
+  ["oil-extractor", "b", "water-extractor", "copper:5200 lead:3900 graphite:6200 thorium:3900 silicon:2400", "sand"],
+  ["pyratite-mixer", "b", "graphite-press", "copper:1500 lead:700", "coal sand"],
+  ["blast-mixer", "b", "pyratite-mixer", "lead:900 titanium:600", "pyratite spore-pod"],
+  ["silicon-smelter", "b", "graphite-press", "copper:900 lead:700", "coal sand"],
+  ["spore-press", "b", "silicon-smelter", "lead:1000 silicon:900", "spore-pod"],
+  ["coal-centrifuge", "b", "spore-press", "lead:900 graphite:1200 titanium:600", ""],
+  ["multi-press", "b", "coal-centrifuge", "lead:3300 graphite:1500 titanium:3300 silicon:700", "coal"],
+  ["silicon-crucible", "b", "multi-press", "metaglass:2600 titanium:4100 silicon:1900 plastanium:1000", "coal sand pyratite"],
+  ["plastanium-compressor", "b", "spore-press", "lead:3900 graphite:1900 titanium:2600 silicon:2600", ""],
+  ["phase-weaver", "b", "plastanium-compressor", "lead:4100 thorium:2400 silicon:4500", "sand"],
+  ["kiln", "b", "silicon-smelter", "copper:1900 lead:900 graphite:900", "sand"],
+  ["pulverizer", "b", "kiln", "copper:900 lead:700", "scrap"],
+  ["incinerator", "b", "pulverizer", "lead:400 graphite:100", ""],
+  ["melter", "b", "incinerator", "copper:900 lead:1000 graphite:1400", "scrap"],
+  ["surge-smelter", "b", "melter", "lead:2600 thorium:2200 silicon:2600", "copper titanium"],
+  ["separator", "b", "melter", "copper:900 titanium:700", ""],
+  ["disassembler", "b", "separator", "titanium:3300 thorium:2600 silicon:5200 plastanium:1200", "scrap"],
+  ["cryofluid-mixer", "b", "melter", "lead:2100 titanium:1900 silicon:1200", ""],
+  ["micro-processor", "b", "silicon-smelter", "copper:3000 lead:1500 silicon:1500", ""],
+  ["switch", "b", "micro-processor", "copper:100 graphite:100", ""],
+  ["message", "b", "switch", "copper:100 graphite:100", ""],
+  ["logic-display", "b", "message", "lead:3300 metaglass:1500 silicon:1500", ""],
+  ["large-logic-display", "b", "logic-display", "lead:7200 metaglass:3300 silicon:5200 phase-fabric:2400", ""],
+  ["memory-cell", "b", "message", "copper:900 graphite:900 silicon:900", ""],
+  ["memory-bank", "b", "memory-cell", "copper:900 graphite:2600 silicon:2600 phase-fabric:900", ""],
+  ["logic-processor", "b", "switch", "lead:12000 graphite:1900 thorium:1500 silicon:2600", ""],
+  ["hyper-processor", "b", "logic-processor", "lead:17000 thorium:2400 silicon:5200 surge-alloy:1500", ""],
+  ["illuminator", "b", "silicon-smelter", "lead:200 graphite:300 silicon:200", ""],
+  ["combustion-generator", "b", "mechanical-drill", "copper:700 lead:400", "coal"],
+  ["power-node", "b", "combustion-generator", "copper:100 lead:200", ""],
+  ["power-node-large", "b", "power-node", "lead:300 titanium:100 silicon:100", ""],
+  ["diode", "b", "power-node-large", "metaglass:300 silicon:300 plastanium:100", ""],
+  ["surge-tower", "b", "diode", "lead:300 titanium:200 silicon:400 surge-alloy:400", ""],
+  ["battery", "b", "power-node", "copper:100 lead:600", ""],
+  ["battery-large", "b", "battery", "lead:1500 titanium:600 silicon:900", ""],
+  ["mender", "b", "power-node", "copper:700 lead:900", ""],
+  ["mend-projector", "b", "mender", "copper:1500 lead:3300 titanium:700 silicon:1200", ""],
+  ["force-projector", "b", "mend-projector", "lead:3300 titanium:2400 silicon:4300", ""],
+  ["overdrive-projector", "b", "force-projector", "lead:3300 titanium:2400 silicon:2400 plastanium:900", ""],
+  ["overdrive-dome", "b", "overdrive-projector", "lead:7200 titanium:4500 silicon:4500 plastanium:2600 surge-alloy:4100", "phase-fabric"],
+  ["repair-point", "b", "mend-projector", "copper:900 lead:900 silicon:600", ""],
+  ["steam-generator", "b", "power-node", "copper:1000 lead:1200 graphite:700 silicon:900", ""],
+  ["thermal-generator", "b", "steam-generator", "copper:1200 lead:1500 metaglass:1200 graphite:1000 silicon:1000", ""],
+  ["differential-generator", "b", "thermal-generator", "copper:2200 lead:3300 metaglass:1500 titanium:1500 silicon:2100", "pyratite"],
+  ["thorium-reactor", "b", "differential-generator", "lead:11000 metaglass:1500 graphite:5200 thorium:5200 silicon:7200", "cryofluid"],
+  ["impact-reactor", "b", "thorium-reactor", "lead:19000 metaglass:9200 graphite:15000 thorium:3300 silicon:11000 surge-alloy:9200", "blast-compound"],
+  ["rtg-generator", "b", "thorium-reactor", "lead:3300 thorium:1500 silicon:2400 plastanium:2400 phase-fabric:700", ""],
+  ["solar-panel", "b", "power-node", "lead:300 silicon:200", ""],
+  ["solar-panel-large", "b", "solar-panel", "lead:1900 silicon:2200 phase-fabric:400", ""],
+  ["duo", "b", "core-shard", "copper:50", ""],
+  ["copper-wall", "b", "duo", "copper:20", ""],
+  ["copper-wall-large", "b", "copper-wall", "copper:700", ""],
+  ["scrap-wall", "b", "copper-wall-large", "scrap:200", ""],
+  ["scrap-wall-large", "b", "scrap-wall", "scrap:700", ""],
+  ["scrap-wall-huge", "b", "scrap-wall-large", "scrap:1700", ""],
+  ["scrap-wall-gigantic", "b", "scrap-wall-huge", "scrap:3200", ""],
+  ["titanium-wall", "b", "copper-wall-large", "titanium:200", ""],
+  ["titanium-wall-large", "b", "titanium-wall", "titanium:700", ""],
+  ["door", "b", "titanium-wall", "titanium:200 silicon:100", ""],
+  ["door-large", "b", "door", "titanium:700 silicon:400", ""],
+  ["plastanium-wall", "b", "titanium-wall", "metaglass:100 plastanium:100", ""],
+  ["plastanium-wall-large", "b", "plastanium-wall", "metaglass:200 plastanium:600", ""],
+  ["thorium-wall", "b", "titanium-wall", "thorium:200", ""],
+  ["thorium-wall-large", "b", "thorium-wall", "thorium:700", ""],
+  ["surge-wall", "b", "thorium-wall", "surge-alloy:200", ""],
+  ["surge-wall-large", "b", "surge-wall", "surge-alloy:700", ""],
+  ["phase-wall", "b", "surge-wall", "phase-fabric:200", ""],
+  ["phase-wall-large", "b", "phase-wall", "phase-fabric:700", ""],
+  ["scatter", "b", "duo", "copper:100 lead:70", ""],
+  ["hail", "b", "scatter", "copper:1200 graphite:500", ""],
+  ["salvo", "b", "hail", "copper:3300 graphite:2600 titanium:1500", ""],
+  ["swarmer", "b", "salvo", "graphite:1000 titanium:1000 silicon:900 plastanium:1400", ""],
+  ["cyclone", "b", "swarmer", "copper:7200 titanium:4300 plastanium:2600", ""],
+  ["spectre", "b", "cyclone", "copper:38000 graphite:11000 thorium:9200 plastanium:6200 surge-alloy:9200", ""],
+  ["ripple", "b", "salvo", "copper:5200 graphite:4600 titanium:1900", ""],
+  ["fuse", "b", "ripple", "copper:8200 graphite:8200 thorium:3300", ""],
+  ["arc", "b", "duo", "copper:500 lead:500", ""],
+  ["scorch", "b", "arc", "copper:700 graphite:600", ""],
+  ["wave", "b", "scorch", "copper:700 lead:2400 metaglass:1400", ""],
+  ["parallax", "b", "wave", "graphite:1500 titanium:3700 silicon:5600", ""],
+  ["segment", "b", "parallax", "titanium:1200 thorium:2600 silicon:4500 phase-fabric:1200", ""],
+  ["tsunami", "b", "wave", "lead:15000 metaglass:3300 titanium:9200 thorium:3300", ""],
+  ["lancer", "b", "scorch", "copper:1900 lead:2200 titanium:900 silicon:1900", ""],
+  ["meltdown", "b", "lancer", "copper:52000 lead:13000 graphite:11000 silicon:12000 surge-alloy:12000", ""],
+  ["foreshadow", "b", "meltdown", "copper:42000 metaglass:24000 silicon:24000 plastanium:7200 surge-alloy:11000", ""],
+  ["shock-mine", "b", "lancer", "lead:700 silicon:300", ""],
+  ["ground-factory", "b", "core-shard", "copper:700 lead:2000 silicon:1300", ""],
+  ["dagger", "u", "ground-factory", "silicon:5 lead:5", ""],
+  ["mace", "u", "dagger", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["fortress", "u", "mace", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["scepter", "u", "fortress", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["reign", "u", "scepter", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["nova", "u", "dagger", "silicon:1500 lead:1000 titanium:1000", ""],
+  ["pulsar", "u", "nova", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["quasar", "u", "pulsar", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["vela", "u", "quasar", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["corvus", "u", "vela", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["crawler", "u", "dagger", "silicon:400 graphite:400", "coal"],
+  ["atrax", "u", "crawler", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["spiroct", "u", "atrax", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["arkyid", "u", "spiroct", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["toxopid", "u", "arkyid", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["air-factory", "b", "ground-factory", "copper:900 lead:1100 silicon:900", ""],
+  ["flare", "u", "air-factory", "silicon:7", ""],
+  ["horizon", "u", "flare", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["zenith", "u", "horizon", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["antumbra", "u", "zenith", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["eclipse", "u", "antumbra", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["mono", "u", "flare", "silicon:1500 lead:700", ""],
+  ["poly", "u", "mono", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["mega", "u", "poly", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["quad", "u", "mega", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["oct", "u", "quad", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["naval-factory", "b", "air-factory", "copper:5200 lead:4500 metaglass:4100", ""],
+  ["risso", "u", "naval-factory", "silicon:1000 metaglass:1700", ""],
+  ["minke", "u", "risso", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["bryde", "u", "minke", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["sei", "u", "bryde", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["omura", "u", "sei", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["retusa", "u", "risso", "silicon:700 titanium:1000", ""],
+  ["oxynoe", "u", "retusa", "silicon:2000 graphite:2000", "additive-reconstructor"],
+  ["cyerce", "u", "oxynoe", "silicon:6500 titanium:4000 metaglass:2000", "multiplicative-reconstructor"],
+  ["aegires", "u", "cyerce", "silicon:42000 titanium:37000 plastanium:32000", "exponential-reconstructor"],
+  ["navanax", "u", "aegires", "silicon:50000 plastanium:30000 surge-alloy:25000 phase-fabric:17000", "tetrative-reconstructor"],
+  ["additive-reconstructor", "b", "ground-factory", "copper:7200 lead:4100 silicon:3000", "graphite"],
+  ["multiplicative-reconstructor", "b", "additive-reconstructor", "lead:26000 titanium:13000 thorium:26000 silicon:17000", "metaglass"],
+  ["exponential-reconstructor", "b", "multiplicative-reconstructor", "lead:92000 titanium:92000 thorium:31000 silicon:42000 plastanium:17000 phase-fabric:24000", ""],
+  ["tetrative-reconstructor", "b", "exponential-reconstructor", "lead:199000 thorium:42000 silicon:144000 plastanium:24000 phase-fabric:24000 surge-alloy:33000", ""],
+  ["copper", "i", "core-shard", "", ""],
+  ["water", "l", "copper", "", ""],
+  ["lead", "i", "copper", "", ""],
+  ["titanium", "i", "lead", "", ""],
+  ["cryofluid", "l", "titanium", "", ""],
+  ["thorium", "i", "titanium", "", ""],
+  ["surge-alloy", "i", "thorium", "", ""],
+  ["phase-fabric", "i", "thorium", "", ""],
+  ["metaglass", "i", "lead", "", ""],
+  ["sand", "i", "copper", "", ""],
+  ["scrap", "i", "sand", "", ""],
+  ["slag", "l", "scrap", "", ""],
+  ["coal", "i", "sand", "", ""],
+  ["graphite", "i", "coal", "", ""],
+  ["silicon", "i", "graphite", "", ""],
+  ["pyratite", "i", "coal", "", ""],
+  ["blast-compound", "i", "pyratite", "", ""],
+  ["spore-pod", "i", "coal", "", ""],
+  ["oil", "l", "coal", "", ""],
+  ["plastanium", "i", "oil", "", ""],
+];
+
+// Research state (TechTree.TechNode + UnlockableContent.unlocked): global across games like the campaign, stored in
+// localStorage. Research mode is chosen per game (title screen); saves made without it keep everything unlocked.
+const TECH = {};
+(() => {
+  TECH['core-shard'] = { name: 'core-shard', type: 'b', parent: null, req: [], obj: [], children: [] };
+  for (const [name, type, parent, req, obj] of TECH_DATA) {
+    TECH[name] = {
+      name, type, parent, children: [],
+      req: req ? req.split(' ').map(s => { const [i, a] = s.split(':'); return { item: Items[i], amount: +a }; }) : [],
+      obj: obj ? obj.split(' ') : [],
+    };
+  }
+  for (const n of Object.values(TECH)) if (n.parent) TECH[n.parent].children.push(n);
+})();
+
+const Research = {
+  KEY: 'mindustry-lite-research',
+  done: new Set(),     // researched / obtained content names
+  paid: {},            // name -> { itemName: amount } partial progress (TechNode.finishedRequirements)
+
+  load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+      this.done = new Set(d.done || []); this.paid = d.paid || {};
+    } catch (e) { /* storage unavailable */ }
+  },
+  save() { try { localStorage.setItem(this.KEY, JSON.stringify({ done: [...this.done], paid: this.paid })); } catch (e) { /* ignore */ } },
+  reset() { this.done = new Set(); this.paid = {}; this.save(); },
+
+  // content that isn't in the tree (core ships, core shard) is always available
+  has(name) { return !TECH[name] || name === 'core-shard' || this.done.has(name); },
+  active() { return !!Game.researchMode; },
+  locked(c) { return this.active() && !this.has(typeof c === 'string' ? c : c.name); },
+
+  // TechNode objectives: parent researched + Research(...) objectives (items/liquids must have been obtained)
+  missing(n) {
+    const out = [];
+    if (n.parent && !this.has(n.parent)) out.push(n.parent);
+    for (const r of n.req) if (!this.has(r.item.name)) out.push(r.item.name);
+    for (const o of n.obj) if (!this.has(o)) out.push(o);
+    return out;
+  },
+  progress(n, item) { return (this.paid[n.name] && this.paid[n.name][item.name]) || 0; },
+  // spend whatever the core has toward the node (TechNode research with partial progress); true if completed
+  spend(n, core) {
+    if (this.has(n.name) || this.missing(n).length || n.type === 'i' || n.type === 'l') return false;
+    const p = this.paid[n.name] || (this.paid[n.name] = {});
+    let spent = 0;
+    for (const r of n.req) {
+      const need = r.amount - (p[r.item.name] || 0);
+      const take = core ? Math.min(need, core.items[r.item.id]) : 0;
+      if (take > 0) { core.removeItem(r.item, take); p[r.item.name] = (p[r.item.name] || 0) + take; spent += take; }
+    }
+    const complete = n.req.every(r => (p[r.item.name] || 0) >= r.amount);
+    if (complete) this.unlock(n.name);
+    else this.save();
+    return complete || spent > 0 ? (complete ? 'done' : 'spent') : false;
+  },
+  unlock(name) {
+    if (this.done.has(name)) return;
+    this.done.add(name); delete this.paid[name]; this.save();
+    if (typeof UI !== 'undefined' && UI.onResearched) UI.onResearched(TECH[name]);
+  },
+
+  // items unlock when they reach the core, liquids when a building holds them (nodeProduce)
+  scanTimer: 0,
+  update() {
+    if ((this.scanTimer += Time.delta) < 20) return;
+    this.scanTimer = 0;
+    const core = Game.playerCore();
+    if (core) for (const it of ITEMS) if (core.items[it.id] > 0 && !this.has(it.name)) this.unlock(it.name);
+    for (const b of Game.byTeam.sharded) {
+      const l = b.liquid;
+      if (l && l.type && l.amount > 0.01 && !this.has(l.type.name)) this.unlock(l.type.name);
+    }
+  },
+};
+
+Research.load();
+
+// ---------------------------------------------------------------- gating
+const _rsValidPlace = Game.validPlace;
+Game.validPlace = function (block, x, y, rot, team = 'sharded') {
+  if (team === 'sharded' && Research.locked(block)) return false;
+  return _rsValidPlace.call(this, block, x, y, rot, team);
+};
+const _rsGameUpdate = Game.update;
+Game.update = function () { _rsGameUpdate.apply(this, arguments); if (Research.active() && this.state === 'playing') Research.update(); };
+
+// UnitFactory: plans for unresearched units are unavailable
+const _rsPlanGet = Object.getOwnPropertyDescriptor(UnitFactory.prototype, 'plan').get;
+Object.defineProperty(UnitFactory.prototype, 'plan', {
+  get() { const p = _rsPlanGet.call(this); return p && Research.locked(p.unit) ? null : p; },
+  configurable: true,
+});
+const _rsFactoryInfo = UnitFactory.prototype.info;
+UnitFactory.prototype.info = function () {
+  const p = _rsPlanGet.call(this);
+  if (p && Research.locked(p.unit)) return [`${titleCase(p.unit)} is not researched (J)`];
+  return _rsFactoryInfo.call(this);
+};
+// Reconstructor: only upgrades into researched units (Reconstructor.upgrade checks unlockedNowHost)
+const _rsUpgrade = Reconstructor.prototype.upgrade;
+Reconstructor.prototype.upgrade = function (type) { const u = _rsUpgrade.call(this, type); return u && Research.locked(u.name) ? null : u; };
