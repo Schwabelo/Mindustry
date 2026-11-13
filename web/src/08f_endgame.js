@@ -2,7 +2,7 @@
 // segment, parallax); core upgrades (foundation, nucleus), beta/gamma, vault and core-linked storage.
 // Stats from content/Blocks.java, UnitTypes.java, Items.java.
 
-defItem('surge-alloy', 'f3e979', { cost: 1.2 });
+defItem('surge-alloy', 'f3e979', { cost: 1.2, charge: 0.75 });
 defItem('phase-fabric', 'f4ba6e', { cost: 1.3 });
 Items.surgeAlloy = Items['surge-alloy']; Items.phaseFabric = Items['phase-fabric'];
 Pal.meltdownHit = col('ffb98b');

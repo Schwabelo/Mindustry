@@ -65,9 +65,8 @@ Game.upgradeCore = function (block, x, y) {
 
 const _addPlan = Input.addPlan;
 Input.addPlan = function (pl) {
-  if (pl.block.coreUpgrade) {
-    if (Game.validPlace(pl.block, pl.x, pl.y, 0)) Game.upgradeCore(pl.block, pl.x, pl.y);
-    else UI.toast('Place it over your current core (it must be a bigger core)', 2.5, true);
+  if (pl.block.coreUpgrade && !Game.validPlace(pl.block, pl.x, pl.y, 0)) {
+    UI.toast('Place it over your current core (it must be a bigger core)', 2.5, true);
     return;
   }
   _addPlan.call(this, pl);

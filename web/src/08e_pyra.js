@@ -39,9 +39,7 @@ const Fires = {
     return r;
   },
   create(tx, ty) {
-    if (!World.inside(tx, ty) || World.isWall(tx, ty)) return;
-    const f = World.floorAt(tx, ty);
-    if (f.liquidDrop === 'water') return;
+    if (!World.inside(tx, ty)) return; // Fires.create: no floor check, fires without fuel burn out 8x faster
     const i = ty * World.w + tx;
     let fire = this.map.get(i);
     if (fire) { fire.lifetime = 1000; fire.time = 0; return; }
@@ -53,7 +51,9 @@ const Fires = {
     for (const [i, f] of this.map) {
       f.anim = (f.anim + Time.delta / (90 / 40)) % 40;
       f.warmup += Time.delta;
-      f.time = Math.min(f.time + Time.delta, f.lifetime);
+      // FireComp: rain (water attribute) makes fires burn out faster
+      const env = typeof Weather !== 'undefined' && Weather.env ? Math.max(Weather.env('water') * 10, 0) : 0;
+      f.time = Math.min(f.time + Time.delta * (1 + env), f.lifetime);
       if (f.time >= f.lifetime) { this.map.delete(i); continue; }
       const b = World.buildAt(f.tx, f.ty);
       const flam = this.tileFlammability(f.tx, f.ty);
@@ -63,6 +63,11 @@ const Fires = {
         f.spread = 0;
         const [dx, dy] = Geometry.d4[Math.floor(Math.random() * 4)];
         this.create(f.tx + dx, f.ty + dy);
+      }
+      // flammable fires throw fireballs (Bullets.fireball) that start new fires nearby
+      if (flam > 0 && (f.fireball = (f.fireball ?? Math.random() * 40) + Time.delta * Mathf.clamp(flam / 10, 0, 0.5)) >= 40) {
+        f.fireball = 0;
+        Fireballs.create(f.tx * TS, f.ty * TS, Math.random() * 360);
       }
       if ((f.dmg += Time.delta) >= 40) {
         f.dmg = 0;
@@ -119,23 +124,42 @@ Bullets.hitUnit = function (b, u) {
   if (b.type.status === 'blasted') u.applyStatus('blasted', 60);
 };
 
-// buildings holding explosive / flammable items or charged batteries blow up (Damage.dynamicExplosion)
+// Damage.dynamicExplosion: lightning from stored power, fireballs from flammability, and up to 25 growing damage waves of
+// explosiveness / 2 each
+function dynamicExplosion(x, y, flam, expl, power, radius, fire = true) {
+  for (let i = 0; i < Mathf.clamp(power / 700, 0, 8); i++) Lightning.create('derelict', Pal.powerLight, 3, x, y, Math.random() * 360, 5 + Mathf.clamp(Math.floor(power / 500), 1, 20) + Math.round(Mathf.range(2)), { collidesAir: true });
+  if (fire) for (let i = 0; i < Mathf.clamp(flam / 4, 0, 30); i++) Fireballs.create(x, y, Math.random() * 360);
+  const waves = expl <= 2 ? 0 : Mathf.clamp(Math.floor(expl / 11), 1, 25);
+  for (let i = 0; i < waves; i++) Damage.splash(null, x, y, Mathf.clamp(radius + expl, 0, 50) * ((i + 1) / waves), expl / 2, true, true, 1);
+  if (expl > 2) Fx.create('blockExplode', x, y, 0, null, Math.min(radius / 4 + expl / 20, 6));
+  const shake = Math.min(expl / 4 + 3, 9);
+  Render.shake(shake, shake);
+}
+// fireballs (Bullets.fireball: speed 1, drag 0.03): leave fires along the way (4% per tick) and where they stop
+const Fireballs = {
+  list: [],
+  create(x, y, ang) { this.list.push({ x, y, vx: Angles.trnsx(ang, 1), vy: Angles.trnsy(ang, 1), life: 40 }); },
+  update() {
+    for (const f of this.list) {
+      f.x += f.vx * Time.delta; f.y += f.vy * Time.delta;
+      const d = Math.max(1 - 0.03 * Time.delta, 0); f.vx *= d; f.vy *= d;
+      if (Math.random() < 0.04 * Time.delta) Fires.createWorld(f.x, f.y);
+      if ((f.life -= Time.delta) <= 0) Fires.createWorld(f.x, f.y);
+    }
+    this.list = this.list.filter(f => f.life > 0);
+  },
+};
+// Building.onDestroyed: items (explosiveness, flammability, charge), liquids and stored power feed the explosion
 function buildingExplosion(b) {
   let expl = b.block.baseExplosiveness || 0, flam = 0, power = 0;
-  if (b.items) for (let i = 0; i < ITEMS.length; i++) if (b.items[i]) { expl += ITEMS[i].explosiveness * b.items[i]; flam += ITEMS[i].flammability * b.items[i]; }
-  if (b.liquid && b.liquid.type) { flam += (b.liquid.type.flammability || 0) * b.liquid.amount / 2; expl += (b.liquid.type.explosiveness || 0) * b.liquid.amount / 2; }
-  if (b.block.cls === 'Battery') power = b.power.stored;
-  expl *= 3.5;
-  if (b.block.cls === 'Core') return; // the core ends the game anyway
-  const radius = TS * b.block.size / 2;
-  for (let i = 0; i < Mathf.clamp(flam / 4, 0, 30); i++) Fires.createWorld(b.x + Mathf.range(radius), b.y + Mathf.range(radius));
-  for (let i = 0; i < Mathf.clamp(power / 700, 0, 8); i++) Lightning.create(null, Pal.powerLight, 3, b.x, b.y, Math.random() * 360, 8 + Math.floor(Math.random() * 12), { collidesAir: true });
-  if (expl > 2) {
-    const waves = Mathf.clamp(Math.floor(expl / 11), 1, 25);
-    Damage.splash(null, b.x, b.y, Mathf.clamp(radius + expl, 0, 50), expl / 2 * Math.min(waves, 4), true, true, 1);
-    Fx.create('blockExplode', b.x, b.y, 0, null, Math.min(b.block.size + expl / 20, 6));
-    Render.shake(Math.min(expl / 10, 6), 20);
+  if (b.items) for (let i = 0; i < ITEMS.length; i++) if (b.items[i]) {
+    expl += ITEMS[i].explosiveness * b.items[i]; flam += ITEMS[i].flammability * b.items[i];
+    power += (ITEMS[i].charge || 0) * Math.pow(b.items[i], 1.1) * 150;
   }
+  if (b.liquid && b.liquid.type) { flam += (b.liquid.type.flammability || 0) * b.liquid.amount / 2; expl += (b.liquid.type.explosiveness || 0) * b.liquid.amount / 2; }
+  if (b.block.cls === 'Battery') power += b.power.stored;
+  if (b.block.cls === 'Core') return; // the core ends the game anyway
+  dynamicExplosion(b.x, b.y, flam, expl * 3.5, power, TS * b.block.size / 2);
 }
 
 // ---------------------------------------------------------------- crafters

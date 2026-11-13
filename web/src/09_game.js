@@ -1,8 +1,10 @@
 // Game state: buildings, units, waves, placement rules, construction lifecycle.
 
-const SPAWN_SAFE_RADIUS = 10; // tiles around the enemy spawn where nothing can be built
+const DROP_ZONE_RADIUS = 300; // Rules.dropZoneRadius (world units): wave spawns wipe everything of other teams inside it
+const SPAWN_SAFE_RADIUS = DROP_ZONE_RADIUS / TS;
+const ENEMY_CORE_BUILD_RADIUS = 400; // Rules.enemyCoreBuildRadius
 
-// Waves.java default groups (units not in this build are mapped to the nearest equivalent)
+// Waves.java default groups (effect: overdrive, items: cargo the unit carries)
 const WAVE_GROUPS = [
   { unit: 'dagger', end: 10, unitScaling: 2, max: 30 },
   { unit: 'crawler', begin: 4, end: 13, unitAmount: 2, unitScaling: 1.5 },
@@ -12,16 +14,16 @@ const WAVE_GROUPS = [
   { unit: 'mace', begin: 7, spacing: 3, unitScaling: 2, end: 30 },
   { unit: 'dagger', begin: 12, unitScaling: 1, unitAmount: 4, spacing: 2, shieldScaling: 20, max: 14 },
   { unit: 'mace', begin: 28, spacing: 3, unitScaling: 1, end: 40, shieldScaling: 20 },
-  { unit: 'spiroct', begin: 45, spacing: 3, unitScaling: 1, max: 10, shieldScaling: 30, shields: 100 },
-  { unit: 'pulsar', begin: 120, spacing: 2, unitScaling: 3, unitAmount: 5 },
+  { unit: 'spiroct', begin: 45, spacing: 3, unitScaling: 1, max: 10, shieldScaling: 30, shields: 100, effect: 'overdrive' },
+  { unit: 'pulsar', begin: 120, spacing: 2, unitScaling: 3, unitAmount: 5, effect: 'overdrive' },
   { unit: 'flare', begin: 16, unitScaling: 1, spacing: 2, shieldScaling: 20, max: 20 },
-  { unit: 'quasar', begin: 82, spacing: 3, unitAmount: 4, unitScaling: 3, shieldScaling: 30 },
+  { unit: 'quasar', begin: 82, spacing: 3, unitAmount: 4, unitScaling: 3, shieldScaling: 30, effect: 'overdrive' },
   { unit: 'pulsar', begin: 41, spacing: 5, unitAmount: 1, unitScaling: 3, shields: 640, max: 25 },
   { unit: 'fortress', begin: 40, spacing: 5, unitAmount: 2, unitScaling: 2, max: 20, shieldScaling: 30 },
-  { unit: 'nova', begin: 35, spacing: 3, unitAmount: 4, end: 60 },
-  { unit: 'dagger', begin: 42, spacing: 3, unitAmount: 4, end: 130, max: 30 },
+  { unit: 'nova', begin: 35, spacing: 3, unitAmount: 4, end: 60, effect: 'overdrive', items: ['blast-compound', 60] },
+  { unit: 'dagger', begin: 42, spacing: 3, unitAmount: 4, end: 130, max: 30, effect: 'overdrive', items: ['pyratite', 100] },
   { unit: 'horizon', begin: 40, unitAmount: 2, spacing: 2, unitScaling: 2, shieldScaling: 20 },
-  { unit: 'flare', begin: 50, unitAmount: 4, unitScaling: 3, spacing: 5, shields: 100, shieldScaling: 10, max: 20 },
+  { unit: 'flare', begin: 50, unitAmount: 4, unitScaling: 3, spacing: 5, shields: 100, shieldScaling: 10, max: 20, effect: 'overdrive' },
   { unit: 'zenith', begin: 50, unitAmount: 2, unitScaling: 3, spacing: 5, max: 16, shieldScaling: 30 },
   { unit: 'nova', begin: 53, unitAmount: 2, unitScaling: 3, spacing: 4, shieldScaling: 30 },
   { unit: 'atrax', begin: 31, unitAmount: 4, unitScaling: 1, spacing: 3, shieldScaling: 10 },
@@ -67,7 +69,7 @@ const Game = {
     Bullets.list = []; Bullets.lasers = []; Fx.list = []; Lightning.list = []; Decals.list = [];
     World.generate(seed);
     this.wave = 1;
-    this.waveCountdown = 60 * 150;
+    this.waveCountdown = this.waveSpacing * 2; // Logic.play: initialWaveSpacing unset -> waveSpacing * 2
     this.command = 'defend';
     this.stats = { built: 0, destroyed: 0, kills: 0 };
     const core = createBuilding(BLOCKS['core-shard'], 'sharded', World.coreTile.x, World.coreTile.y, 0);
@@ -96,7 +98,7 @@ const Game = {
   },
 
   onPlayerDeath(u) {
-    this.respawnTimer = 90;
+    this.respawnTimer = 60; // Player.deathDelay
     UI.toast('Your unit was destroyed. Respawning...', 2.5);
   },
 
@@ -161,9 +163,11 @@ const Game = {
     this.removeBuilding(b);
     if (b.team === 'sharded') {
       this.stats.destroyed++;
-      // Mindustry keeps a "rebuild" ghost; we re-queue the block as a plan for the player
-      if (b.block.buildable && !(b instanceof ConstructBuild) && this.player && !this.player.dead) {
-        Input.ghosts.push({ block: b.block, x: b.tx, y: b.ty, rotation: b.rotation, time: Time.time });
+      // Logic (BlockDestroyEvent, rules.ghostBlocks): the block goes to the front of the team's rebuild queue, which
+      // builder units (polys) work through; the player isn't assigned anything
+      if (b.block.buildable && !(b instanceof ConstructBuild) && b.block.cls !== 'Core') {
+        this.rebuildQueue = this.rebuildQueue.filter(g => !(g.x === b.tx && g.y === b.ty));
+        this.rebuildQueue.unshift({ block: b.block, x: b.tx, y: b.ty, rotation: b.rotation });
       }
     }
     if (b.block.cls === 'Core') this.checkGameOver();
@@ -180,6 +184,13 @@ const Game = {
   // ------------------------------------------------------------ placement
   validPlace(block, x, y, rot, team = 'sharded') {
     if (!block.buildable) return false;
+    // Build.validPlace: nothing within enemyCoreBuildRadius of an enemy core
+    if (team !== 'derelict') {
+      const wx = x * TS + block.offset, wy = y * TS + block.offset;
+      for (const t in this.byTeam) if (t !== team && t !== 'derelict') for (const c of this.byTeam[t]) {
+        if (c.block.cls === 'Core' && !c.dead && Math.hypot(c.x - wx, c.y - wy) < ENEMY_CORE_BUILD_RADIUS + TS) return false;
+      }
+    }
     const s = block.size, o = block.sizeOffset;
     let drillable = false, pumpable = false;
     for (let dy = 0; dy < s; dy++) for (let dx = 0; dx < s; dx++) {
@@ -189,7 +200,6 @@ const Game = {
       if (World.wall[i]) return false;
       if (FLOOR_DEFS[World.floor[i]].isDeep && !block.floating) return false;
       if (FLOOR_DEFS[World.floor[i]].liquidDrop) pumpable = true;
-      for (const sp of World.spawns) if (Math.hypot(tx - sp.x, ty - sp.y) < SPAWN_SAFE_RADIUS) return false;
       const ex = World.build[i];
       if (ex) {
         if (ex.team === 'derelict' && team !== 'derelict' && ex.block === block && ex.tx === x && ex.ty === y && !(ex instanceof ConstructBuild)) continue; // derelict repair
@@ -308,35 +318,42 @@ const Game = {
   // ------------------------------------------------------------ waves
   // WaveSpawner: every group spawns its count at each spawn point (or only at its own spawn); in attack sectors also at enemy cores
   waveGroups() { return WAVE_GROUPS; },
-  spawnPoints(g) {
-    const pts = World.spawns.map(s => [s.x * TS, s.y * TS]);
+  spawnPoints(g, flying) {
+    let pts = World.spawns.map(s => [s.x * TS, s.y * TS]);
+    if (g && g.spawn) { const own = pts.filter(([x, y]) => Math.round(x / TS) === g.spawn[0] && Math.round(y / TS) === g.spawn[1]); pts = own; }
+    // eachFlyerSpawn (airUseSpawns false): from the map edge, in the spawn's direction from the map centre
+    if (flying) pts = pts.map(([x, y]) => {
+      const cx = World.w * TS / 2, cy = World.h * TS / 2, ang = Angles.angle(cx, cy, x, y), tr = Math.max(World.w, World.h) * Math.SQRT2 * TS;
+      return [Mathf.clamp(cx + Angles.trnsx(ang, tr), 0, (World.w - 1) * TS), Mathf.clamp(cy + Angles.trnsy(ang, tr), 0, (World.h - 1) * TS)];
+    });
     if (this.attackMode) for (const b of this.byTeam.crux) if (b.block.cls === 'Core' && !b.dead) pts.push([b.x, b.y]);
-    if (g && g.spawn) { const own = pts.filter(([x, y]) => Math.round(x / TS) === g.spawn[0] && Math.round(y / TS) === g.spawn[1]); return own.length ? own : pts.slice(0, 1); }
     return pts;
+  },
+  // WaveSpawner.doShockwave: Damage.damage(waveTeam, spawn, dropZoneRadius, huge, complete) - kills everything else there
+  dropZoneShockwave(sx, sy) {
+    Fx.create('spawnShockwave', sx, sy, 0, null, DROP_ZONE_RADIUS);
+    for (const u of this.units) if (u.team !== 'crux' && !u.dead && Math.hypot(u.x - sx, u.y - sy) < DROP_ZONE_RADIUS + u.type.hitSize / 2) u.kill();
+    for (const b of [...this.buildings]) if (b.team !== 'crux' && !b.dead && circleRect(sx, sy, DROP_ZONE_RADIUS, b)) b.damage(1e9);
   },
   runWave() {
     const w = this.wave - 1;
     let total = 0;
+    for (const sp of World.spawns) this.dropZoneShockwave(sp.x * TS, sp.y * TS);
     for (const g of this.waveGroups()) {
       const n = groupSpawned(g, w);
       if (!n) continue;
       const type = UNITS[g.unit];
       if (!type) continue;
       const shield = groupShield(g, w);
-      for (const [sx, sy] of this.spawnPoints(g)) for (let i = 0; i < n; i++) {
-        const spread = type.flying ? 40 : 14;
-        const a = Math.random() * 360, d = Math.random() * spread;
+      for (const [sx, sy] of this.spawnPoints(g, type.flying)) for (let i = 0; i < n; i++) {
+        const a = Math.random() * 360, d = type.flying ? 0 : 16;
         const u = this.spawnUnit(type, 'crux', sx + Angles.trnsx(a, d), sy + Angles.trnsy(a, d), Angles.angle(sx, sy, World.coreTile.x * TS, World.coreTile.y * TS));
         u.shield = shield;
+        if (g.effect && g.effect !== 'boss') { if (!u.statuses) u.statuses = {}; u.statuses[g.effect] = Infinity; }
+        if (g.items && Items[g.items[0]]) u.stack = { item: Items[g.items[0]], amount: g.items[1] };
         Fx.create('unitSpawn', u.x, u.y, 0, Teams.crux.color);
         total++;
       }
-    }
-    for (const sp of World.spawns) {
-      const sx = sp.x * TS, sy = sp.y * TS;
-      Fx.create('spawnShockwave', sx, sy, 0, null, 120);
-      // wave spawn kills player units in the drop zone
-      for (const u of this.units) if (u.team === 'sharded' && !u.isFlying && Math.hypot(u.x - sx, u.y - sy) < SPAWN_SAFE_RADIUS * TS) u.kill();
     }
     Audio2.play('waveSpawn', undefined, undefined, 0.7);
     this.wave++;
@@ -351,7 +368,7 @@ const Game = {
     Time.time += Time.delta;
     if (Render.shakeTime > 0) { Render.shakeTime -= Time.delta; if (Render.shakeTime <= 0) Render.shakeIntensity = 0; }
 
-    this.waveCountdown -= Time.delta;
+    if (!(this.winWave > 0 && this.wave >= this.winWave && this.enemiesAlive() > 0)) this.waveCountdown -= Time.delta;
     if (this.waveCountdown <= 0) this.runWave();
 
     Input.updatePlayer();
@@ -389,6 +406,7 @@ const Game = {
     Fx.update();
     Decals.update();
     Fires.update();
+    Fireballs.update();
     Pathfinder.update();
     SaveIO.update();
 

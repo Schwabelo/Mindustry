@@ -66,7 +66,7 @@ const Input = {
         if (Game.player) { Game.player.plans = []; UI.toast('Build queue cleared', 1.5); }
         break;
       case 'KeyN':
-        if (Game.state === 'playing') { Game.runWave(); }
+        if (Game.state === 'playing' && Game.enemiesAlive() === 0) Game.runWave(); // HudFragment.canSkipWave
         break;
       default:
         if (/^Digit[1-9]$/.test(e.code)) UI.selectIndex(parseInt(e.code.slice(5)) - 1);
@@ -247,20 +247,6 @@ const Input = {
   updatePlayer() {
     this.updateWorldMouse();
     const p = Game.player;
-    // ghosts of destroyed blocks get re-queued after a short delay (rebuild)
-    if (p && this.ghosts.length) {
-      const builders = Game.units.some(u => u.team === 'sharded' && u.controller instanceof BuilderAI);
-      for (const g of this.ghosts) {
-        if (Time.time - g.time > 120 && !g.queued) {
-          g.queued = true;
-          if (!Game.validPlace(g.block, g.x, g.y, g.rotation)) continue;
-          // polys rebuild destroyed blocks (BuilderAI rebuild command); without them the player re-queues them
-          if (builders) Game.rebuildQueue.push(g);
-          else p.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false });
-        }
-      }
-      this.ghosts = this.ghosts.filter(g => !g.queued);
-    }
     if (!p) return;
     const t = p.type;
     let mx = 0, my = 0;
@@ -285,7 +271,7 @@ const Input = {
     this.updateTransfer(p);
   },
 
-  updateMining(p) { p.updateMining(); },
+  updateMining(p) { if (!this.activePlan) p.updateMining(); }, // MinerComp.mining(): not while actively building
 
   updateTransfer(p) {
     if (!p.stack.amount) return;
@@ -465,6 +451,8 @@ function builderUpdate(p) {
         if (pl.stuck > 30 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }
         return pl;
       }
+      // CoreBlock.placeBegan: a core placed over a smaller one finishes immediately once the builder starts it
+      if (pl.block.coreUpgrade) { p.plans.splice(idx, 1); Game.upgradeCore(pl.block, pl.x, pl.y); return pl; }
       const config = pl.block.cls === 'ItemBridge' && !(pl.config && pl.config.schem) ? null : pl.config;
       ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, 'sharded', config);
     }

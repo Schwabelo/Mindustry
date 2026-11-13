@@ -54,16 +54,17 @@ t_widx = function (u, w) { return u.type.weapons.indexOf(w.orig || w); };
 const _bossRunWave = Game.runWave;
 Game.runWave = function () {
   const w = this.wave - 1;
-  const sx = World.spawn.x * TS, sy = World.spawn.y * TS;
   _bossRunWave.call(this);
   const spawned = [];
   for (const g of BOSS_GROUPS) {
     const n = groupSpawned(g, w);
     if (!n) continue;
     const type = UNITS[g.unit], shield = groupShield(g, w);
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * 360, d = Math.random() * (type.flying ? 40 : 14);
-      const u = this.spawnUnit(type, 'crux', sx + Angles.trnsx(a, d), sy + Angles.trnsy(a, d), Angles.angle(sx, sy, World.coreTile.x * TS, World.coreTile.y * TS));
+    if (!type) continue;
+    // like every other group: at each spawn point (flyers from the map edge)
+    for (const [px, py] of this.spawnPoints(g, type.flying)) for (let i = 0; i < n; i++) {
+      const a = Math.random() * 360, d = type.flying ? 0 : 16;
+      const u = this.spawnUnit(type, 'crux', px + Angles.trnsx(a, d), py + Angles.trnsy(a, d), Angles.angle(px, py, World.coreTile.x * TS, World.coreTile.y * TS));
       u.shield = shield;
       makeBoss(u);
       Fx.create('unitSpawn', u.x, u.y, 0, Teams.crux.color);
@@ -127,12 +128,4 @@ const BossHud = {
 const _bossGameUpdate = Game.update;
 Game.update = function () { _bossGameUpdate.call(this); BossHud.update(); };
 
-// guardians get a red ring so you can tell them apart on the field
-const _bossDraw = Unit.prototype.draw;
-Unit.prototype.draw = function () {
-  if (this.boss && !this.dead) {
-    const r = this.type.hitSize * 0.75 + 3 + Mathf.absin(Time.time, 6, 1.5);
-    Lines.set(rgba(Teams.crux.color, 0.5), 1); Lines.poly(this.x, this.y, 8, r, Time.time * 0.4);
-  }
-  _bossDraw.call(this);
-};
+// (no ring around guardians: Mindustry marks them only through the boss status and the guardian health bar)

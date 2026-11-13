@@ -15,7 +15,7 @@ const UI = {
     // logo + skip button icons
     $('logoImg').src = Assets.url('logo');
     $('skipWave').innerHTML = `<img src="${Assets.url('icon-play')}">`;
-    $('skipWave').onclick = () => { if (Game.state === 'playing') { Game.runWave(); Audio2.play('uiButton'); } };
+    $('skipWave').onclick = () => { if (Game.state === 'playing' && Game.enemiesAlive() === 0) { Game.runWave(); Audio2.play('uiButton'); } else if (Game.enemiesAlive() > 0) UI.toast('Kill the enemies first', 1.5, true); };
 
     // categories
     const cats = $('cats');

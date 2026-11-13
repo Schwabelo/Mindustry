@@ -18,24 +18,37 @@ const WEATHER_DEFS = {
 const Weather = {
   active: [], entries: [], statusTimer: 0,
   setup(seed) {
-    // which weathers this map gets, from its floors
-    const n = { snow: 0, sand: 0, moss: 0 }, N = World.w * World.h;
+    // PlanetGenerator (procedural sectors): weather from the most common floor
+    const counts = new Map(), N = World.w * World.h;
+    let water = false;
     for (let i = 0; i < N; i++) {
-      const f = FLOOR_DEFS[World.floor[i]].name;
-      if (f === 'snow' || f === 'ice') n.snow++; else if (f === 'sand-floor' || f === 'darksand') n.sand++; else if (f === 'moss') n.moss++;
+      const f = FLOOR_DEFS[World.floor[i]];
+      counts.set(f.name, (counts.get(f.name) || 0) + 1);
+      if (f.liquidDrop === 'water') water = true;
+      if (World.ore[i]) { const o = 'ore-' + ITEMS[World.ore[i] - 1].name; counts.set(o, (counts.get(o) || 0) + 1); }
     }
-    // like a sector: rain and fog anywhere, plus the one storm that fits the map's main biome
-    const kinds = ['rain', 'fog'];
-    const biome = [['snowing', n.snow / N / 0.12], ['sandstorm', n.sand / N / 0.12], ['sporestorm', n.moss / N / 0.04]].sort((a, b) => b[1] - a[1])[0];
-    if (biome[1] >= 1) kinds.push(biome[0]);
-    const rand = makeRand((seed * 48271 + 11) >>> 0);
-    this.rand = rand;
-    this.entries = kinds.map(k => {
-      const d = WEATHER_DEFS[k].duration;
-      // first occurrence comes sooner than the regular interval so it actually shows up in a session
-      return { name: k, minF: d * 2, maxF: d * 6, minD: d / 2, maxD: d * 1.5, cooldown: d * (0.25 + rand() * 1.5) };
-    });
+    const top = [...counts.entries()].filter(e => e[1] >= 30).sort((a, b) => b[1] - a[1]).map(e => e[0])[0] || '';
+    const snow = top.includes('ice') || top.includes('snow');
+    const rain = !snow && water && !top.includes('sand');
+    const desert = !snow && !rain && top === 'sand-floor';
+    const spores = top.includes('spore') || top.includes('moss') || top.includes('tainted');
+    const kinds = [];
+    if (snow) kinds.push('snowing');
+    if (rain) kinds.push('rain', 'fog');
+    if (desert) kinds.push('sandstorm');
+    if (spores) kinds.push('sporestorm');
+    this.rand = makeRand((seed * 48271 + 11) >>> 0);
+    // WeatherEntry(weather): frequency duration*2..6, duration duration/2..1.5
+    this.entries = kinds.map(k => { const d = WEATHER_DEFS[k].duration; return { name: k, minF: d * 2, maxF: d * 6, minD: d / 2, maxD: d * 1.5 }; });
+    this.initCooldowns();
     this.active = [];
+  },
+  // Logic (PlayEvent): shuffle the entries, each waits the previous ones' cooldowns plus random(maxFrequency)
+  initCooldowns() {
+    const e = this.entries;
+    for (let i = e.length - 1; i > 0; i--) { const j = Math.floor(this.rand() * (i + 1)); [e[i], e[j]] = [e[j], e[i]]; }
+    let sum = 0;
+    for (const w of e) { w.cooldown = sum + this.rand() * w.maxF; sum += w.cooldown; }
   },
   start(name, duration, intensity = 1) {
     const def = WEATHER_DEFS[name];

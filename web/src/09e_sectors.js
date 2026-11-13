@@ -115,7 +115,7 @@ const Sectors = {
     const m = this.current;
     if (!m || Game.state !== 'playing' || (this.checkTimer += Time.delta) < 30) return;
     this.checkTimer = 0;
-    if (Game.attackMode) this.fillEnemyCores();
+    this.fillEnemyCores(); // Serpulo: the wave team's cores are always kept full
     if (this.captured.has(m.name) && Game.waveCountdown === Infinity) return;
     const won = m.attack ? !Game.byTeam.crux.some(b => b.block.cls === 'Core' && !b.dead)
       : m.winWave > 0 && Game.wave >= m.winWave && Game.enemiesAlive() === 0;
@@ -126,8 +126,12 @@ const Sectors = {
     this.captured.add(m.name); this.save();
     this.setCaptured(true);
     // the enemy base is left behind as ruins
-    for (const u of Game.units) if (u.team === 'crux' && !u.dead) u.kill();
-    for (const b of [...Game.byTeam.crux]) { Game.removeBuilding(b); b.team = 'derelict'; Game.addBuilding(b); }
+    // Teams.destroyToDerelict: cores die, the rest turns derelict with 20% exploding over 6 s, units die over 5 s
+    for (const b of [...Game.byTeam.crux]) {
+      if (b.block.cls === 'Core') b.damage(1e9);
+      else scheduleDerelict(b);
+    }
+    for (const u of Game.units) if (u.team === 'crux' && !u.dead) Game.later(Math.random() * 300, () => { if (u.team === 'crux' && !u.dead) u.kill(); });
     Pathfinder.dirty = true;
     if (first) {
       UI.toast(`Sector captured: ${m.title || this.title(m.name)}!`, 6);
@@ -179,8 +183,8 @@ Sectors.init();
     const m = Sectors.current;
     if (!m) return;
     // the sector's own Rules.weather entries (frequency and duration in ticks)
-    this.entries = m.weather.filter(w => WEATHER_DEFS[w[0]]).map(([name, minF, maxF, minD, maxD]) =>
-      ({ name, minF, maxF, minD, maxD, cooldown: minF / 2 + this.rand() * (maxF - minF) / 2 }));
+    this.entries = m.weather.filter(w => WEATHER_DEFS[w[0]]).map(([name, minF, maxF, minD, maxD]) => ({ name, minF, maxF, minD, maxD }));
+    this.initCooldowns();
   };
   const _gu = Game.update;
   Game.update = function () { _gu.apply(this, arguments); Sectors.update(); };
