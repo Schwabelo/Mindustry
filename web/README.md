@@ -49,6 +49,13 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   every enemy core (enemy cores stay full of items, as with Serpulo's enemyInfiniteItems). Sector requirements in the
   tech tree (e.g. Pneumatic Drill needs Frozen Forest) apply. Sectors you leave are stored (IndexedDB) and resume where you
   left them; you can also restart one from scratch
+- Campaign keeps running: every 2 minutes of play counts as a turn for your other sectors (production measured per second
+  like SectorInfo, added to their stored cores up to capacity). Sectors next to enemy bases can be invaded (Universe:
+  1% per turn after 20 minutes); an attacked sector gets waves until you hold it again. Research is paid from all your
+  sectors' cores. Launching to a new sector (except Ground Zero) costs a launch loadout from one of your sectors: the
+  core's build cost plus the resources you take along (up to half the core's capacity per item)
+- Puddles: leaking conduits, destroyed tanks and liquid bullets leave puddles that spread, soak ground units (wet,
+  tarred, melting, freezing) and react: oil burns, slag next to water or cryofluid turns to steam, water puts out fires
 - Launch pads: advanced launch pad (power + oil) fires 100-item pods to the sector's destination; the export rate is
   averaged over a minute like SectorInfo, and landing pads (1500 water per landing) in the destination receive pods at the
   summed export rate of every stored sector sending there. In free play a landing pad lands pods endlessly
@@ -66,8 +73,9 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   packcolor/ubind/ucontrol/uradar/ulocate and the rest of the normal-processor instruction set
 - Save/load: autosave every minute, Continue on the title screen, save file export/import
 
-It is not a port of the Java game; there is no campaign, tech tree, multiplayer, world processors,
-or the Erekir planet.
+It is not a port of the Java game; there is no multiplayer, no world processors, no Erekir planet, and the campaign
+simulation is simplified (sector neighbours follow the tech tree, not the planet's grid; damage taken by an invaded sector
+while you are away is not simulated).
 
 ## Controls
 

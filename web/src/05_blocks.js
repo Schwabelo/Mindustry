@@ -504,7 +504,7 @@ class Unloader extends Building {
       for (let k = pbs.length - 1; k >= 0; k--) if (pbs[k].canUnload && pbs[k].b.items[item.id] > 0) { from = pbs[k]; break; }
       if (!from || !to) break;
       const fm = maxAccepted(from.b), tm = maxAccepted(to.b);
-      from.load = fm ? from.b.items[item.id] / fm : 0; to.load = tm ? to.b.items[item.id] / tm : 0;
+      from.load = fm ? from.b.items[item.id] / fm : 0; to.load = tm && to.b.items ? to.b.items[item.id] / tm : 0;
       if (from.load !== to.load || !from.canLoad) {
         to.b.handleItem(this, item); from.b.removeItem(item);
         this.lastUsed.set(to.b, 0); this.lastUsed.set(from.b, 0);

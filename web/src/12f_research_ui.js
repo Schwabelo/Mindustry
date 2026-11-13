@@ -147,9 +147,9 @@ const ResearchUI = {
     else {
       html += `<div style="margin-top:8px;font-size:13px;color:#ccc">Cost (items come out of your core, you can pay in parts):</div>`;
       for (const r of n.req) {
-        const paid = Research.progress(n, r.item), have = core ? core.items[r.item.id] : 0;
+        const paid = Research.progress(n, r.item), have = Sectors.current && core ? Sectors.pooled(r.item) : core ? core.items[r.item.id] : 0;
         html += `<div style="margin-top:5px;font-size:13px"><div style="display:flex;align-items:center;gap:5px"><img src="${Assets.url(r.item.icon)}" style="width:16px;height:16px;image-rendering:pixelated">
-          <span>${titleCase(r.item.name)}</span><span style="flex:1"></span><span>${paid} / ${r.amount}</span>${core ? `<small style="color:${have > 0 ? '#aaa' : '#e55454'}">&nbsp;(core ${have})</small>` : ''}</div>
+          <span>${titleCase(r.item.name)}</span><span style="flex:1"></span><span>${paid} / ${r.amount}</span>${core ? `<small style="color:${have > 0 ? '#aaa' : '#e55454'}">&nbsp;(${Sectors.current ? 'all bases' : 'core'} ${have})</small>` : ''}</div>
           <div style="height:4px;background:#333;margin-top:2px"><div style="height:4px;width:${Math.min(100, paid / r.amount * 100)}%;background:var(--accent)"></div></div></div>`;
       }
       const miss = Research.missing(n);

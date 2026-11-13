@@ -137,7 +137,8 @@ const SectorUI = {
     for (const n of Sectors.order) {
       const d = this.nodeEls.get(n); if (!d) continue;
       const st = this.state(n);
-      d.style.borderColor = this.sel === n ? '#fff' : st === 'captured' ? '#84f491' : st === 'open' ? 'var(--accent)' : '#333';
+      const attacked = Sectors.info[n] && Sectors.info[n].attacked;
+      d.style.borderColor = this.sel === n ? '#fff' : attacked ? '#e55454' : st === 'captured' ? '#84f491' : st === 'open' ? 'var(--accent)' : '#333';
       d.firstChild.style.filter = st === 'locked' ? 'grayscale(1) brightness(0.35)' : '';
       d.lastChild.style.color = st === 'locked' ? '#666' : st === 'captured' ? '#84f491' : '#fff';
       d.lastChild.textContent = Sectors.title(n) + (Sectors.bases.has(n) || (Sectors.current && Sectors.current.name === n && Game.state !== 'title') ? ' \u25cf' : '');
@@ -172,19 +173,56 @@ const SectorUI = {
       if (Object.keys(imp).length) html += `<div style="font-size:13px">Imports: ${Object.entries(imp).map(([k, v]) => `${icon(k)} ${Math.round(v * 60)}/min`).join(' ')} (needs landing pads)</div>`;
     }
     const based = Sectors.bases.has(n) && !playing;
+    const bi = Sectors.info[n] || {};
+    if (bi.attacked) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">Under attack! Hold it to wave ${bi.attacked.winWave}; it produces nothing until then.</div>`;
+    if (based && bi.items) {
+      const stock = Object.entries(bi.items).filter(([, v]) => v > 0);
+      const prod = Object.entries(bi.production || {}).filter(([, v]) => v > 0);
+      html += `<div style="font-size:13px;margin-top:6px">Core: ${stock.length ? stock.map(([k, v]) => `${icon(k)} ${v}`).join(' ') : 'empty'}</div>`;
+      if (prod.length) html += `<div style="font-size:12px;color:#aaa">Producing while away: ${prod.map(([k, v]) => `${icon(k)} ${Math.round(v * 60)}/min`).join(' ')}</div>`;
+    }
     const leaving = Sectors.current && (Game.state === 'playing' || Game.state === 'paused') && !playing ? Sectors.current.name : null;
+    // LaunchLoadoutDialog: a new sector is launched to from a base, paying the core and resources
+    const needLoadout = st !== 'locked' && !based && !playing && Sectors.needsLoadout(n);
+    const sources = needLoadout ? Sectors.launchSources() : [];
+    if (needLoadout) {
+      if (!this.lo || this.lo.target !== n) this.lo = { target: n, source: leaving && sources.includes(leaving) ? leaving : sources[0], core: 'core-shard', max: true };
+      const lo = this.lo;
+      if (!sources.length) html += `<div style="margin-top:8px;font-size:13px;color:#e55454">You need a base to launch from.</div>`;
+      else {
+        const srcCore = Sectors.sourceCore(lo.source);
+        const cores = ['core-shard', 'core-foundation', 'core-nucleus'].filter(c => BLOCKS[c] && BLOCKS[c].size <= srcCore.size && (c === 'core-shard' || Research.has(c)));
+        if (!cores.includes(lo.core)) lo.core = 'core-shard';
+        const plan = Sectors.loadoutPlan(lo.source, lo.core, lo.max);
+        lo.plan = plan;
+        const sel = (id, opts, cur) => `<select id="${id}" style="background:#111;color:#ddd;border:2px solid #454545;padding:2px">${opts.map(([v, t]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+        html += `<div style="margin-top:10px;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center">
+          <span>Launch from</span>${sel('scSrc', sources.map(x => [x, Sectors.title(x)]), lo.source)}
+          <span>Core</span>${sel('scCore', cores.map(c => [c, titleCase(c)]), lo.core)}
+          <span>Resources</span><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="scMax" ${lo.max ? 'checked' : ''}> as much as possible (up to ${Math.floor(0.5 * plan.core.itemCapacity)} each)</label></div>
+          <div style="font-size:12px;margin-top:6px">Costs: ${Object.entries(plan.total).map(([k, v]) => `<span style="color:${(plan.have[k] || 0) >= v ? '#ddd' : '#e55454'}">${icon(k)} ${v}${(plan.have[k] || 0) < v ? ` (${plan.have[k] || 0})` : ''}</span>`).join(' ')}</div>`;
+      }
+    }
     if (st !== 'locked') {
-      html += `<button id="scLaunch" class="accent" style="margin-top:10px;width:100%">${playing ? 'Return' : based ? 'Resume base' : st === 'captured' ? 'Revisit' : 'Launch'}</button>`;
+      const blocked = needLoadout && (!sources.length || !this.lo.plan || !this.lo.plan.valid);
+      html += `<button id="scLaunch" class="accent" style="margin-top:10px;width:100%${blocked ? ';opacity:0.4' : ''}" ${blocked ? 'disabled' : ''}>${playing ? 'Return' : based ? 'Resume base' : st === 'captured' ? 'Revisit' : 'Launch'}</button>`;
       if (based || playing) html += `<button id="scFresh" style="margin-top:6px;width:100%">Restart sector from scratch</button>`;
-      if (leaving) html += `<div style="font-size:12px;color:#aaa;margin-top:4px">${Sectors.title(leaving)} is kept and paused while you're away.</div>`;
+      if (leaving) html += `<div style="font-size:12px;color:#aaa;margin-top:4px">${Sectors.title(leaving)} keeps running at its measured production while you're away.</div>`;
     }
     box.innerHTML = html;
     box.querySelector('#scInfoClose').onclick = () => { this.sel = null; this.render(); };
+    const on = (id, ev, fn) => { const e = box.querySelector(id); if (e) e[ev] = fn; };
+    on('#scSrc', 'onchange', e => { this.lo.source = e.target.value; this.renderInfo(); });
+    on('#scCore', 'onchange', e => { this.lo.core = e.target.value; this.renderInfo(); });
+    on('#scMax', 'onchange', e => { this.lo.max = e.target.checked; this.renderInfo(); });
     const go = async fresh => {
       if (fresh && !confirm(`Throw away everything built on ${m.title} and start it over?`)) return;
       UI.initAudio();
       if (playing && !fresh) { this.close(); return; }
-      if (await Sectors.launch(n, { fresh })) {
+      const opts = { fresh };
+      if (needLoadout && !fresh) opts.loadout = { source: this.lo.source, plan: this.lo.plan };
+      if (await Sectors.launch(n, opts)) {
+        this.lo = null;
         this.close();
         $('pause').classList.add('hidden'); $('gameover').classList.add('hidden');
         UI.enterGame();
