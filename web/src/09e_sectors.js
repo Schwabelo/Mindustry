@@ -88,6 +88,7 @@ const Sectors = {
       else if (typeof cfg === 'boolean') c = { bool: cfg };
       else if (Array.isArray(cfg) && cfg.length && Array.isArray(cfg[0])) c = { points: cfg };
       else if (Array.isArray(cfg) && cfg.length === 2) c = { point: cfg };
+      else if (cfg && typeof cfg === 'object' && !Array.isArray(cfg)) c = cfg; // editor maps store the schematic config form
       if (c) try { applySchemConfig(b, c); } catch (e) { /* unsupported config */ }
     }
     updateSchemPending(); SchemPending.length = 0;

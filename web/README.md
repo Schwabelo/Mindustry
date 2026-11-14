@@ -68,6 +68,10 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   block and unit health / damage, unit cost / build speed / cap, fire, reactor explosions, weather, solar power and enemy
   team rules. In attack mode the enemy can grow its base like Mindustry's BaseBuilderAI: it places the real base
   schematics (`core/assets/baseparts`) on matching ore around its cores and its core units build them
+- Map editor: new maps (50-500 tiles), or copies of built-in and sector maps; pencil, line, fill, eraser and pick tools
+  with brush sizes for floors, walls, ores and rocks; buildings of any team (your core, enemy cores, ruins), drop zones,
+  map info (title, description, win wave, wave spacing, starting items, weather), undo, save in the browser, export /
+  import map files and test play. Saved maps appear in the custom game dialog
 - Floors affect ground units: water makes them wet, tar tarred, slag melting, mud muddy
 - Schematics: copy areas with their settings (sorter items, bridge / node / processor links and code, factory
   plans...), rotate / flip, save a library, and import / export Mindustry schematic codes

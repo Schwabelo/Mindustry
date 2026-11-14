@@ -24,7 +24,7 @@ const Custom = {
   },
   baseRules(name, mode) {
     const idx = this.index(name), m = this.map(name);
-    const r = { waveSpacing: m ? m.waveSpacing : 2 * 60 * 60, winWave: 0, initialWaveSpacing: 0, waves: true, waveTimer: true, teams: {} };
+    const r = { waveSpacing: m ? m.waveSpacing : 2 * 60 * 60, winWave: m && m.winWave > 0 ? m.winWave : 0, initialWaveSpacing: 0, waves: true, waveTimer: true, teams: {} };
     if (mode === 'survival') { r.waves = true; r.waveTimer = true; }
     if (mode === 'sandbox') { r.infiniteResources = true; r.waves = true; r.waveTimer = false; }
     if (mode === 'attack') {
