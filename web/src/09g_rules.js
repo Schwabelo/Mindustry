@@ -2,7 +2,7 @@
 // games (13e_custom.js) override them. Global multipliers combine with the team's own (Rules.unitDamage(team) etc.).
 
 const RULE_DEFAULTS = {
-  waves: true, waveTimer: true, waitEnemies: false, dropZoneRadius: 300,
+  waves: true, waveTimer: true, waitEnemies: false, dropZoneRadius: 300, winWave: 0, waveSpacing: 2 * 60 * 60, initialWaveSpacing: 0, attackMode: false,
   infiniteResources: false, buildCostMultiplier: 1, buildSpeedMultiplier: 1, deconstructRefundMultiplier: 0.5,
   blockHealthMultiplier: 1, blockDamageMultiplier: 1,
   unitCap: 0, unitDamageMultiplier: 1, unitHealthMultiplier: 1, unitBuildSpeedMultiplier: 1, unitCostMultiplier: 1,

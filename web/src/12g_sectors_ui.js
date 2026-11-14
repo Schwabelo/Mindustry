@@ -36,7 +36,10 @@ const SectorUI = {
   // small picture of the map: floors, walls, ores, cores
   preview(name) {
     if (this.previews.has(name)) return this.previews.get(name);
-    const m = Sectors.map(name);
+    return this.previewMap(name, Sectors.map(name));
+  },
+  previewMap(name, m) {
+    if (this.previews.has(name)) return this.previews.get(name);
     const S = 96, c = document.createElement('canvas');
     c.width = c.height = S;
     if (!m) return c;
