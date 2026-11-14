@@ -153,26 +153,34 @@ Object.assign(FX, {
 // BuilderAI (rebuild command, poly's default): rebuilds destroyed blocks from the team's rebuild queue (with their
 // settings), helps any teammate who is building, and when idle with an enemy within 370 for 2 seconds retreats to within
 // 110 of the closest core. Doesn't shoot while building.
+// team plan queues (TeamData.plans): the player's team uses the rebuild queue, AI teams the base builder's plans
+const TEAM_PLANS = {};
+function teamPlans(team) { return team === 'sharded' ? Game.rebuildQueue : (TEAM_PLANS[team] || (TEAM_PLANS[team] = [])); }
+
 class BuilderAI {
-  constructor() { this.retarget = 0; this.target = null; this.enemy = null; this.enemyTimer = 0; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; this.retreatTimer = 0; }
+  constructor(alwaysFlee = false, fleeRange = 370) {
+    this.alwaysFlee = alwaysFlee; this.fleeRange = fleeRange; this.fallback = null; this.retarget = 0; this.target = null; this.enemy = null; this.enemyTimer = 0; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; this.retreatTimer = 0; }
   update(u) {
+    // useFallback: the wave team fights instead of building while waves are on
+    if (u.team === 'crux' && Rules.cur.waves) { if (!this.fallback) this.fallback = u.type.flying ? new FlyingAI() : new GroundAI(); return this.fallback.update(u); }
     const planOf = o => o.activePlan || (o.isPlayer ? Input.activePlan : null);
     if (this.following && (this.following.dead || !planOf(this.following))) { this.following = null; u.plans = []; }
     if (this.following) {
       // mimic the followed builder's current plan
       this.retreatTimer = 0;
       u.plans = [planOf(this.following)];
-    } else if (!u.plans.length) {
-      if ((this.enemyTimer -= Time.delta) <= 0) { this.enemyTimer = 40; this.enemy = Targeting.closestTarget(u.team, u.x, u.y, 370, true, true); }
+    } else if (!u.plans.length || this.alwaysFlee) {
+      if ((this.enemyTimer -= Time.delta) <= 0) { this.enemyTimer = 40; this.enemy = Targeting.closestTarget(u.team, u.x, u.y, this.fleeRange, true, true); }
       if (this.enemy && this.enemy.dead) this.enemy = null;
-      if ((this.retreatTimer += Time.delta) >= 120 && this.enemy) {
+      if (((this.retreatTimer += Time.delta) >= 120 || this.alwaysFlee) && this.enemy) {
+        u.plans = [];
         let core = null, cd = Infinity;
         for (const b of Game.byTeam[u.team] || []) if (b.block.cls === 'Core' && !b.dead) { const d = Mathf.dst2(b.x, b.y, u.x, u.y); if (d < cd) { cd = d; core = b; } }
         if (core && Math.hypot(core.x - u.x, core.y - u.y) > 110) u.moveTo(core.x, core.y, 110);
         else u.moveAt(0, 0);
       } else u.moveAt(0, 0);
       // follow anyone building (Java's reach check is always true, since min(dst - range, 0) <= 0)
-      if ((this.assistTimer -= Time.delta) <= 0) {
+      if (!u.plans.length && (this.assistTimer -= Time.delta) <= 0) {
         this.assistTimer = 20;
         for (const o of Game.units) {
           if (o === u || o.team !== u.team || o.dead || !o.type.buildSpeed) continue;
@@ -180,14 +188,15 @@ class BuilderAI {
           if (pl && World.buildAt(pl.x, pl.y) instanceof ConstructBuild) { this.following = o; break; }
         }
       }
-      if (!this.following && Game.rebuildQueue.length && (this.rebuildTimer -= Time.delta) <= 0) {
-        this.rebuildTimer = 120;
-        const q = Game.rebuildQueue, g = q[0];
+      const q = teamPlans(u.team);
+      if (!this.following && !u.plans.length && q.length && (this.rebuildTimer -= Time.delta) <= 0) {
+        this.rebuildTimer = Rules.team(u.team).buildAi ? 10 : 120; // rebuildPeriod: much faster with buildAi
+        const g = q[0];
         const there = World.buildAt(g.x, g.y);
         if (there && there.block === g.block && there.tx === g.x && there.ty === g.y) q.shift();
         else {
           q.push(q.shift()); // shift to the tail so the next builder takes something else
-          if (Game.validPlace(g.block, g.x, g.y, g.rotation)) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false, config: g.config ? { schem: g.config } : undefined });
+          if (Game.validPlace(g.block, g.x, g.y, g.rotation, u.team) && !(this.alwaysFlee && Targeting.closestTarget(u.team, g.x * TS, g.y * TS, this.fleeRange / 2, true, true))) u.plans.push({ block: g.block, x: g.x, y: g.y, rotation: g.rotation, breaking: false, config: g.config ? { schem: g.config } : undefined });
         }
       }
     }

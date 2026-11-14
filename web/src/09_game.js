@@ -198,7 +198,7 @@ const Game = {
       const tx = x + o + dx, ty = y + o + dy;
       if (!World.inside(tx, ty)) return false;
       const i = ty * World.w + tx;
-      if (World.wall[i]) return false;
+      if (World.wall[i] || FLOOR_DEFS[World.floor[i]].solid) return false;
       if (FLOOR_DEFS[World.floor[i]].isDeep && !block.floating) return false;
       if (FLOOR_DEFS[World.floor[i]].liquidDrop) pumpable = true;
       const ex = World.build[i];
@@ -281,7 +281,7 @@ const Game = {
     this.removeBuilding(cb);
     const b = createBuilding(cb.current, cb.team, cb.tx, cb.ty, cb.rotation);
     this.addBuilding(b);
-    this.stats.built++;
+    if (cb.team === 'sharded') this.stats.built++;
     Fx.create('placeBlock', b.x, b.y, b.block.size);
     Audio2.play(b.block.size > 1 ? 'place2' : 'place', b.x, b.y, 0.6);
     // post-placement behaviour

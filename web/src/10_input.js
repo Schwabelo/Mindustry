@@ -66,7 +66,7 @@ const Input = {
         if (Game.player) { Game.player.plans = []; UI.toast('Build queue cleared', 1.5); }
         break;
       case 'KeyN':
-        if (Game.state === 'playing' && Game.enemiesAlive() === 0) Game.runWave(); // HudFragment.canSkipWave
+        if (Game.state === 'playing' && Rules.cur.waves && Game.enemiesAlive() === 0) Game.runWave(); // HudFragment.canSkipWave
         break;
       default:
         if (/^Digit[1-9]$/.test(e.code)) UI.selectIndex(parseInt(e.code.slice(5)) - 1);
@@ -411,7 +411,7 @@ const Input = {
 // BuilderComp.update, shared by the player and builder AI units. Returns the plan being worked on.
 function builderUpdate(p) {
   if (!p.plans.length) return null;
-    const core = Game.playerCore();
+    const core = p.team === 'sharded' ? Game.playerCore() : (Game.byTeam[p.team] || []).find(b => b.block.cls === 'Core' && !b.dead) || null;
     // find first plan within range
     let idx = -1;
     for (let i = 0; i < p.plans.length; i++) {
@@ -425,8 +425,8 @@ function builderUpdate(p) {
     let ex = World.buildAt(pl.x, pl.y);
 
     if (pl.breaking) {
-      if (!ex || (ex.team !== 'sharded' && ex.team !== 'derelict')) { p.plans.splice(idx, 1); return pl; }
-      if (ex.team === 'derelict') { Game.removeBuilding(ex); ex.team = 'sharded'; Game.addBuilding(ex); } // deconstructs like your own block
+      if (!ex || (ex.team !== p.team && ex.team !== 'derelict')) { p.plans.splice(idx, 1); return pl; }
+      if (ex.team === 'derelict') { Game.removeBuilding(ex); ex.team = p.team; Game.addBuilding(ex); } // deconstructs like your own block
       if (!(ex instanceof ConstructBuild)) ex = Game.beginBreak(ex);
       ex.deconstruct(p, core, bs);
       if (ex.dead) p.plans.splice(idx, 1);
@@ -435,7 +435,7 @@ function builderUpdate(p) {
 
     if (ex instanceof ConstructBuild && ex.current === pl.block && ex.tx === pl.x && ex.ty === pl.y) {
       // continue (also resumes a deconstruction in reverse)
-    } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y && ex.team === 'derelict') {
+    } else if (ex && ex.block === pl.block && ex.tx === pl.x && ex.ty === pl.y && ex.team === 'derelict' && p.team === 'sharded') {
       Game.repairDerelict(ex, pl.rotation);
       p.plans.splice(idx, 1);
       return pl;
@@ -444,7 +444,7 @@ function builderUpdate(p) {
       p.plans.splice(idx, 1);
       return pl;
     } else {
-      if (!Game.validPlace(pl.block, pl.x, pl.y, pl.rotation)) { p.plans.splice(idx, 1); return pl; }
+      if (!Game.validPlace(pl.block, pl.x, pl.y, pl.rotation, p.team)) { p.plans.splice(idx, 1); return pl; }
       if (!Rules.infinite(p.team) && (!core || !pl.block.requirements.every(r => core.items[r.item.id] > 0))) {
         // not enough resources: move to back of the queue
         pl.stuck = (pl.stuck || 0) + Time.delta;
@@ -454,7 +454,7 @@ function builderUpdate(p) {
       // CoreBlock.placeBegan: a core placed over a smaller one finishes immediately once the builder starts it
       if (pl.block.coreUpgrade) { p.plans.splice(idx, 1); Game.upgradeCore(pl.block, pl.x, pl.y); return pl; }
       const config = pl.block.cls === 'ItemBridge' && !(pl.config && pl.config.schem) ? null : pl.config;
-      ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, 'sharded', config);
+      ex = Game.beginPlace(pl.block, pl.x, pl.y, pl.rotation, p.team, config);
     }
     const ok = ex.construct(p, core, bs);
     if (!ok) {

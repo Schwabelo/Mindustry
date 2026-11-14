@@ -62,6 +62,13 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
 - Tech tree (J): Mindustry's Serpulo research tree with its real research costs (exported from `SerpuloTechTree`);
   blocks and units are locked until researched with items from your core (pay in parts), items unlock when they first
   reach the core. Research is kept across games and only applies to the campaign; free play has everything unlocked, like custom games
+- Custom game: the built-in maps (Fortress, Veins, Glacier, Archipelago... exported with `tools/MapExport.java`) or a random
+  map, with Survival / Sandbox / Attack presets and editable rules: waves, wave timer, win wave, wave spacing, drop zone,
+  infinite resources (instant free building, item / liquid / power source and void blocks), build cost / speed / refund,
+  block and unit health / damage, unit cost / build speed / cap, fire, reactor explosions, weather, solar power and enemy
+  team rules. In attack mode the enemy can grow its base like Mindustry's BaseBuilderAI: it places the real base
+  schematics (`core/assets/baseparts`) on matching ore around its cores and its core units build them
+- Floors affect ground units: water makes them wet, tar tarred, slag melting, mud muddy
 - Schematics: copy areas with their settings (sorter items, bridge / node / processor links and code, factory
   plans...), rotate / flip, save a library, and import / export Mindustry schematic codes
 - Weather: rain (wet status), snow, sandstorm and spore storm (wind, spore-slowed air units), fog; each map gets

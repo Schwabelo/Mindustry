@@ -15,7 +15,7 @@ const UI = {
     // logo + skip button icons
     $('logoImg').src = Assets.url('logo');
     $('skipWave').innerHTML = `<img src="${Assets.url('icon-play')}">`;
-    $('skipWave').onclick = () => { if (Game.state === 'playing' && Game.enemiesAlive() === 0) { Game.runWave(); Audio2.play('uiButton'); } else if (Game.enemiesAlive() > 0) UI.toast('Kill the enemies first', 1.5, true); };
+    $('skipWave').onclick = () => { if (Game.state === 'playing' && Rules.cur.waves && Game.enemiesAlive() === 0) { Game.runWave(); Audio2.play('uiButton'); } else if (Game.enemiesAlive() > 0) UI.toast('Kill the enemies first', 1.5, true); };
 
     // categories
     const cats = $('cats');
@@ -283,10 +283,13 @@ const UI = {
     this.frame++;
     const core = Game.playerCore();
     if (this.frame % 6 === 0) {
-      $('waveTitle').textContent = `Wave ${Game.wave}` + (Game.winWave ? ` / ${Game.winWave}` : '');
+      const R = Rules.cur, enemies = Game.enemiesAlive();
+      const cores = Game.attackMode ? Game.byTeam.crux.filter(b => b.block.cls === 'Core' && !b.dead).length : 0;
+      $('waveTitle').textContent = !R.waves ? (Game.attackMode ? `Enemy cores: ${cores}` : 'Waves off') : `Wave ${Game.wave}` + (Game.winWave ? ` / ${Game.winWave}` : '');
       const secs = Math.max(0, Math.ceil(Game.waveCountdown / 60));
-      const enemies = Game.enemiesAlive();
-      $('waveSub').textContent = (Game.waveCountdown === Infinity ? (Game.waveStatus || 'No more waves') : `Next in ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`) + (enemies ? ` · ${enemies} enem${enemies === 1 ? 'y' : 'ies'}` : '');
+      const timer = !R.waves ? (Game.attackMode ? 'Destroy them to win' : 'No waves') : Game.waveCountdown === Infinity ? (Game.waveStatus || 'No more waves')
+        : !R.waveTimer ? 'Call waves with N' : `Next in ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+      $('waveSub').textContent = timer + (enemies ? ` · ${enemies} enem${enemies === 1 ? 'y' : 'ies'}` : '');
       const p = Game.player;
       $('playerHealth').firstChild.style.width = (p ? p.healthf * 100 : 0) + '%';
       if (core) {
