@@ -59,16 +59,18 @@ FLOORS = {
     "shale": 3, "core-zone": 0, "spore-moss": 3, "metal-floor": 0, "metal-floor-damaged": 3, "metal-floor-2": 0,
     "metal-floor-3": 0, "metal-floor-4": 0, "metal-floor-5": 0, "dark-panel-1": 0, "dark-panel-2": 0, "dark-panel-3": 0,
     "dark-panel-4": 0, "dark-panel-5": 0, "dark-panel-6": 0,
+    # custom game maps
+    "mud": 3, "molten-slag": 0, "space": 0,
 }
 for f, v in FLOORS.items():
     add([f] if v == 0 else [f"{f}{i}" for i in range(1, v + 1)])
 
 WALLS = ["stone-wall", "dune-wall", "sand-wall", "snow-wall", "ice-wall", "dirt-wall",
          "shale-wall", "salt-wall", "red-ice-wall", "red-stone-wall", "spore-wall", "dark-metal", "dacite-wall", "carbon-wall",
-         "crystalline-stone-wall"]
+         "crystalline-stone-wall", "shrubs"]
 for w in WALLS:
     add([f"{w}1", f"{w}2", f"{w}-large"])
-add(["metal-wall-1", "metal-wall-2", "metal-wall-3", "spore-pine", "snow-pine", "white-tree", "white-tree-dead",
+add(["metal-wall-1", "metal-wall-2", "metal-wall-3", "spore-pine", "snow-pine", "pine", "white-tree", "white-tree-dead",
      "white-tree-shadow", "white-tree-dead-shadow", "basalt-boulder1", "basalt-boulder2", "shale-boulder1", "shale-boulder2",
      "dacite-boulder1", "dacite-boulder2", "spore-cluster1", "spore-cluster2", "spore-cluster3"])
 
@@ -77,6 +79,8 @@ for o in ORES:
     add([f"ore-{o}{i}" for i in range(1, 4)])
 
 add(["boulder1", "boulder2", "sand-boulder1", "sand-boulder2", "snow-boulder1", "snow-boulder2", "spawn"])
+# sandbox blocks (custom games with infinite resources)
+add(["item-source", "item-void", "liquid-source", "liquid-void", "source-bottom", "power-source", "power-void"])
 
 ITEMS = ["copper", "lead", "metaglass", "graphite", "sand", "coal", "titanium", "scrap", "silicon", "thorium", "plastanium",
          "spore-pod", "pyratite", "blast-compound", "surge-alloy", "phase-fabric"]
@@ -359,6 +363,13 @@ import zlib
 sector_files = sorted(glob.glob(os.path.join(WEB, "sectors", "*.json")))
 sector_index = json.load(open(os.path.join(WEB, "sectors", "index.json")))
 sector_maps = {os.path.basename(f)[:-5]: open(f).read() for f in sector_files if not f.endswith("index.json")}
+# custom game maps (Maps.defaultMapNames) and BaseRegistry parts ride along in the same pack
+for f in sorted(glob.glob(os.path.join(WEB, "maps", "*.json"))):
+    n = os.path.basename(f)[:-5]
+    if n == "index": continue
+    sector_maps["baseparts" if n == "baseparts" else "map:" + n] = open(f).read()
+map_index = json.load(open(os.path.join(WEB, "maps", "index.json")))
+assets_js += "const MAP_INDEX = " + json.dumps(map_index, separators=(",", ":")) + ";\n"
 assets_js += "const SECTOR_INDEX = " + json.dumps(sector_index, separators=(",", ":")) + ";\n"
 assets_js += "const SECTOR_PACK = '" + base64.b64encode(zlib.compress(json.dumps(sector_maps, separators=(",", ":")).encode(), 9)).decode() + "';\n"
 

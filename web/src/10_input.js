@@ -138,7 +138,7 @@ const Input = {
       if (b instanceof LogicProcessor) { this.linkSource = b; UI.openConfig(b); Audio2.play('click', undefined, undefined, 0.3); return; }
       if (b instanceof MessageBlock) { UI.openConfig(b); return; }
       if (b instanceof PowerNode || b instanceof ItemBridge || b instanceof MassDriver) { this.linkSource = b; Audio2.play('click', undefined, undefined, 0.3); return; }
-      if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory || b instanceof LaunchPad || b instanceof LandingPad) { UI.openConfig(b); return; }
+      if (b instanceof Sorter || b instanceof Unloader || b instanceof UnitFactory || b instanceof LaunchPad || b instanceof LandingPad || b instanceof ItemSource || b instanceof LiquidSource) { UI.openConfig(b); return; }
       if (b instanceof Door || b instanceof SwitchBlock || b instanceof Illuminator || (b instanceof PayloadConveyor && b.block.router)) { b.toggle(); return; }
     }
     // mining
@@ -417,11 +417,11 @@ function builderUpdate(p) {
     for (let i = 0; i < p.plans.length; i++) {
       const pl = p.plans[i];
       const px = pl.x * TS + pl.block.offset, py = pl.y * TS + pl.block.offset;
-      if (Math.hypot(px - p.x, py - p.y) <= BUILD_RANGE) { idx = i; break; }
+      if (Rules.cur.infiniteResources || Math.hypot(px - p.x, py - p.y) <= BUILD_RANGE) { idx = i; break; } // infiniteResources: no build range
     }
     if (idx < 0) return null;
     const pl = p.plans[idx];
-    const bs = 1 / Math.max(pl.block.buildTime, 0.0001) * p.type.buildSpeed * Time.delta;
+    const bs = 1 / Math.max(pl.block.buildTime, 0.0001) * p.type.buildSpeed * Rules.buildSpeed(p.team) * Time.delta;
     let ex = World.buildAt(pl.x, pl.y);
 
     if (pl.breaking) {
@@ -445,7 +445,7 @@ function builderUpdate(p) {
       return pl;
     } else {
       if (!Game.validPlace(pl.block, pl.x, pl.y, pl.rotation)) { p.plans.splice(idx, 1); return pl; }
-      if (!core || !pl.block.requirements.every(r => core.items[r.item.id] > 0)) {
+      if (!Rules.infinite(p.team) && (!core || !pl.block.requirements.every(r => core.items[r.item.id] > 0))) {
         // not enough resources: move to back of the queue
         pl.stuck = (pl.stuck || 0) + Time.delta;
         if (pl.stuck > 30 && p.plans.length > 1) { p.plans.splice(idx, 1); p.plans.push(pl); pl.stuck = 0; }

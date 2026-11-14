@@ -56,7 +56,8 @@ const Game = {
   teamBuildings(team) { return this.byTeam[team]; },
   playerCore() { return this.byTeam.sharded.find(b => b.block.cls === 'Core' && !b.dead) || null; },
   unitCount(team, name) { let n = 0; for (const u of this.units) if (u.team === team && u.type.name === name && !u.dead) n++; return n; },
-  unitCap(team) { let c = 0; for (const b of this.byTeam[team]) if (b.block.cls === 'Core') c += b.block.unitCapModifier; return c; },
+  // Rules.unitCap + every core's unitCapModifier (unitCapVariable)
+  unitCap(team) { let c = Rules.cur.unitCap; for (const b of this.byTeam[team]) if (b.block.cls === 'Core') c += b.block.unitCapModifier; return Math.max(0, c); },
 
   // ------------------------------------------------------------ lifecycle
   newGame(seed) {
@@ -188,7 +189,7 @@ const Game = {
     if (team !== 'derelict') {
       const wx = x * TS + block.offset, wy = y * TS + block.offset;
       for (const t in this.byTeam) if (t !== team && t !== 'derelict') for (const c of this.byTeam[t]) {
-        if (c.block.cls === 'Core' && !c.dead && Math.hypot(c.x - wx, c.y - wy) < ENEMY_CORE_BUILD_RADIUS + TS) return false;
+        if (c.block.cls === 'Core' && !c.dead && Math.hypot(c.x - wx, c.y - wy) < Rules.cur.enemyCoreBuildRadius + TS) return false;
       }
     }
     const s = block.size, o = block.sizeOffset;
@@ -331,9 +332,10 @@ const Game = {
   },
   // WaveSpawner.doShockwave: Damage.damage(waveTeam, spawn, dropZoneRadius, huge, complete) - kills everything else there
   dropZoneShockwave(sx, sy) {
-    Fx.create('spawnShockwave', sx, sy, 0, null, DROP_ZONE_RADIUS);
-    for (const u of this.units) if (u.team !== 'crux' && !u.dead && Math.hypot(u.x - sx, u.y - sy) < DROP_ZONE_RADIUS + u.type.hitSize / 2) u.kill();
-    for (const b of [...this.buildings]) if (b.team !== 'crux' && !b.dead && circleRect(sx, sy, DROP_ZONE_RADIUS, b)) b.damage(1e9);
+    const R = Rules.cur.dropZoneRadius;
+    Fx.create('spawnShockwave', sx, sy, 0, null, R);
+    for (const u of this.units) if (u.team !== 'crux' && !u.dead && Math.hypot(u.x - sx, u.y - sy) < R + u.type.hitSize / 2) u.kill();
+    for (const b of [...this.buildings]) if (b.team !== 'crux' && !b.dead && circleRect(sx, sy, R, b)) b.damage(1e9);
   },
   runWave() {
     const w = this.wave - 1;
@@ -368,8 +370,10 @@ const Game = {
     Time.time += Time.delta;
     if (Render.shakeTime > 0) { Render.shakeTime -= Time.delta; if (Render.shakeTime <= 0) Render.shakeIntensity = 0; }
 
-    if (!(this.winWave > 0 && this.wave >= this.winWave && this.enemiesAlive() > 0)) this.waveCountdown -= Time.delta;
-    if (this.waveCountdown <= 0) this.runWave();
+    // Logic.update: the countdown runs with waves + waveTimer on; it holds while enemies live past the win wave or with waitEnemies
+    const R = Rules.cur;
+    if (R.waves && R.waveTimer && !(this.winWave > 0 && this.wave >= this.winWave && this.enemiesAlive() > 0) && !(R.waitEnemies && this.enemiesAlive() > 0)) this.waveCountdown -= Time.delta;
+    if (R.waves && this.waveCountdown <= 0) this.runWave();
 
     Input.updatePlayer();
 

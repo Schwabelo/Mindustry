@@ -40,9 +40,9 @@ function renderFrame() {
   }
   for (const sp of World.spawns) {
     const sx = sp.x * TS, sy = sp.y * TS;
-    if (inView(v, sx, sy, SPAWN_SAFE_RADIUS * TS + 20)) {
+    if (inView(v, sx, sy, Rules.cur.dropZoneRadius + 20)) {
       Lines.set(rgba(Teams.crux.color, 0.5 + Mathf.absin(Time.time, 10, 0.3)), 1.5);
-      Lines.dashCircle(sx, sy, SPAWN_SAFE_RADIUS * TS, -Time.time / 120);
+      Lines.dashCircle(sx, sy, Rules.cur.dropZoneRadius, -Time.time / 120);
     }
   }
 

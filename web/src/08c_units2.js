@@ -272,10 +272,10 @@ class Reconstructor extends Building {
     if (this.inDir < 0) this.inDir = Mathf.mod(this.rotation + 2, 4);
   }
   acceptItem(source, item) {
-    const r = this.block.consumeItems.find(c => c.item === item);
+    const r = unitReqs(this.block.consumeItems, this.team).find(c => c.item === item);
     return !!r && this.items[item.id] < r.amount * 2;
   }
-  hasReqs() { return this.block.consumeItems.every(c => this.has(c.item, c.amount)); }
+  hasReqs() { return unitReqs(this.block.consumeItems, this.team).every(c => this.has(c.item, c.amount)); }
   shouldConsume() { return !!this.payload && this.hasReqs(); }
   update() {
     if (!this.payload) { this.speedScl = Mathf.approach(this.speedScl, 0, 0.05 * Time.delta); return; }
@@ -283,9 +283,9 @@ class Reconstructor extends Building {
     const b = this.block;
     if (this.progress < b.constructTime) {
       const eff = this.hasReqs() ? this.efficiency : 0;
-      this.progress += Time.delta * eff;
+      this.progress += Time.delta * eff * unitBuildSpeed(this.team);
       this.speedScl = Mathf.approach(this.speedScl, eff > 0 ? 1 : 0, 0.05 * Time.delta);
-      if (this.progress >= b.constructTime) for (const c of b.consumeItems) this.removeItem(c.item, c.amount);
+      if (this.progress >= b.constructTime) for (const c of unitReqs(b.consumeItems, this.team)) this.removeItem(c.item, c.amount);
       return;
     }
     // finished: hand to the next reconstructor or release the unit

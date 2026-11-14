@@ -987,12 +987,12 @@ class UnitFactory extends Building {
   acceptItem(source, item) {
     const p = this.plan;
     if (!p) return false;
-    const r = p.requirements.find(r => r.item === item);
+    const r = unitReqs(p.requirements, this.team).find(r => r.item === item);
     return !!r && this.items[item.id] < r.amount * 2;
   }
   canBuild() {
     const p = this.plan;
-    return p && p.requirements.every(r => this.has(r.item, r.amount));
+    return p && unitReqs(p.requirements, this.team).every(r => this.has(r.item, r.amount));
   }
   update() {
     const p = this.plan;
@@ -1000,10 +1000,10 @@ class UnitFactory extends Building {
     const capped = Game.unitCount(this.team, p.unit) >= Game.unitCap(this.team);
     if (this.canBuild() && !capped) {
       const eff = this.efficiency;
-      this.progress += Time.delta * eff;
+      this.progress += Time.delta * eff * unitBuildSpeed(this.team);
       this.speedScl = Mathf.approach(this.speedScl, eff > 0 ? 1 : 0, 0.05 * Time.delta);
       if (this.progress >= p.time) {
-        for (const r of p.requirements) this.removeItem(r.item, r.amount);
+        for (const r of unitReqs(p.requirements, this.team)) this.removeItem(r.item, r.amount);
         this.progress = 0;
         const ang = this.rotation * 90;
         const sx = this.x + Angles.trnsx(ang, this.block.size * TS / 2 + 4), sy = this.y + Angles.trnsy(ang, this.block.size * TS / 2 + 4);
@@ -1059,6 +1059,13 @@ class Core extends StorageBlock {
 }
 
 // ================================================================ construction
+// Rules.unitCost / unitBuildSpeed (global x team), used by unit factories and reconstructors
+function unitReqs(reqs, team) {
+  const m = typeof Rules !== 'undefined' ? Rules.unitCost(team) : 1;
+  return m === 1 ? reqs : reqs.map(r => ({ item: r.item, amount: Math.max(1, Math.round(r.amount * m)) }));
+}
+function unitBuildSpeed(team) { return typeof Rules !== 'undefined' ? Rules.unitBuildSpeed(team) : 1; }
+
 class ConstructBuild extends Building {
   constructor(block, team, tx, ty, rotation, current, breaking) {
     super(BLOCKS.build, team, tx, ty, rotation);
@@ -1092,7 +1099,8 @@ class ConstructBuild extends Building {
     const target = Math.min(1, this.progress + amount);
     const reqs = this.current.requirements;
     // how many of each item must be consumed in total to reach 'target'
-    const need = reqs.map((r, i) => Math.max(0, Math.floor(r.amount * target + 1e-6) - this.consumed[i]));
+    const cm = typeof Rules !== 'undefined' ? Rules.cur.buildCostMultiplier : 1; // Rules.buildCostMultiplier
+    const need = reqs.map((r, i) => Math.max(0, Math.floor(r.amount * cm * target + 1e-6) - this.consumed[i]));
     if (core) {
       let frac = 1;
       reqs.forEach((r, i) => {
@@ -1118,7 +1126,7 @@ class ConstructBuild extends Building {
     const reqs = this.current.requirements;
     if (core) {
       reqs.forEach((r, i) => {
-        const shouldRefund = Math.floor(this.consumed[i] * 0.5 * (1 - this.progress) + 1e-6);
+        const shouldRefund = Math.floor(this.consumed[i] * (typeof Rules !== 'undefined' ? Rules.cur.deconstructRefundMultiplier : 0.5) * (1 - this.progress) + 1e-6);
         const d = shouldRefund - this.refunded[i];
         if (d > 0) { core.handleItem(core, r.item); if (d > 1) core.addItem(r.item, Math.min(d - 1, core.block.itemCapacity - core.items[r.item.id])); this.refunded[i] += d; }
       });

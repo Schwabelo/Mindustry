@@ -236,8 +236,13 @@ const UI = {
       el.appendChild(head);
       b.block.plans.forEach((p, i) => { if (!Research.locked(p.unit)) addBtn(Assets.url(p.unit), titleCase(p.unit) + ': ' + p.requirements.map(r => r.amount + ' ' + r.item.name).join(', '), b.currentPlan === i, () => b.configure(i)); });
       addBtn(null, 'None', b.currentPlan === -1, () => b.configure(-1));
+    } else if (typeof LiquidSource !== 'undefined' && b instanceof LiquidSource) {
+      const head = document.createElement('div'); head.className = 'wide'; head.textContent = 'Output liquid';
+      el.appendChild(head);
+      for (const l of LIQUIDS) addBtn(Assets.url(l.icon), titleCase(l.name), b.source === l, () => b.configure(b.source === l ? null : l));
+      addBtn(null, 'Clear', !b.source, () => b.configure(null));
     } else {
-      const head = document.createElement('div'); head.className = 'wide'; head.textContent = b instanceof Sorter ? 'Sort item' : 'Unload item';
+      const head = document.createElement('div'); head.className = 'wide'; head.textContent = b instanceof Sorter ? 'Sort item' : typeof ItemSource !== 'undefined' && b instanceof ItemSource ? 'Output item' : 'Unload item';
       el.appendChild(head);
       for (const it of ITEMS) addBtn(Assets.url(it.icon), titleCase(it.name), b.sortItem === it, () => b.configure(b.sortItem === it ? null : it));
       addBtn(null, 'Clear', !b.sortItem, () => b.configure(null));

@@ -2,14 +2,14 @@
 
 const FLOOR_DEFS = [
   // order = blend priority (Mindustry block id order): higher draws its edges onto lower; blend = Floor.blendGroup
-  { name: 'deep-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.2, liquidDrop: 'water', liquidMultiplier: 1.5 },
-  { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water' },
-  { name: 'tainted-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water', wall: 'spore-wall' },
-  { name: 'deep-tainted-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.18, liquidDrop: 'water', liquidMultiplier: 1.5, wall: 'spore-wall' },
-  { name: 'darksand-tainted-water', variants: 0, isLiquid: true, speed: 0.75, liquidDrop: 'water', wall: 'dune-wall' },
-  { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
-  { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water' },
-  { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall', liquidDrop: 'oil', isLiquid: true },
+  { name: 'deep-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.2, liquidDrop: 'water', liquidMultiplier: 1.5, status: 'wet', statusDuration: 120, drownTime: 200 },
+  { name: 'shallow-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water', status: 'wet', statusDuration: 90 },
+  { name: 'tainted-water', variants: 0, isLiquid: true, speed: 0.5, liquidDrop: 'water', wall: 'spore-wall', status: 'wet', statusDuration: 90 },
+  { name: 'deep-tainted-water', variants: 0, isLiquid: true, isDeep: true, speed: 0.18, liquidDrop: 'water', liquidMultiplier: 1.5, wall: 'spore-wall', status: 'wet', statusDuration: 140, drownTime: 200 },
+  { name: 'darksand-tainted-water', variants: 0, isLiquid: true, speed: 0.75, liquidDrop: 'water', wall: 'dune-wall', status: 'wet', statusDuration: 60 },
+  { name: 'sand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water', status: 'wet', statusDuration: 50 },
+  { name: 'darksand-water', variants: 0, isLiquid: true, speed: 0.8, liquidDrop: 'water', status: 'wet', statusDuration: 50 },
+  { name: 'tar', variants: 0, speed: 0.19 * 4, wall: 'dune-wall', liquidDrop: 'oil', isLiquid: true, status: 'tarred', statusDuration: 240, drownTime: 230 },
   { name: 'stone', variants: 3, wall: 'stone-wall', boulder: 'boulder' },
   { name: 'crater-stone', variants: 3, wall: 'stone-wall', boulder: 'boulder', blend: 'stone' },
   { name: 'char', variants: 3, wall: 'stone-wall', boulder: 'boulder', blend: 'stone' },
@@ -41,6 +41,10 @@ const FLOOR_DEFS = [
   { name: 'dark-panel-4', variants: 0, wall: 'dark-metal' },
   { name: 'dark-panel-5', variants: 0, wall: 'dark-metal' },
   { name: 'dark-panel-6', variants: 0, wall: 'dark-metal' },
+  // custom game maps (appended so existing ids stay stable)
+  { name: 'mud', variants: 3, wall: 'dirt-wall', boulder: 'boulder', speed: 0.6, status: 'muddy', statusDuration: 30, water: 1 },
+  { name: 'molten-slag', variants: 0, isLiquid: true, speed: 0.19, liquidDrop: 'slag', status: 'melting', statusDuration: 240, drownTime: 230, heat: 0.85 },
+  { name: 'space', variants: 0, solid: true, noEdges: true },
 ];
 const FLOOR = {};
 FLOOR_DEFS.forEach((f, i) => { f.id = i; f.speed = f.speed || 1; FLOOR[f.name] = f; });
@@ -48,9 +52,10 @@ FLOOR_DEFS.forEach(f => { f.blendId = FLOOR[f.blend || f.name].id; });
 const WALL_DEFS = ['stone-wall', 'dune-wall', 'sand-wall', 'snow-wall', 'ice-wall', 'dirt-wall',
   // sector maps
   'shale-wall', 'salt-wall', 'red-ice-wall', 'red-stone-wall', 'spore-wall', 'dark-metal', 'dacite-wall', 'carbon-wall',
-  'crystalline-stone-wall', 'metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine', 'white-tree', 'white-tree-dead'];
+  'crystalline-stone-wall', 'metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine', 'white-tree', 'white-tree-dead',
+  'shrubs', 'pine'];
 // walls drawn from one sprite (no variants / large version); TreeBlocks: big canopy, solid, no wall darkness
-const WALL_SINGLE = new Set(['metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine']);
+const WALL_SINGLE = new Set(['metal-wall-1', 'metal-wall-2', 'metal-wall-3', 'spore-pine', 'snow-pine', 'pine']);
 const WALL_TREE = new Set(['white-tree', 'white-tree-dead']);
 const WALL_IS_TREE = WALL_DEFS.map(n => WALL_TREE.has(n));
 const BOULDER_KINDS = ['boulder', 'sand-boulder', 'snow-boulder', 'basalt-boulder', 'shale-boulder', 'dacite-boulder', 'spore-cluster'];
@@ -80,12 +85,12 @@ const World = {
     const f = this.floorAt(x, y);
     return f.itemDrop ? Items[f.itemDrop] : null;
   },
-  isWall(x, y) { return !this.inside(x, y) || this.wall[y * this.w + x] > 0; },
+  isWall(x, y) { return !this.inside(x, y) || this.wall[y * this.w + x] > 0 || FLOOR_DEFS[this.floor[y * this.w + x]].solid === true; },
   // solid for ground units / building collision
   solid(x, y) {
     if (!this.inside(x, y)) return true;
     const i = y * this.w + x;
-    if (this.wall[i]) return true;
+    if (this.wall[i] || FLOOR_DEFS[this.floor[i]].solid) return true;
     const b = this.build[i];
     return !!(b && b.block.solid && !b.open);
   },
@@ -93,7 +98,7 @@ const World = {
   groundPassable(x, y) {
     if (!this.inside(x, y)) return false;
     const i = y * this.w + x;
-    return !this.wall[i] && !FLOOR_DEFS[this.floor[i]].isDeep;
+    return !this.wall[i] && !FLOOR_DEFS[this.floor[i]].isDeep && !FLOOR_DEFS[this.floor[i]].solid;
   },
 
   // ------------------------------------------------------------ generation

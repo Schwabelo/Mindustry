@@ -4,7 +4,7 @@
 usage: compact_maps.py <export dir with <sector>.json + techtree.json> <lite block names json>
 writes web/sectors/<sector>.json and web/sectors/index.json
 """
-import json, os, re, sys, collections
+import json, os, re, sys, collections, glob
 sys.path.insert(0, os.path.dirname(__file__))
 from mapjson import load
 
@@ -45,12 +45,8 @@ for line in open(os.path.join(os.path.dirname(__file__), '..', '..', 'core', 'as
     if line.startswith('sector.') and ' = ' in line:
         k, v = line.rstrip('\n').split(' = ', 1)
         BUNDLE[k] = re.sub(r'\[[a-z#0-9]*\]', '', v.replace('\\n', '\n'))
-index, unknown = [], collections.Counter()
-for sec in SECTORS:
-    name = sec['name']
-    path = os.path.join(SRC, name + '.json')
-    if not os.path.exists(path): print('no map for', name); continue
-    d = load(path)
+def convert(name, d, outdir):
+    """compacts one exported map; returns (data, resources)"""
     W, H, N = d['w'], d['h'], d['w'] * d['h']
     fl = [d['floorPal'][int(v)] for v in d['floor'].rstrip(',').split(',')]
     ov = [d['orePal'][int(v)] for v in d['ore'].rstrip(',').split(',')]
@@ -98,7 +94,7 @@ for sec in SECTORS:
     for t, blk, x, y, r, cfg in d['builds']:
         if blk not in LITE_BLOCKS: unknown['build:' + blk] += 1; continue
         if isinstance(cfg, str) and cfg not in LITE_UNITS and not cfg.replace('-', '').isalpha(): cfg = None
-        builds.append([teams[t], blk, x, y, r] + ([cfg] if cfg is not None else []))
+        builds.append([teams.get(t, 1), blk, x, y, r] + ([cfg] if cfg is not None else []))
     data['builds'] = builds
     data['spawns'] = d['spawns']
     groups = []
@@ -120,13 +116,51 @@ for sec in SECTORS:
     data['loadout'] = d['loadout']
     data['weather'] = d['weather']
     data['difficulty'] = d['difficulty']
-    json.dump(data, open(os.path.join(OUT, name + '.json'), 'w'), separators=(',', ':'))
+    json.dump(data, open(os.path.join(outdir, name + '.json'), 'w'), separators=(',', ':'))
     res = sorted({o for o in ore if o} | ({'sand'} if any(f in ('sand-floor', 'darksand') for f in floor) else set()))
+    print(f"{name:22s} {os.path.getsize(os.path.join(outdir, name + '.json')) // 1024} KB, {len(builds)} builds, {len(groups)} groups")
+    return data, res
+
+index, unknown = [], collections.Counter()
+for sec in SECTORS:
+    name = sec['name']
+    path = os.path.join(SRC, name + '.json')
+    if not os.path.exists(path): print('no map for', name); continue
+    d = load(path)
+    data, res = convert(name, d, OUT)
     index.append({'name': name, 'title': BUNDLE.get(f'sector.{name}.name', name), 'desc': BUNDLE.get(f'sector.{name}.description', ''),
                   'parent': sec['parent'], 'difficulty': d['difficulty'], 'winWave': data['winWave'], 'attack': d['attack'],
-                  'w': W, 'h': H, 'resources': res,
+                  'w': data['w'], 'h': data['h'], 'resources': res,
                   'research': [o[9:] for o in sec['obj'] if o.startswith('research:')],
                   'sectors': [o[7:] for o in sec['obj'] if o.startswith('sector:')]})
-    print(f"{name:22s} {os.path.getsize(os.path.join(OUT, name + '.json')) // 1024} KB, {len(builds)} builds, {len(groups)} groups")
-json.dump(index, open(os.path.join(OUT, 'index.json'), 'w'), indent=1)
+if index: json.dump(index, open(os.path.join(OUT, 'index.json'), 'w'), indent=1)
+
+# ---------------------------------------------------------------- custom game maps (Maps.defaultMapNames) -> web/maps
+MAPS_OUT = os.path.join(os.path.dirname(__file__), '..', 'maps')
+os.makedirs(MAPS_OUT, exist_ok=True)
+ERELIR_ITEMS = {'beryllium', 'tungsten', 'oxide', 'carbide'}
+mindex = []
+for path in sorted(glob.glob(os.path.join(SRC, 'map-*.json'))):
+    d = load(path)
+    if any(n in ERELIR_ITEMS for n, a in d['loadout']): print('skip (Erekir)', d['name']); continue
+    name = d['name'][4:]
+    data, res = convert(name, d, MAPS_OUT)
+    mindex.append({'name': name, 'title': d['title'], 'author': d.get('author', ''), 'desc': d.get('desc', ''), 'w': data['w'], 'h': data['h'],
+                   'teams': d['teams'], 'spawns': d['mapSpawns'], 'resources': res, 'waves': d['waves'], 'attack': d['attack']})
+if mindex: json.dump(mindex, open(os.path.join(MAPS_OUT, 'index.json'), 'w'), indent=1)
+
+# ---------------------------------------------------------------- BaseRegistry parts for the enemy base builder AI
+bp = os.path.join(SRC, 'baseparts.json')
+if os.path.exists(bp):
+    src = json.load(open(bp))
+    def keep(part):
+        tiles = [t for t in part['tiles'] if t[0] in LITE_BLOCKS]
+        if len(tiles) < len(part['tiles']): unknown['basepart:' + ','.join(sorted({t[0] for t in part['tiles'] if t[0] not in LITE_BLOCKS}))] += 1; return None
+        return {'w': part['w'], 'h': part['h'], 'cx': part['cx'], 'cy': part['cy'], 'tier': round(part['tier'], 1), 'core': part['core'], 'req': part['req'],
+                'tiles': [t[:4] + ([t[4]] if t[4] is not None else []) for t in tiles]}
+    out = {'cores': [p for p in map(keep, src['cores']) if p], 'parts': [p for p in map(keep, src['parts']) if p],
+           'req': {k: [p for p in map(keep, v) if p] for k, v in src['req'].items()}}
+    out['req'] = {k: v for k, v in out['req'].items() if v}
+    json.dump(out, open(os.path.join(MAPS_OUT, 'baseparts.json'), 'w'), separators=(',', ':'))
+    print('base parts:', len(out['cores']), 'cores,', len(out['parts']), 'free,', {k: len(v) for k, v in out['req'].items()})
 print('unknown:', unknown.most_common())

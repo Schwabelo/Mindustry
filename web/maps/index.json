@@ -1,0 +1,366 @@
+[
+ {
+  "name": "archipelago",
+  "title": "Archipelago",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 500,
+  "h": 500,
+  "teams": 1,
+  "spawns": 1,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "caldera",
+  "title": "Ancient Caldera",
+  "author": "Anuke",
+  "desc": "unknown",
+  "w": 256,
+  "h": 256,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "canyon",
+  "title": "Canyon",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 250,
+  "h": 250,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "debrisField",
+  "title": "Debris Field",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 400,
+  "h": 400,
+  "teams": 1,
+  "spawns": 1,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "fork",
+  "title": "Fork",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 250,
+  "h": 300,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "fortress",
+  "title": "Fortress",
+  "author": "Anuke",
+  "desc": "The fortress map from 3.5, remade.",
+  "w": 256,
+  "h": 256,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "glacier",
+  "title": "Glacier",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 150,
+  "h": 250,
+  "teams": 2,
+  "spawns": 0,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "islands",
+  "title": "Islands",
+  "author": "Anuke",
+  "desc": "unknown",
+  "w": 256,
+  "h": 256,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": true,
+  "attack": false
+ },
+ {
+  "name": "labyrinth",
+  "title": "Labyrinth",
+  "author": "Slava0135",
+  "desc": "unknown",
+  "w": 200,
+  "h": 200,
+  "teams": 1,
+  "spawns": 1,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": true,
+  "attack": false
+ },
+ {
+  "name": "maze",
+  "title": "Maze",
+  "author": "Anuke",
+  "desc": "unknown",
+  "w": 256,
+  "h": 256,
+  "teams": 1,
+  "spawns": 1,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": true,
+  "attack": false
+ },
+ {
+  "name": "moltenLake",
+  "title": "Molten Lake",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 400,
+  "h": 400,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "mudFlats",
+  "title": "Mud Flats",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 400,
+  "h": 400,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "passage",
+  "title": "Passage",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 500,
+  "h": 120,
+  "teams": 3,
+  "spawns": 0,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "shattered",
+  "title": "Shattered",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 350,
+  "h": 350,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "tendrils",
+  "title": "Tendrils",
+  "author": "Anuke",
+  "desc": "unknown",
+  "w": 300,
+  "h": 300,
+  "teams": 1,
+  "spawns": 1,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "triad",
+  "title": "Triad",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 200,
+  "h": 200,
+  "teams": 1,
+  "spawns": 3,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "scrap",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "veins",
+  "title": "Veins",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 350,
+  "h": 200,
+  "teams": 2,
+  "spawns": 0,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ },
+ {
+  "name": "wasteland",
+  "title": "Wasteland",
+  "author": "unknown",
+  "desc": "unknown",
+  "w": 300,
+  "h": 300,
+  "teams": 1,
+  "spawns": 2,
+  "resources": [
+   "coal",
+   "copper",
+   "lead",
+   "sand",
+   "thorium",
+   "titanium"
+  ],
+  "waves": false,
+  "attack": false
+ }
+]

@@ -31,7 +31,7 @@
     if (this.state !== 'playing' || !World.spawns.length) return;
     for (const u of this.units) {
       if (u.dead || u.team === 'crux') continue;
-      const rel = DROP_ZONE_RADIUS + u.type.hitSize / 2 + 1;
+      const rel = Rules.cur.dropZoneRadius + u.type.hitSize / 2 + 1;
       for (const sp of World.spawns) {
         const sx = sp.x * TS, sy = sp.y * TS, d = Math.hypot(u.x - sx, u.y - sy);
         if (d < rel && d > 0) {
@@ -75,8 +75,8 @@ function scheduleDerelict(b) {
     if (b.team === 'crux' && b.block.cls === 'Core' && typeof Sectors !== 'undefined' && Sectors.current) {
       const others = this.byTeam.crux.filter(c => c !== b && c.block.cls === 'Core' && !c.dead);
       for (const o of [...this.byTeam.crux]) {
-        if (o.dead || Math.hypot(o.x - b.x, o.y - b.y) > ENEMY_CORE_BUILD_RADIUS) continue;
-        if (others.some(c => Math.hypot(c.x - o.x, c.y - o.y) <= ENEMY_CORE_BUILD_RADIUS)) continue;
+        if (o.dead || Math.hypot(o.x - b.x, o.y - b.y) > Rules.cur.enemyCoreBuildRadius) continue;
+        if (others.some(c => Math.hypot(c.x - o.x, c.y - o.y) <= Rules.cur.enemyCoreBuildRadius)) continue;
         scheduleDerelict(o);
       }
     }
