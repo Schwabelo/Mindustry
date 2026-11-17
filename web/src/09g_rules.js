@@ -11,6 +11,7 @@ const RULE_DEFAULTS = {
 };
 const TEAM_RULE_DEFAULTS = {
   infiniteResources: false, fillItems: false, buildAi: false, buildAiTier: 1, aiCoreSpawn: true,
+  rtsAi: false, rtsMinSquad: 4, rtsMaxSquad: 50, rtsMinWeight: 1.2,
   buildSpeedMultiplier: 1, blockHealthMultiplier: 1, blockDamageMultiplier: 1,
   unitDamageMultiplier: 1, unitHealthMultiplier: 1, unitBuildSpeedMultiplier: 1, unitCostMultiplier: 1,
 };

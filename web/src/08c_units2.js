@@ -162,7 +162,7 @@ class BuilderAI {
     this.alwaysFlee = alwaysFlee; this.fleeRange = fleeRange; this.fallback = null; this.retarget = 0; this.target = null; this.enemy = null; this.enemyTimer = 0; this.assistTimer = 0; this.rebuildTimer = 0; this.following = null; this.retreatTimer = 0; }
   update(u) {
     // useFallback: the wave team fights instead of building while waves are on
-    if (u.team === 'crux' && Rules.cur.waves) { if (!this.fallback) this.fallback = u.type.flying ? new FlyingAI() : new GroundAI(); return this.fallback.update(u); }
+    if (u.team === 'crux' && Rules.cur.waves && !Rules.team('crux').rtsAi) { if (!this.fallback) this.fallback = u.type.flying ? new FlyingAI() : new GroundAI(); return this.fallback.update(u); }
     const planOf = o => o.activePlan || (o.isPlayer ? Input.activePlan : null);
     if (this.following && (this.following.dead || !planOf(this.following))) { this.following = null; u.plans = []; }
     if (this.following) {

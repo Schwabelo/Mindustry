@@ -24,13 +24,14 @@ const Custom = {
   },
   baseRules(name, mode) {
     const idx = this.index(name), m = this.map(name);
-    const r = { waveSpacing: m ? m.waveSpacing : 2 * 60 * 60, winWave: m && m.winWave > 0 ? m.winWave : 0, initialWaveSpacing: 0, waves: true, waveTimer: true, teams: {} };
+    // the map's own rules for the enemy team (built-in attack maps turn on its base builder), then the mode preset
+    const r = { teams: { crux: Object.assign({}, (m && m.enemyRules) || {}) }, waveSpacing: m ? m.waveSpacing : 2 * 60 * 60, winWave: m && m.winWave > 0 ? m.winWave : 0, initialWaveSpacing: 0, waves: true, waveTimer: true };
     if (mode === 'survival') { r.waves = true; r.waveTimer = true; }
     if (mode === 'sandbox') { r.infiniteResources = true; r.waves = true; r.waveTimer = false; }
     if (mode === 'attack') {
       r.attackMode = true; r.waveTimer = true; r.waveSpacing = 2 * 60 * 60;
       r.waves = !!(idx && idx.spawns > 0); // maps without drop zones keep waves off (their own rules)
-      r.teams.crux = { infiniteResources: true, buildAi: true };
+      r.teams.crux = Object.assign(r.teams.crux || {}, { infiniteResources: true }); // Gamemode.attack: waveTeam infiniteResources
     }
     return Rules.make(r);
   },
@@ -167,7 +168,9 @@ const CustomUI = {
     ]],
     ['Enemy team', [
       ['attackMode', 'Attack mode (destroy enemy cores to win)', 'bool'], ['enemyCoreBuildRadius', 'No-build radius around enemy cores (tiles)', 'tiles'],
-      ['crux.buildAi', 'AI builds a base (needs waves off)', 'bool'], ['crux.buildAiTier', 'AI base tier (0-1)', 'num', r => r.teams.crux.buildAi],
+      ['crux.buildAi', 'AI builds a base (with waves on only under RTS AI)', 'bool'], ['crux.buildAiTier', 'AI base tier (0-1)', 'num', r => r.teams.crux.buildAi],
+      ['crux.rtsAi', 'RTS AI: enemy units attack in squads', 'bool'], ['crux.rtsMinSquad', 'RTS min squad size', 'int', r => r.teams.crux.rtsAi],
+      ['crux.rtsMaxSquad', 'RTS max squad size', 'int', r => r.teams.crux.rtsAi], ['crux.rtsMinWeight', 'RTS min attack weight', 'num', r => r.teams.crux.rtsAi],
       ['crux.infiniteResources', 'Enemy infinite resources', 'bool'], ['crux.fillItems', 'Enemy cores stay full', 'bool'],
       ['crux.unitDamageMultiplier', 'Enemy unit damage ×', 'num'], ['crux.unitHealthMultiplier', 'Enemy unit health ×', 'num'],
       ['crux.blockHealthMultiplier', 'Enemy block health ×', 'num'],

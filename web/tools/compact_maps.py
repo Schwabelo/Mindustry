@@ -116,6 +116,7 @@ def convert(name, d, outdir):
     data['loadout'] = d['loadout']
     data['weather'] = d['weather']
     data['difficulty'] = d['difficulty']
+    if d.get('enemyRules') and (d['enemyRules'].get('buildAi') or d['enemyRules'].get('rtsAi')): data['enemyRules'] = d['enemyRules']  # the wave team's TeamRule from the map
     json.dump(data, open(os.path.join(outdir, name + '.json'), 'w'), separators=(',', ':'))
     res = sorted({o for o in ore if o} | ({'sand'} if any(f in ('sand-floor', 'darksand') for f in floor) else set()))
     print(f"{name:22s} {os.path.getsize(os.path.join(outdir, name + '.json')) // 1024} KB, {len(builds)} builds, {len(groups)} groups")

@@ -5,17 +5,18 @@
 // ---------------------------------------------------------------- path fields to an arbitrary tile (ControlPathfinder)
 const CommandPaths = {
   cache: new Map(), version: 0,
-  passable(kind, i) {
+  passable(kind, i, team = 'sharded') {
     const fl = FLOOR_DEFS[World.floor[i]];
     if (World.wall[i]) return false;
     if (kind === 'naval') return fl.isLiquid && !(World.build[i] && World.build[i].block.solid && !World.build[i].open);
     if (kind === 'legs') return true;
     if (fl.isDeep) return false;
     const b = World.build[i];
+    if (b && team !== 'sharded' && b.team !== team && b.team !== 'derelict') return true;
     return !(b && b.block.solid && !b.open && !(b instanceof ConstructBuild && b.progress < 0.1));
   },
-  field(kind, tx, ty) {
-    const key = kind + ':' + tx + ',' + ty;
+  field(kind, tx, ty, team = 'sharded') {
+    const key = kind + ':' + team + ':' + tx + ',' + ty;
     let f = this.cache.get(key);
     if (f && f.version === this.version) return f;
     const W = World.w, H = World.h, N = W * H, dist = new Int32Array(N).fill(-1);
@@ -25,10 +26,10 @@ const CommandPaths = {
     dist[start] = 0; q[qt++] = start;
     while (qh < qt) {
       const i = q[qh++], x = i % W, y = (i / W) | 0, d = dist[i] + 1;
-      if (x > 0 && dist[i - 1] < 0 && this.passable(kind, i - 1)) { dist[i - 1] = d; q[qt++] = i - 1; }
-      if (x < W - 1 && dist[i + 1] < 0 && this.passable(kind, i + 1)) { dist[i + 1] = d; q[qt++] = i + 1; }
-      if (y > 0 && dist[i - W] < 0 && this.passable(kind, i - W)) { dist[i - W] = d; q[qt++] = i - W; }
-      if (y < H - 1 && dist[i + W] < 0 && this.passable(kind, i + W)) { dist[i + W] = d; q[qt++] = i + W; }
+      if (x > 0 && dist[i - 1] < 0 && this.passable(kind, i - 1, team)) { dist[i - 1] = d; q[qt++] = i - 1; }
+      if (x < W - 1 && dist[i + 1] < 0 && this.passable(kind, i + 1, team)) { dist[i + 1] = d; q[qt++] = i + 1; }
+      if (y > 0 && dist[i - W] < 0 && this.passable(kind, i - W, team)) { dist[i - W] = d; q[qt++] = i - W; }
+      if (y < H - 1 && dist[i + W] < 0 && this.passable(kind, i + W, team)) { dist[i + W] = d; q[qt++] = i + W; }
     }
     f = { dist, version: this.version };
     if (this.cache.size > 24) this.cache.delete(this.cache.keys().next().value);
@@ -37,7 +38,7 @@ const CommandPaths = {
   },
   // next waypoint (world coords) for a unit heading to tile (tx, ty); null = go straight
   next(kind, u, tx, ty) {
-    const f = this.field(kind, tx, ty);
+    const f = this.field(kind, tx, ty, u.team === 'sharded' ? 'sharded' : u.team);
     if (!f) return null;
     const W = World.w, cx = Math.round(u.x / TS), cy = Math.round(u.y / TS);
     if (!World.inside(cx, cy)) return null;

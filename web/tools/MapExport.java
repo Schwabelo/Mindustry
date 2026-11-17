@@ -160,12 +160,16 @@ public class MapExport{
         String out = "{\"name\":\"" + sname + "\",\"w\":" + w + ",\"h\":" + h + ",\"difficulty\":" + difficulty + ",\"captureWave\":" + captureWave + extra +
             ",\"winWave\":" + r.winWave + ",\"attack\":" + r.attackMode + ",\"waves\":" + r.waves + ",\"waveTimer\":" + r.waveTimer + ",\"waveSpacing\":" + r.waveSpacing +
             ",\"initialWaveSpacing\":" + r.initialWaveSpacing + ",\"startWaveTimeMultiplier\":" + startMul + ",\"enemyCoreBuildRadius\":" + r.enemyCoreBuildRadius +
-            ",\"loadout\":[" + loadout + "],\"weather\":[" + weather + "],\"spawns\":[" + spawns + "],\"builds\":[" + builds + "]" +
+            ",\"enemyRules\":" + teamRules(r.waveTeam.rules()) + ",\"loadout\":[" + loadout + "],\"weather\":[" + weather + "],\"spawns\":[" + spawns + "],\"builds\":[" + builds + "]" +
             ",\"floorPal\":" + pal(fp) + ",\"orePal\":" + pal(op) + ",\"blockPal\":" + pal(bp) +
             ",\"floor\":\"" + fl + "\",\"ore\":\"" + ov + "\",\"block\":\"" + bl + "\",\"groups\":" + JsonIO.write(r.spawns) + "}";
         new Fi(OUT + "/" + sname + ".json").writeString(out);
     }
 
+    static String teamRules(Rules.TeamRule t){
+        return "{\"rtsAi\":" + t.rtsAi + ",\"rtsMinSquad\":" + t.rtsMinSquad + ",\"rtsMaxSquad\":" + t.rtsMaxSquad + ",\"rtsMinWeight\":" + t.rtsMinWeight +
+            ",\"buildAi\":" + t.buildAi + ",\"buildAiTier\":" + t.buildAiTier + ",\"infiniteResources\":" + t.infiniteResources + ",\"fillItems\":" + t.fillItems + ",\"aiCoreSpawn\":" + t.aiCoreSpawn + "}";
+    }
     static String q(String v){ return "\"" + (v == null ? "" : v.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")) + "\""; }
     String pts(Point2[] p){ StringBuilder sb = new StringBuilder("["); for(int i = 0; i < p.length; i++) sb.append(i > 0 ? "," : "").append('[').append(p[i].x).append(',').append(p[i].y).append(']'); return sb.append(']').toString(); }
     int idx(Seq<String> pal, String n){ int i = pal.indexOf(n); if(i < 0){ pal.add(n); i = pal.size - 1; } return i; }

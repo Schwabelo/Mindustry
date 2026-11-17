@@ -67,7 +67,9 @@ taken from the Java source (`core/src/mindustry/content/*.java`, `world/blocks/*
   infinite resources (instant free building, item / liquid / power source and void blocks), build cost / speed / refund,
   block and unit health / damage, unit cost / build speed / cap, fire, reactor explosions, weather, solar power and enemy
   team rules. In attack mode the enemy can grow its base like Mindustry's BaseBuilderAI: it places the real base
-  schematics (`core/assets/baseparts`) on matching ore around its cores and its core units build them
+  schematics (`core/assets/baseparts`) on matching ore around its cores and its core units build them. With the RTS AI rule
+  (RtsAI) enemy units gather into squads, defend damaged buildings and attack the generators, factories, drills,
+  batteries or cores they estimate they can beat. The built-in attack maps turn the base builder on in their own rules
 - Map editor: new maps (50-500 tiles), or copies of built-in and sector maps; pencil, line, fill, eraser and pick tools
   with brush sizes for floors, walls, ores and rocks; buildings of any team (your core, enemy cores, ruins), drop zones,
   map info (title, description, win wave, wave spacing, starting items, weather), undo, save in the browser, export /
