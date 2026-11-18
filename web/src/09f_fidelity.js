@@ -53,7 +53,7 @@ Game.later = function (ticks, fn) { this.laterList.push({ t: Time.time + ticks, 
     if (this.laterList.length) {
       const due = this.laterList.filter(e => e.t <= Time.time);
       this.laterList = this.laterList.filter(e => e.t > Time.time);
-      for (const e of due) e.fn();
+      for (const e of due) { try { e.fn(); } catch (err) { console.error(err); } } // one failing callback must not drop the others
     }
   };
   const _ng = Game.newGame;

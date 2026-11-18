@@ -122,11 +122,14 @@ Bullets.hitUnit = function (b, u) {
 
 // Damage.dynamicExplosion: lightning from stored power, fireballs from flammability, and up to 25 growing damage waves of
 // explosiveness / 2 each
+// Like Damage.dynamicExplosion, the lightning, fireballs and damage waves run a little later (Time.run), never inside the
+// call that caused the explosion - so a chain of exploding units / blocks can't recurse (and spreads over a few frames).
 function dynamicExplosion(x, y, flam, expl, power, radius, fire = true) {
-  for (let i = 0; i < Mathf.clamp(power / 700, 0, 8); i++) Lightning.create('derelict', Pal.powerLight, 3, x, y, Math.random() * 360, 5 + Mathf.clamp(Math.floor(power / 500), 1, 20) + Math.round(Mathf.range(2)), { collidesAir: true });
-  if (fire) for (let i = 0; i < Mathf.clamp(flam / 4, 0, 30); i++) Fireballs.create(x, y, Math.random() * 360);
+  const later = (t, fn) => typeof Game !== 'undefined' && Game.later ? Game.later(t, fn) : fn();
+  for (let i = 0; i < Mathf.clamp(power / 700, 0, 8); i++) later(i * 0.8 + Math.random() * 4, () => Lightning.create('derelict', Pal.powerLight, 3, x, y, Math.random() * 360, 5 + Mathf.clamp(Math.floor(power / 500), 1, 20) + Math.round(Mathf.range(2)), { collidesAir: true }));
+  if (fire) for (let i = 0; i < Mathf.clamp(flam / 4, 0, 30); i++) later(i / 2, () => Fireballs.create(x, y, Math.random() * 360));
   const waves = expl <= 2 ? 0 : Mathf.clamp(Math.floor(expl / 11), 1, 25);
-  for (let i = 0; i < waves; i++) Damage.splash(null, x, y, Mathf.clamp(radius + expl, 0, 50) * ((i + 1) / waves), expl / 2, true, true, 1);
+  for (let i = 0; i < waves; i++) later(i * 2, () => Damage.splash(null, x, y, Mathf.clamp(radius + expl, 0, 50) * ((i + 1) / waves), expl / 2, true, true, 1));
   if (expl > 2) Fx.create('blockExplode', x, y, 0, null, Math.min(radius / 4 + expl / 20, 6));
   const shake = Math.min(expl / 4 + 3, 9);
   Render.shake(shake, shake);

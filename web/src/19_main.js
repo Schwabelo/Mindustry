@@ -41,7 +41,12 @@ function mainLoop(now) {
     UI.update();
   } catch (e) {
     console.error(e);
-    if (!errorShown) { errorShown = true; UI.toast('Error: ' + e.message, 8, true); }
+    if (!errorShown) {
+      errorShown = true;
+      // where it happened: the first few function names of the stack, so a bug report says more than the message
+      const where = String(e.stack || '').split('\n').slice(1, 4).map(l => (l.trim().match(/^at (?:new )?([\w.$<>]+)/) || [])[1]).filter(Boolean).join(' < ');
+      UI.toast('Error: ' + e.message + (where ? ' (at ' + where + ')' : ''), 15, true);
+    }
   }
   requestAnimationFrame(mainLoop);
 }
